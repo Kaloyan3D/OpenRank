@@ -1,4 +1,9 @@
 export type {
+  MajorGroup,
+  RankingEligibility,
+  RankingStrategy,
+} from "./exercise";
+export type {
   Exercise,
   ExerciseCategory,
   ExerciseForce,
@@ -17,3 +22,33 @@ export type {
   WorkoutSet,
   WorkoutStatus,
 } from "./workout";
+export type {
+  Routine,
+  RoutineDetail,
+  RoutineExercise,
+  RoutineSetTarget,
+} from "./routine";
+export type {
+  BodyweightRepository,
+  DerivedDirtyReason,
+  DerivedEntityType,
+  DerivedDirtyRecord,
+  DerivedStateRepository,
+  ExerciseRepository,
+  ExerciseSearchOptions,
+  ExerciseMediaItem,
+  ExerciseAliasItem,
+  ExerciseDetail,
+  CustomExerciseInput,
+  ProfileRepository,
+  RoutineRepository,
+  RoutineCreateInput,
+  RoutineExerciseAddInput,
+  RoutineSetTargetInput,
+  WorkoutRepository,
+  WorkoutCreateInput,
+  WorkoutSetInput,
+  WorkoutExerciseDetail,
+  WorkoutDetail,
+  BodyweightAddInput,
+} from "./repositories";

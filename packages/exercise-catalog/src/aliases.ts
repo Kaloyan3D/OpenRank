@@ -54,6 +54,8 @@ export interface AliasBuildResult {
   hevyDuplicateSkipped: number;
   hevyRelaxedMatched: number;
   hevyCurated: number;
+  /** Exercise ids whose Hevy template mapping came from a curated override. */
+  curatedExerciseIds: ReadonlySet<string>;
 }
 
 /** Major group a Hevy template's primary muscle implies (null if unknown). */
@@ -286,6 +288,7 @@ export function buildAliases(
   }
 
   // --- curated overrides (highest precedence, validated) ----------------
+  const curatedExerciseIds = new Set<string>();
   const templateByTitle = new Map<string, HevyTemplate>();
   for (const t of hevyTemplates) {
     if (t.title) templateByTitle.set(t.title, t);
@@ -331,6 +334,7 @@ export function buildAliases(
       datasetIndex.set(normalized, exercise.id);
     }
     if (template.id) mappedTemplateIds.add(template.id);
+    curatedExerciseIds.add(exercise.id);
     hevyCurated += 1;
   }
 
@@ -360,5 +364,6 @@ export function buildAliases(
     hevyDuplicateSkipped,
     hevyRelaxedMatched,
     hevyCurated,
+    curatedExerciseIds,
   };
 }

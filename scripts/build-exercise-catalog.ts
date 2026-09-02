@@ -18,6 +18,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { buildCatalogPipeline } from "../packages/exercise-catalog/src/build.js";
+import { classifyRankingSupport } from "../packages/exercise-catalog/src/ranking-coverage.js";
 import type {
   CatalogSourceInfo,
   HevyTemplate,
@@ -104,6 +105,13 @@ function main(): void {
     source,
     aliasSources: [aliasSource],
     rankingCompatibility: RANKING_VERSION,
+    // Phase 3: engine-backed ranking-support classification (frozen engine
+    // stays authoritative; no coefficients are invented here).
+    classify: ({ exercises, curatedExerciseIds, templateIdOf }) =>
+      classifyRankingSupport(exercises, hevyTemplates, {
+        curatedExerciseIds,
+        templateIdOf,
+      }),
   });
 
   mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
@@ -126,11 +134,12 @@ function main(): void {
   console.log("mechanic:        " + JSON.stringify(stats.byMechanic));
   console.log("trackingType:    " + JSON.stringify(stats.byTrackingType));
   console.log(
-    "rank-eligible:   " +
-      String(stats.rankEligible) +
-      " " +
-      JSON.stringify(stats.rankEligibleByGroup),
+    "rank-supported:  " +
+      String(stats.rankSupported) +
+      " bySupport=" +
+      JSON.stringify(stats.bySupport),
   );
+  console.log("byStrategy:      " + JSON.stringify(stats.byStrategy));
   console.log("alias sources:   " + JSON.stringify(stats.aliases.bySource));
   console.log("alias kinds:     " + JSON.stringify(stats.aliases.byKind));
   console.log(

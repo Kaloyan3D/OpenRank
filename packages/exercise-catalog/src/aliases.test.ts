@@ -19,7 +19,7 @@ function exercise(id: string, name: string): CatalogExercise {
     secondaryMuscles: [],
     instructions: [],
     images: [],
-    ranking: { group: "chest", eligible: true },
+    ranking: { group: "chest", support: "eligible", strategy: "keyword", engineGroup: "chest", reason: null },
   };
 }
 
@@ -53,7 +53,17 @@ describe("buildAliases", () => {
   it("uses the relaxed movement-core match with primary-muscle consistency", () => {
     const exercises = [
       exercise("fdb:bench-press", "Bench Press"),
-      { ...exercise("fdb:front-squat", "Front Squat"), primaryMuscles: ["quadriceps"], ranking: { group: "legs" as const, eligible: true } },
+      {
+        ...exercise("fdb:front-squat", "Front Squat"),
+        primaryMuscles: ["quadriceps"],
+        ranking: {
+          group: "legs" as const,
+          support: "eligible" as const,
+          strategy: "keyword" as const,
+          engineGroup: "legs" as const,
+          reason: null,
+        },
+      },
     ];
     const templates: HevyTemplate[] = [{ id: "XYZ", title: "Bench Press (Barbell)", primary: "chest" }];
     const result = buildAliases(exercises, templates);

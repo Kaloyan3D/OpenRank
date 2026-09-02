@@ -1,23 +1,22 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import catalogJson from "@openrank/exercise-catalog/catalog.v1.json";
-import type { CatalogV1 } from "@openrank/exercise-catalog";
-import { aliasesForExercise, getExerciseBySlug } from "@openrank/exercise-catalog";
+import { useRepos } from "../../db/DatabaseProvider";
 import { colors, spacing, typography } from "../../theme/tokens";
 
 /**
  * Exercise details (spec section 49 route exercise/[id]): canonical fields,
- * muscles, instruction steps and alias names. Media is manifest-only until
- * the optional media pack ships (spec section 8).
+ * muscles, instruction steps, alias names and media metadata - all served
+ * from SQLite through the repository layer (Phase 3).
  */
-const catalog = catalogJson as unknown as CatalogV1;
-
 export default function ExerciseDetailScreen() {
+  const repos = useRepos();
   const params = useLocalSearchParams<{ id: string }>();
   const slug = typeof params.id === "string" ? decodeURIComponent(params.id) : "";
-  const exercise = getExerciseBySlug(catalog, slug);
 
-  if (!exercise) {
+  const bySlug = repos.exercise.findBySlug(slug);
+  const detail = bySlug ? repos.exercise.getDetail(bySlug.id) : null;
+
+  if (!detail) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Exercise not found</Text>
@@ -26,13 +25,14 @@ export default function ExerciseDetailScreen() {
     );
   }
 
-  const aliases = aliasesForExercise(catalog, exercise.id)
+  const { exercise } = detail;
+  const aliases = detail.aliases
     .map((a) => a.alias)
     .filter((alias) => alias !== exercise.name)
     .slice(0, 8);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       <Text style={styles.title}>{exercise.name}</Text>
       <View style={styles.badgeRow}>
         <Badge label={exercise.category} />
@@ -40,24 +40,30 @@ export default function ExerciseDetailScreen() {
         {exercise.force ? <Badge label={exercise.force} /> : null}
         <Badge label={exercise.equipment ?? "bodyweight"} />
         <Badge label={exercise.trackingType.replace(/_/g, " ")} />
-        {exercise.ranking.eligible && exercise.ranking.group ? (
-          <Badge label={"rank: " + exercise.ranking.group} />
+        {exercise.rankingEligibility !== "unsupported" && exercise.rankingGroup ? (
+          <Badge
+            label={
+              exercise.rankingEligibility === "provisional"
+                ? "rank (provisional): " + exercise.rankingGroup
+                : "rank: " + exercise.rankingGroup
+            }
+          />
         ) : null}
       </View>
 
       <Text style={styles.section}>Muscles</Text>
       <Text style={styles.body}>
-        Primary: {exercise.primaryMuscles.join(", ") || "none"}
-        {exercise.secondaryMuscles.length > 0
-          ? "\nSecondary: " + exercise.secondaryMuscles.join(", ")
+        {"Primary: " + (detail.primaryMuscles.join(", ") || "none")}
+        {detail.secondaryMuscles.length > 0
+          ? "\nSecondary: " + detail.secondaryMuscles.join(", ")
           : ""}
       </Text>
 
       <Text style={styles.section}>How to</Text>
-      {exercise.instructions.length === 0 ? (
+      {detail.instructions.length === 0 ? (
         <Text style={styles.meta}>No instructions in the source dataset.</Text>
       ) : (
-        exercise.instructions.map((step, i) => (
+        detail.instructions.map((step, i) => (
           <Text key={String(i)} style={styles.body}>
             {String(i + 1) + ". " + step}
           </Text>
@@ -73,12 +79,14 @@ export default function ExerciseDetailScreen() {
 
       <Text style={styles.section}>Media</Text>
       <Text style={styles.meta}>
-        {exercise.images.length > 0
-          ? String(exercise.images.length) + " images available via the media pack (not bundled)."
+        {detail.media.length > 0
+          ? String(detail.media.length) + " images available via the media pack (not bundled)."
           : "No images in the source dataset."}
       </Text>
-      <Text style={styles.source}>Source: {exercise.source} ({exercise.sourceId})</Text>
-    </View>
+      <Text style={styles.source}>
+        Source: {exercise.source} ({exercise.sourceId ?? "local"})
+      </Text>
+    </ScrollView>
   );
 }
 
@@ -91,7 +99,8 @@ function Badge(props: { label: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.lg, gap: spacing.xs },
+  scroll: { flex: 1, backgroundColor: colors.background },
+  container: { padding: spacing.lg, gap: spacing.xs },
   title: { ...typography.title, color: colors.text, marginBottom: spacing.sm },
   badgeRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs, marginBottom: spacing.sm },
   badge: {

@@ -16,8 +16,8 @@ export interface SearchFilters {
   equipment?: string | null | undefined;
   /** Filter by tracking type. */
   trackingType?: TrackingType | null | undefined;
-  /** Only rank-eligible exercises. */
-  rankEligibleOnly?: boolean | undefined;
+  /** Only exercises that participate in ranking (eligible + provisional). */
+  rankSupportedOnly?: boolean | undefined;
 }
 
 export interface ExerciseSearchResult {
@@ -91,7 +91,7 @@ export function searchExercises(catalog: CatalogV1, filters: SearchFilters = {})
     }
     if (filters.equipment === null && ex.equipment !== null) continue;
     if (filters.trackingType != null && ex.trackingType !== filters.trackingType) continue;
-    if (filters.rankEligibleOnly === true && !ex.ranking.eligible) continue;
+    if (filters.rankSupportedOnly === true && ex.ranking.support === "unsupported") continue;
     const tier = matchesQuery(ex);
     if (tier != null) results.push({ exercise: ex, tier });
   }

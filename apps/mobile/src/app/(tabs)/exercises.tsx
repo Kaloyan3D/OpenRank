@@ -1,18 +1,16 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import catalogJson from "@openrank/exercise-catalog/catalog.v1.json";
-import type { CatalogV1, MajorGroup, TrackingType } from "@openrank/exercise-catalog";
-import { MAJOR_GROUPS, searchExercises } from "@openrank/exercise-catalog";
+import type { Exercise, MajorGroup, TrackingType } from "@openrank/domain";
+import { MAJOR_GROUPS } from "@openrank/exercise-catalog";
+import { useRepos } from "../../db/DatabaseProvider";
 import { colors, spacing, typography } from "../../theme/tokens";
 
 /**
- * Exercise catalog browser (Phase 2): offline search + filters over the
- * bundled catalog. All logic lives in @openrank/exercise-catalog; this screen
- * is display only (spec section 44).
+ * Exercise catalog browser (Phase 3): offline search + filters served from
+ * SQLite (the seeded catalog), through the repository layer. This screen is
+ * display only; persistence lives in packages/database (spec sections 2, 44).
  */
-const catalog = catalogJson as unknown as CatalogV1;
-
 const GROUP_LABELS: Record<MajorGroup, string> = {
   legs: "Legs",
   chest: "Chest",
@@ -31,19 +29,20 @@ const TRACKING_LABELS: Partial<Record<TrackingType, string>> = {
 
 export default function ExercisesScreen() {
   const router = useRouter();
+  const repos = useRepos();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState<MajorGroup | null>(null);
   const [tracking, setTracking] = useState<TrackingType | null>(null);
 
-  const results = useMemo(
+  const results: Exercise[] = useMemo(
     () =>
-      searchExercises(catalog, {
+      repos.exercise.search({
         query,
         majorGroup: group,
         trackingType: tracking,
-        rankEligibleOnly: false,
-      }).slice(0, 200),
-    [query, group, tracking],
+        limit: 200,
+      }),
+    [repos, query, group, tracking],
   );
 
   return (
@@ -87,21 +86,29 @@ export default function ExercisesScreen() {
       </Text>
       <FlatList
         data={results}
-        keyExtractor={(item) => item.exercise.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Pressable
             style={styles.row}
-            onPress={() => router.push("/exercise/" + encodeURIComponent(item.exercise.slug))}
+            onPress={() => router.push("/exercise/" + encodeURIComponent(item.slug))}
           >
-            <Text style={styles.name}>{item.exercise.name}</Text>
+            <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.meta}>
-              {[item.exercise.equipment ?? "bodyweight", ...item.exercise.primaryMuscles].join(" - ")}
+              {[item.equipment ?? "bodyweight", rankLabel(item)].filter(Boolean).join(" - ")}
             </Text>
           </Pressable>
         )}
       />
     </View>
   );
+}
+
+/** Short rank-participation label from the ranking-support metadata. */
+function rankLabel(exercise: Exercise): string | null {
+  if (exercise.rankingEligibility === "unsupported" || !exercise.rankingGroup) return null;
+  return exercise.rankingEligibility === "provisional"
+    ? "rank (provisional): " + exercise.rankingGroup
+    : "rank: " + exercise.rankingGroup;
 }
 
 function FilterChip(props: { label: string; active: boolean; onPress: () => void }) {

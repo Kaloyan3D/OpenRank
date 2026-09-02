@@ -2,14 +2,34 @@
   "name": "@openrank/database",
   "version": "0.1.0",
   "private": true,
-  "license": "AGPL-3.0-or-later",
+  "description": "OpenRank SQLite persistence: migrations, catalog seeding, repositories (source of truth).",
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./expo": "./src/expo-driver.ts",
+    "./node": "./src/node-driver.ts"
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@openrank/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "expo-crypto": "*",
+    "expo-sqlite": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-crypto": { "optional": true },
+    "expo-sqlite": { "optional": true }
   },
   "devDependencies": {
+    "@openrank/domain": "workspace:*",
+    "@openrank/exercise-catalog": "workspace:*",
+    "@types/node": "^24.10.1",
     "typescript": "~6.0.3"
   }
 }

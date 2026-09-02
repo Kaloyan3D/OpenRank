@@ -41,9 +41,30 @@ export interface Exercise {
   /** Dataset origin, e.g. "free-exercise-db", "hevy-templates", "user". */
   source: string;
   sourceId: string | null;
+  /** Whether (and how confidently) this exercise participates in ranking. */
+  rankingEligibility: RankingEligibility;
+  /** Mapping strategy toward ranking-core. */
+  rankingStrategy: RankingStrategy;
+  /** Engine's authoritative group when participating, else null. */
+  rankingGroup: MajorGroup | null;
+  /** Why an unsupported/provisional exercise is not (confidently) ranked. */
+  rankingReason: string | null;
 }
 
 export type MuscleRole = "primary" | "secondary";
+
+/** The six major rank groups (aligned with ranking-core GROUPS keys). */
+export type MajorGroup = "legs" | "chest" | "back" | "shoulders" | "arms" | "core";
+
+/**
+ * Ranking-support semantics (Phase 3): whether an exercise participates in
+ * ranking and how confident its mapping into ranking-core is. The frozen
+ * engine remains the sole ranking authority.
+ */
+export type RankingEligibility = "eligible" | "provisional" | "unsupported";
+
+/** How an exercise maps into ranking-core. */
+export type RankingStrategy = "template" | "keyword" | "curated" | "none";
 
 export interface Muscle {
   id: string;

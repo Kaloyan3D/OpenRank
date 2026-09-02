@@ -42,6 +42,12 @@ export interface Workout {
   finishedAt: string | null;
   /** Local calendar date (YYYY-MM-DD) under the 04:00 logical day boundary. */
   startLocalDate: string;
+  /**
+   * The logical training day this workout belongs to (YYYY-MM-DD). In Phase 3
+   * this always equals startLocalDate; the schedule engine (Phase 6) may move
+   * a session to a different logical day than it started on.
+   */
+  logicalTrainingDate: string;
   startTimezoneOffsetMinutes: number;
   notes: string | null;
 }

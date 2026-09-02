@@ -63,8 +63,9 @@ describe("searchExercises", () => {
   it("filters by tracking type and rank eligibility", () => {
     const duration = searchExercises(catalog, { trackingType: "duration" });
     expect(duration.map((r) => r.exercise.id)).toEqual(["fdb:hamstring-stretch"]);
-    const eligible = searchExercises(catalog, { rankEligibleOnly: true });
-    expect(eligible.map((r) => r.exercise.id)).not.toContain("fdb:hamstring-stretch");
+    const supported = searchExercises(catalog, { rankSupportedOnly: true });
+    expect(supported.map((r) => r.exercise.id)).not.toContain("fdb:hamstring-stretch");
+    expect(supported.map((r) => r.exercise.id)).toContain("fdb:barbell-bench-press");
   });
 });
 

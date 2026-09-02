@@ -59,6 +59,8 @@ const TRACKING_TYPES: ReadonlySet<string> = new Set([
 ]);
 
 const CATEGORIES: ReadonlySet<string> = new Set(["strength", "cardio", "mobility", "other"]);
+const RANKING_SUPPORTS: ReadonlySet<string> = new Set(["eligible", "provisional", "unsupported"]);
+const RANKING_STRATEGIES: ReadonlySet<string> = new Set(["template", "keyword", "curated", "none"]);
 const MECHANICS: ReadonlySet<string | null> = new Set(["compound", "isolation", null]);
 const FORCES: ReadonlySet<string | null> = new Set(["push", "pull", "static", null]);
 const MAJOR_GROUP_IDS: ReadonlySet<string> = new Set([
@@ -229,9 +231,45 @@ export function validateCatalog(catalog: CatalogV1): ValidationIssue[] {
     if (ex.isCustom !== false) {
       issues.push({ code: "malformed_record", message: "catalog exercises cannot be custom", subject: ex.id });
     }
-    if (ex.ranking != null) {
-      if (ex.ranking.group !== null && !MAJOR_GROUP_IDS.has(ex.ranking.group)) {
-        issues.push({ code: "invalid_ranking_group", message: "invalid ranking group", subject: ex.id });
+    if (ex.ranking == null) {
+      issues.push({ code: "missing_required_field", message: "exercise missing ranking metadata", subject: ex.id });
+    } else {
+      const r = ex.ranking;
+      if (r.group !== null && !MAJOR_GROUP_IDS.has(r.group)) {
+        issues.push({ code: "invalid_ranking_group", message: "invalid anatomical ranking group", subject: ex.id });
+      }
+      if (!RANKING_SUPPORTS.has(r.support)) {
+        issues.push({ code: "invalid_ranking_support", message: "invalid ranking support: " + String(r.support), subject: ex.id });
+      }
+      if (!RANKING_STRATEGIES.has(r.strategy)) {
+        issues.push({ code: "invalid_ranking_strategy", message: "invalid ranking strategy: " + String(r.strategy), subject: ex.id });
+      }
+      if (r.engineGroup !== null && !MAJOR_GROUP_IDS.has(r.engineGroup)) {
+        issues.push({ code: "invalid_ranking_group", message: "invalid engine ranking group", subject: ex.id });
+      }
+      if (r.support === "unsupported") {
+        if (r.engineGroup !== null) {
+          issues.push({ code: "inconsistent_ranking_metadata", message: "unsupported exercise must not carry an engine group", subject: ex.id });
+        }
+        if (r.strategy !== "none") {
+          issues.push({ code: "inconsistent_ranking_metadata", message: "unsupported exercise must use strategy 'none'", subject: ex.id });
+        }
+        if (r.reason == null || r.reason.trim() === "") {
+          issues.push({ code: "missing_ranking_reason", message: "unsupported exercise requires a reason", subject: ex.id });
+        }
+      } else {
+        if (r.engineGroup === null) {
+          issues.push({ code: "inconsistent_ranking_metadata", message: "participating exercise requires an engine group", subject: ex.id });
+        }
+        if (r.strategy === "none") {
+          issues.push({ code: "inconsistent_ranking_metadata", message: "participating exercise requires a mapping strategy", subject: ex.id });
+        }
+        if (r.support === "eligible" && r.reason != null && r.reason.trim() !== "") {
+          issues.push({ code: "inconsistent_ranking_metadata", message: "eligible exercise must not carry a reason", subject: ex.id });
+        }
+        if (r.support === "provisional" && (r.reason == null || r.reason.trim() === "")) {
+          issues.push({ code: "missing_ranking_reason", message: "provisional exercise requires a reason", subject: ex.id });
+        }
       }
     }
   }

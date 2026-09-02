@@ -2,8 +2,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { Exercise } from "@openrank/domain";
 import { buildCatalogPipeline } from "./build";
+import { classifyRankingSupport } from "./ranking-coverage";
 import { toDomainExercise, toDomainMuscles } from "./adapter";
-import type { CatalogExercise, CatalogV1, RawExercise } from "./schema";
+import type { CatalogExercise, CatalogV1, HevyTemplate, RawExercise } from "./schema";
+import type { CatalogTemplate } from "@openrank/ranking-core";
 
 const ROOT_UPSTREAM = new URL("../../../datasets/upstream/free-exercise-db/exercises.json", import.meta.url);
 const ROOT_TEMPLATES = new URL("../../ranking-core/src/legacy/data/exercise-templates.json", import.meta.url);
@@ -56,7 +58,13 @@ describe("buildCatalogPipeline", () => {
       primaryMuscles: ["chest"],
       secondaryMuscles: ["triceps"],
     });
-    expect(ex.ranking).toEqual({ group: "chest", eligible: true });
+    expect(ex.ranking).toEqual({
+      group: "chest",
+      support: "eligible",
+      strategy: "keyword",
+      engineGroup: "chest",
+      reason: null,
+    });
   });
 
   it("generates stable canonical ids (id and slug derive deterministically)", () => {
@@ -80,8 +88,10 @@ describe("buildCatalogPipeline", () => {
     const overrides = JSON.parse(readFileSync(OVERRIDES, "utf8")) as { overrides: { title: string; exerciseSlug: string }[] };
     const source = { name: "free-exercise-db", repositoryUrl: "https://github.com/yuhonas/free-exercise-db", commit: "a859101d633a01c4a1a920d6a8ce41dabba0705f", license: "Unlicense", datasetSha256: "0".repeat(64) };
     const aliasSources = [{ name: "hevy-ranks-exercise-templates", repositoryUrl: "https://github.com/BenjiPy/hevy-ranks", commit: "ad4ced63f0d1b5c89920619ec3a00da8beace50d", license: "MIT", datasetSha256: "0".repeat(64) }];
-    const first = buildCatalogPipeline({ upstream, hevyTemplates: templates, overrides: overrides.overrides, source, aliasSources, rankingCompatibility: "hevy-ranks-compatible-v1" });
-    const second = buildCatalogPipeline({ upstream, hevyTemplates: templates, overrides: overrides.overrides, source, aliasSources, rankingCompatibility: "hevy-ranks-compatible-v1" });
+    const classify = (ctx: Parameters<typeof classifyRankingSupport>[3] extends never ? never : { exercises: readonly CatalogExercise[]; curatedExerciseIds: ReadonlySet<string>; templateIdOf: (id: string) => string | null }) =>
+      classifyRankingSupport(ctx.exercises, templates as unknown as CatalogTemplate[], ctx);
+    const first = buildCatalogPipeline({ upstream, hevyTemplates: templates as unknown as HevyTemplate[], overrides: overrides.overrides, source, aliasSources, rankingCompatibility: "hevy-ranks-compatible-v1", classify });
+    const second = buildCatalogPipeline({ upstream, hevyTemplates: templates as unknown as HevyTemplate[], overrides: overrides.overrides, source, aliasSources, rankingCompatibility: "hevy-ranks-compatible-v1", classify });
     expect(JSON.stringify(first.catalog)).toBe(JSON.stringify(second.catalog));
   });
 
@@ -93,11 +103,16 @@ describe("buildCatalogPipeline", () => {
     const overrides = JSON.parse(readFileSync(OVERRIDES, "utf8")) as { overrides: { title: string; exerciseSlug: string }[] };
     const rebuilt = buildCatalogPipeline({
       upstream,
-      hevyTemplates: templates,
+      hevyTemplates: templates as unknown as HevyTemplate[],
       overrides: overrides.overrides,
       source: parsed.source,
       aliasSources: parsed.aliasSources,
       rankingCompatibility: parsed.rankingCompatibility,
+      classify: ({ exercises, curatedExerciseIds, templateIdOf }) =>
+        classifyRankingSupport(exercises, templates as unknown as CatalogTemplate[], {
+          curatedExerciseIds,
+          templateIdOf,
+        }),
     });
     expect(JSON.stringify(rebuilt.catalog)).toBe(JSON.stringify(parsed));
   });
@@ -111,7 +126,9 @@ describe("buildCatalogPipeline", () => {
     expect(stats.exercises).toBe(catalog.exercises.length);
     expect(stats.byCategory.strength).toBe(1);
     expect(stats.byCategory.cardio).toBe(1);
-    expect(stats.rankEligible).toBe(1);
+    expect(stats.rankSupported).toBe(1);
+    expect(stats.bySupport.eligible).toBe(1);
+    expect(stats.byStrategy.keyword).toBe(1);
   });
 });
 

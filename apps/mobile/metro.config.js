@@ -9,6 +9,11 @@ const { getDefaultConfig } = require("expo/metro-config");
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-config.transpilePackages = ["@openrank/exercise-catalog", "@openrank/domain", "@openrank/shared"];
+config.transpilePackages = [
+  "@openrank/exercise-catalog",
+  "@openrank/domain",
+  "@openrank/shared",
+  "@openrank/database",
+];
 
 module.exports = config;

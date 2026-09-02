@@ -132,3 +132,43 @@ only hold temporary UI state.
   Profile" instead of a misleading averaged rank.
 - **Project license:** AGPL-3.0-or-later (per spec recommendation, so hosted
   derivatives stay open). Hevy Ranks stays MIT under THIRD_PARTY_NOTICES.md.
+
+## Decisions log (Phase 3 - Local Database)
+
+- **Persistence:** SQLite via `expo-sqlite` is the canonical store for all
+  mutable state (profile, bodyweight, routines, workouts, imports, dirty
+  queue, seeded catalog). React state is never canonical; the catalog JSON is
+  a build artifact that seeds the DB, after which screens read repositories.
+- **No ORM:** hand-rolled version-tracked migrations over `PRAGMA
+  user_version` + typed repositories; Drizzle was evaluated and declined
+  (migrator-asset path under Metro/pnpm hoisting, extra dependency, weaker
+  node-driven test story). Full evaluation in `docs/DATABASE.md`.
+- **Hexagonal database package:** `@openrank/database` exposes a
+  driver-agnostic root (`openDatabase`), with `./expo` (expo-sqlite) and
+  `./node` (node:sqlite `DatabaseSync`) subpath drivers - the same
+  repositories are exercised in vitest and in the app. Driver subpaths are
+  deliberately not re-exported from the root (importing expo-sqlite in vitest
+  would pull React Native Flow sources).
+- **Schema v1:** 17 tables, 16 FK edges (exercise references from
+  routines/workouts are RESTRICT to protect training history; routine
+  deletion SET NULLs the workout that started from it; everything else
+  cascades), 12 indexes including the partial unique
+  `idx_workouts_single_active` enforcing at most one active workout per
+  profile.
+- **IDs:** UUIDv7 (RFC 9562, `@openrank/shared`) for locally owned mutable
+  entities; deterministic canonical ids (`fdb:*`, `m:*`, `al_*`, `md_*`)
+  for dataset rows so reseeding is byte-stable.
+- **Seeding:** deterministic + idempotent + user-data preserving; muscles
+  upserted never deleted, dataset exercises updated in place by content
+  compare (never `INSERT OR REPLACE`), child rows replaced scoped to
+  `is_custom = 0`, catalog fingerprint recorded in `catalog_meta`.
+- **Derived-state queue:** `derived_dirty` markers written in the same
+  transaction as the canonical change (idempotent by
+  `(entity_type, entity_id, reason)`), persisted across restarts; a later
+  phase drains them to rebuild ranks/streaks.
+- **Crash safety:** WAL + per-write transactions + per-migration transactions;
+  acceptance-tested by closing the DB mid-workout and reopening.
+- **Mobile integration (minimal):** `DatabaseProvider` boots SQLite
+  synchronously on launch with explicit loading/error(retry) states; the
+  Exercises list/detail screens read SQLite repositories. No workout,
+  routine, rank, streak or notification UI yet (Phase 4+).

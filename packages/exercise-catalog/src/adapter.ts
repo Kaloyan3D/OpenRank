@@ -18,6 +18,10 @@ export function toDomainExercise(ex: CatalogExercise): Exercise {
     isCustom: ex.isCustom,
     source: ex.source,
     sourceId: ex.sourceId,
+    rankingEligibility: ex.ranking.support,
+    rankingStrategy: ex.ranking.strategy,
+    rankingGroup: ex.ranking.engineGroup,
+    rankingReason: ex.ranking.reason,
   };
 }
 

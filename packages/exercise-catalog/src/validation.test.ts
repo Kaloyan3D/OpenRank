@@ -20,7 +20,7 @@ function catalogExercise(overrides: Partial<CatalogExercise> = {}): CatalogExerc
     secondaryMuscles: ["triceps"],
     instructions: ["Step one"],
     images: [],
-    ranking: { group: "chest", eligible: true },
+    ranking: { group: "chest", support: "eligible", strategy: "keyword", engineGroup: "chest", reason: null },
     ...overrides,
   };
 }

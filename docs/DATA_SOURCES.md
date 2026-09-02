@@ -71,3 +71,13 @@ or any external API.
 Exercise metadata + instructions are bundled; exercise images ship as a
 manifest + cache (optional offline media pack). Core functionality must work
 when media is not downloaded.
+
+## Phase 3 runtime storage note
+
+The bundled `catalog.v1.json` is a **build-time artifact**. At app boot,
+`@openrank/database` seeds it into SQLite (schema v1, deterministic ids,
+idempotent upserts). After seeding, runtime reads use the SQLite repositories
+- the JSON asset is never re-parsed at runtime for exercise data. The stored
+`catalog_meta.fingerprint` ties the seeded rows back to this document's
+artifact (sha256 over the JSON), and `ranking_compatibility` /
+`dataset_commit` record the provenance that section 3 defines.

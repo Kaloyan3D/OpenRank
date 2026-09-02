@@ -23,7 +23,8 @@ export type TrackingType =
   | "distance_duration";
 
 /** The six major rank groups (shared with ranking-core's group keys). */
-export type MajorGroup = "legs" | "chest" | "back" | "shoulders" | "arms" | "core";
+export type { MajorGroup } from "@openrank/domain";
+import type { MajorGroup } from "@openrank/domain";
 
 export interface CatalogMuscle {
   /** Canonical muscle id - aligns with ranking-core's primary-muscle keys. */
@@ -33,6 +34,45 @@ export interface CatalogMuscle {
   majorGroup: MajorGroup;
 }
 
+/**
+ * Ranking-support semantics (Phase 3, formalized from the Phase 2 coverage
+ * work). The frozen ranking engine remains the sole authority; this metadata
+ * records HOW (and whether) each catalog exercise currently maps into it.
+ *
+ * - eligible:    participates in ranking with a confident mapping (exact
+ *                engine-catalog routing, or keyword classification whose
+ *                engine group agrees with the anatomical group).
+ * - provisional: participates in ranking, but the mapping is expected to be
+ *                refined later (keyword classification that disagrees with the
+ *                anatomical group). Still engine-authoritative.
+ * - unsupported: does not participate (engine cannot classify the title, or
+ *                deliberately skips the activity class). `reason` explains why.
+ */
+export type RankingSupport = "eligible" | "provisional" | "unsupported";
+
+/** How an exercise maps into ranking-core. */
+export type RankingStrategy = "template" | "keyword" | "curated" | "none";
+
+export interface CatalogRanking {
+  /** Anatomical major group of the primary muscles (UI organization). */
+  group: MajorGroup | null;
+  /** Whether the exercise currently participates in ranking. */
+  support: RankingSupport;
+  /** Mapping strategy toward ranking-core. */
+  strategy: RankingStrategy;
+  /** The engine's authoritative group when participating, else null. */
+  engineGroup: MajorGroup | null;
+  /** Why an unsupported/provisional exercise is not (confidently) ranked. */
+  reason: string | null;
+}
+
+/** Build-input form of the ranking metadata (supplied by classification). */
+export interface RankingSupportInput {
+  support: RankingSupport;
+  strategy: RankingStrategy;
+  engineGroup: MajorGroup | null;
+  reason?: string | null;
+}
 /** A canonical exercise in the bundled catalog. */
 export interface CatalogExercise {
   /** Stable canonical id, e.g. "fdb:barbell-bench-press". */
@@ -57,13 +97,8 @@ export interface CatalogExercise {
   instructions: string[];
   /** Upstream image paths (manifest only - media is not bundled). */
   images: string[];
-  /** Ranking integration hints (mapping infra toward ranking-core). */
-  ranking: {
-    /** Major group implied by the primary muscles (null if unmapped). */
-    group: MajorGroup | null;
-    /** Whether this exercise is considered rank-eligible. */
-    eligible: boolean;
-  };
+  /** Ranking integration metadata (mapping infra toward ranking-core). */
+  ranking: CatalogRanking;
 }
 
 export type AliasKind =
@@ -149,8 +184,10 @@ export interface BuildStats {
   byEquipment: Record<string, number>;
   byMechanic: Record<string, number>;
   byTrackingType: Record<string, number>;
-  rankEligible: number;
-  rankEligibleByGroup: Record<string, number>;
+  /** Exercises that participate in ranking (eligible + provisional). */
+  rankSupported: number;
+  bySupport: Record<string, number>;
+  byStrategy: Record<string, number>;
   primaryMuscleUsage: Record<string, number>;
   missingInstructions: number;
   missingImages: number;
