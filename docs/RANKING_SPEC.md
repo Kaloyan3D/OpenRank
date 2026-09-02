@@ -1,4 +1,4 @@
-# Ranking Specification (Phase 1)
+# Ranking Specification (Phase 1 + Phase 2 integration)
 
 The ranking engine is a strict TypeScript port of the MIT-licensed Hevy Ranks
 engine, verified by **golden compatibility tests**: for every characterization
@@ -119,3 +119,37 @@ until a deliberate calibration is designed and tested; the UI displays a
 
 The port result additionally carries `rankingVersion`; it is stripped before
 comparison because the legacy engine predates version stamping.
+
+## Phase 2 integration: catalog -> ranking engine
+
+The exercise catalog does not modify ranking behavior. It feeds the engine
+through three mechanisms, in priority order:
+
+1. **Template id bridge (exact):** the alias build attaches Hevy
+   `exercise_template_id` values to catalog exercises (`source` =
+   `hevy-templates`, `kind` = `import-source`). Passing that id to the
+   engine (`RankCatalog.byId`, e.g. via `computeRanks`' catalog argument)
+   classifies the exercise exactly - group and coefficient come from the
+   vendored template catalog. 152 of the 453 Hevy templates resolve to a
+   catalog exercise (direct, canonical word-order, relaxed movement-core with
+   primary-muscle consistency, plus curated overrides).
+2. **Keyword fallback (inference):** for exercises without a template bridge,
+   the engine's frozen keyword table (`GROUP_HINTS`) classifies the deburred
+   title. This covers 419 more rank-eligible exercises.
+3. **Documented gaps:** 237 rank-eligible exercises remain unmatched and 14 are
+   deliberately skipped by the engine's keyword table (cardio/mobility
+   activities in a strength dataset). Every one is listed with a reason in
+   `packages/exercise-catalog/data/ranking-coverage-exceptions.json`
+   (regenerate via `node scripts/generate-coverage-exceptions.ts`). Coverage
+   tests fail if an unclassified exercise is not documented there. Closing
+   gaps further is a curated-mapping task (Phase 9), never an engine change.
+
+**Taxonomy note (by design):** the catalog's `ranking.group` is anatomical
+(major group of the primary muscles); the engine's classification follows its
+own frozen routing and may differ (e.g. the engine routes the deadlift keyword
+family to legs, while the catalog's primary-muscle mapping says back). The
+engine is authoritative for ranks; the catalog group is for UI organization.
+
+Templates whose Hevy primary is `full_body` are not routable by the frozen
+engine (`PRIMARY_TO_GROUP` has no entry) and stay unmatched until Phase 9
+provides curated mapping or a future engine version (new ranking id) adds it.

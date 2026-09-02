@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "comment": [
+    "Curated import-compatibility aliases for Hevy exercise titles that the",
+    "deterministic auto-matcher cannot resolve against the Free Exercise DB",
+    "naming (e.g. 'Bench Press (Barbell)' vs 'Barbell Bench Press - Medium Grip').",
+    "Every title must exist in the vendored Hevy template catalog and every",
+    "slug must exist in the pinned Free Exercise DB snapshot - the build",
+    "fails otherwise. Extend this list only with verified, unambiguous pairs."
+  ],
+  "overrides": [
+    { "title": "Bench Press (Barbell)", "exerciseSlug": "barbell-bench-press-medium-grip" },
+    { "title": "Bicep Curl (Barbell)", "exerciseSlug": "barbell-curl" },
+    { "title": "Pull Up", "exerciseSlug": "pullups" },
+    { "title": "Chest Dip", "exerciseSlug": "dips-chest-version" },
+    { "title": "Triceps Dip", "exerciseSlug": "dips-triceps-version" },
+    { "title": "Concentration Curl", "exerciseSlug": "concentration-curls" },
+    { "title": "Hammer Curl (Dumbbell)", "exerciseSlug": "hammer-curls" },
+    { "title": "Leg Extension (Machine)", "exerciseSlug": "leg-extensions" }
+  ]
+}

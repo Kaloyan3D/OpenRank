@@ -12,6 +12,8 @@
     "smoke:export": "expo export --platform android"
   },
   "dependencies": {
+    "@openrank/domain": "workspace:*",
+    "@openrank/exercise-catalog": "workspace:*",
     "expo": "~57.0.18",
     "expo-constants": "~57.0.16",
     "expo-linking": "~57.0.8",

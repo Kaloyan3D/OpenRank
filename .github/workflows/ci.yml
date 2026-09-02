@@ -26,6 +26,12 @@ jobs:
         run: pnpm test
       - name: License check
         run: pnpm licenses:check
+      - name: Catalog reproducibility
+        run: |
+          pnpm build:catalog
+          git diff --exit-code -- packages/exercise-catalog/data/catalog.v1.json
+          pnpm exec tsx scripts/generate-coverage-exceptions.ts
+          git diff --exit-code -- packages/exercise-catalog/data/ranking-coverage-exceptions.json
 
   android-smoke:
     name: Android build smoke test

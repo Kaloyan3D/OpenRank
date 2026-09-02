@@ -3,5 +3,5 @@ export {
   formatWeight,
   kgToLb,
   lbToKg,
-} from "./units.js";
-export type { UnitSystem } from "./units.js";
+} from "./units";
+export type { UnitSystem } from "./units";

@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "fixtures:generate": "node scripts/generate-ranking-fixtures.mjs",
+    "build:catalog": "tsx scripts/build-exercise-catalog.ts",
     "licenses:check": "node scripts/check-licenses.mjs"
   },
   "devDependencies": {
@@ -22,6 +23,7 @@
     "eslint": "^9.39.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^16.0.0",
+    "tsx": "^4.20.6",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.69.0",
     "vitest": "^4.1.11"

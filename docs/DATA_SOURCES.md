@@ -14,26 +14,57 @@ bundled; nothing is fetched at runtime.
 - Verification: SHA-256 checksums recorded in
   `packages/ranking-core/src/legacy/README.md`.
 
-## Exercise dataset (Phase 2)
+## Exercise dataset (Phase 2 - implemented)
 
 - Upstream: https://github.com/yuhonas/free-exercise-db
   (Unlicense / public domain)
-- Expected fields: name, force, difficulty, mechanic, equipment, primary
-  muscles, secondary muscles, instructions, images, category.
+- Pinned commit: `a859101d633a01c4a1a920d6a8ce41dabba0705f` (2026-08-30)
+- Vendored snapshot: `datasets/upstream/free-exercise-db/exercises.json`
+  (byte-identical, SHA-256
+  `5bb747e3fc658f095a60dcbf6d53c96627acdcc6ffb6fffde86f7e26995d40bf`),
+  upstream license text in the same directory. Provenance (commit, checksum,
+  license, import timestamp) lives in `datasets/sources.lock.json`.
+- Fields used: name, force, mechanic, equipment, primary muscles, secondary
+  muscles, instructions, images, category, and the upstream `id` (kept as
+  `sourceId`). The upstream `level` (difficulty) field is intentionally not
+  part of the canonical schema (spec section 6).
 
-Pipeline (to be implemented by `scripts/build-exercise-catalog.ts` in Phase 2):
+Build pipeline (`pnpm build:catalog` -> `scripts/build-exercise-catalog.ts`):
 
 ```text
-Pinned upstream commit
+datasets/sources.lock.json (integrity gate: vendored SHA-256 must match)
         v
-Free Exercise DB
+vendored Free Exercise DB snapshot (no network access)
         v
-validation -> normalization -> our canonical schema -> catalog.v1.json
+validation (raw upstream records)
+        v
+normalization (slug, category, mechanic, force, equipment, tracking type,
+               canonical muscle taxonomy, alias variants)
+        v
+canonical OpenRank exercise schema + alias index + ranking hints
+        v
+packages/exercise-catalog/data/catalog.v1.json  (deterministic, byte-stable)
 ```
 
-The upstream commit SHA will be stored in `datasets/sources.lock.json` so
-upstream changes can never silently alter app behavior. The dataset is NOT
-runtime-fetched.
+Determinism: the pipeline is pure (no timestamps in the artifact), sorts every
+collection, and compares with machine-independent string ordering. Two builds
+from the same pinned snapshot are byte-identical; CI regenerates the catalog
+and fails on any diff. 876 exercises and 1,079 aliases are bundled.
+
+Import-compatibility aliases: 152 Hevy exercise templates resolve to catalog
+exercises (exact/canonical/relaxed matching plus a curated, validated override
+list in `packages/exercise-catalog/data/hevy-alias-overrides.json`). The
+remaining Hevy titles map to exercises FreeDB does not contain and are handled
+by custom exercises or future curated mappings (Phase 9).
+
+Ranking integration: `packages/exercise-catalog/data/ranking-coverage-exceptions.json`
+documents every rank-eligible exercise the frozen engine cannot classify
+(keyword or template). Regenerate with
+`node scripts/generate-coverage-exceptions.ts` after catalog changes.
+
+The dataset is NOT runtime-fetched. The app imports the generated catalog as a
+static asset; no code path in the app contacts Free Exercise DB, GitHub, Hevy,
+or any external API.
 
 ## Media
 

@@ -71,6 +71,43 @@ check(
   "root LICENSE is the AGPL-3.0 text",
 );
 
+// 5. Free Exercise DB snapshot (Phase 2): pinned in sources.lock.json and
+//    vendored byte-identical under datasets/upstream/.
+const FDB_COMMIT = "a859101d633a01c4a1a920d6a8ce41dabba0705f";
+const FDB_SHA = "5bb747e3fc658f095a60dcbf6d53c96627acdcc6ffb6fffde86f7e26995d40bf";
+check(
+  notices.includes(FDB_COMMIT),
+  "THIRD_PARTY_NOTICES.md records the Free Exercise DB pinned commit",
+);
+let lock = "";
+try {
+  lock = read("datasets/sources.lock.json");
+} catch {
+  /* handled below */
+}
+check(lock.includes("free-exercise-db"), "datasets/sources.lock.json pins free-exercise-db");
+check(lock.includes(FDB_COMMIT), "datasets/sources.lock.json records the Free Exercise DB commit");
+check(lock.includes(FDB_SHA), "datasets/sources.lock.json records the vendored dataset checksum");
+let fdbSha = "";
+try {
+  fdbSha = createHash("sha256")
+    .update(readFileSync(join(repoRoot, "datasets/upstream/free-exercise-db/exercises.json")))
+    .digest("hex");
+} catch {
+  /* handled below */
+}
+check(fdbSha === FDB_SHA, "sha256(datasets/upstream/free-exercise-db/exercises.json) matches the pin");
+let fdbLicense = "";
+try {
+  fdbLicense = read("datasets/upstream/free-exercise-db/LICENSE.md");
+} catch {
+  /* handled below */
+}
+check(
+  fdbLicense.includes("unencumbered software released into the public domain"),
+  "vendored Free Exercise DB keeps the upstream Unlicense text",
+);
+
 if (failed) {
   console.error("\nlicense check FAILED");
   process.exit(1);

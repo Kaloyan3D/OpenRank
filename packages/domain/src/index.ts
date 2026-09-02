@@ -7,7 +7,7 @@ export type {
   Muscle,
   MuscleRole,
   TrackingType,
-} from "./exercise.js";
+} from "./exercise";
 export type {
   BodyweightEntry,
   Profile,
@@ -16,4 +16,4 @@ export type {
   WorkoutExercise,
   WorkoutSet,
   WorkoutStatus,
-} from "./workout.js";
+} from "./workout";

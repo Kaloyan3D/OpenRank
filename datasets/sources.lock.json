@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "runtimeFetchAllowed": false,
+    "note": "Upstream datasets are vendored under datasets/upstream/ at the pinned commit. Builds must be reproducible byte-for-byte from these files. To update a source: vendor the new snapshot, update the commit/sha/license/importedAtUtc here, regenerate the catalog, and review the diff."
+  },
+  "sources": [
+    {
+      "name": "free-exercise-db",
+      "role": "canonical exercise dataset",
+      "repositoryUrl": "https://github.com/yuhonas/free-exercise-db",
+      "commit": "a859101d633a01c4a1a920d6a8ce41dabba0705f",
+      "commitDateUtc": "2026-08-30T07:30:00Z",
+      "license": "Unlicense",
+      "datasetPath": "dist/exercises.json",
+      "vendoredPath": "datasets/upstream/free-exercise-db/exercises.json",
+      "vendoredSha256": "5bb747e3fc658f095a60dcbf6d53c96627acdcc6ffb6fffde86f7e26995d40bf",
+      "licenseFilePath": "datasets/upstream/free-exercise-db/LICENSE.md",
+      "importedAtUtc": "2026-09-01T18:35:54.487Z",
+      "importedBy": "scripts/build-exercise-catalog.ts (initial Phase 2 import)"
+    },
+    {
+      "name": "hevy-ranks-exercise-templates",
+      "role": "alias source (Hevy import compatibility) + ranking engine baseline",
+      "repositoryUrl": "https://github.com/BenjiPy/hevy-ranks",
+      "commit": "ad4ced63f0d1b5c89920619ec3a00da8beace50d",
+      "commitDateUtc": "2026-07-14T07:47:50Z",
+      "license": "MIT",
+      "datasetPath": "data/exercise-templates.json",
+      "vendoredPath": "packages/ranking-core/src/legacy/data/exercise-templates.json",
+      "vendoredSha256": "cb170066882aaf8e9f2ea0202d633f4210fa6fa7fb341acd8e43a6c5c276dc2e",
+      "licenseFilePath": "packages/ranking-core/src/legacy/LICENSE",
+      "importedAtUtc": "2026-09-01T17:40:00.000Z",
+      "importedBy": "packages/ranking-core (Phase 1 vendoring)"
+    }
+  ]
+}

@@ -1,0 +1,1006 @@
+[
+  {
+    "exerciseId": "fdb:advanced-kettlebell-windmill",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:air-bike",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:alternate-heel-touchers",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:alternate-leg-diagonal-bound",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:alternating-floor-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:alternating-hang-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:alternating-kettlebell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:anti-gravity-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:around-the-worlds",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:atlas-stone-trainer",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:atlas-stones",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:backward-drag",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:backward-medicine-ball-throw",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:balance-board",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:band-pull-apart",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:barbell-incline-shoulder-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:barbell-rollout-from-bench",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:barbell-side-bend",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:barbell-walking-lunge",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:battling-ropes",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bear-crawl-sled-drags",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bench-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bench-sprint",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:bent-arm-barbell-pullover",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bent-arm-dumbbell-pullover",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bent-knee-hip-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bent-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:board-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:body-up",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bodyweight-walking-lunge",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:bottoms-up",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bottoms-up-clean-from-the-hang-position",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:box-jump-multiple-response",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:box-skip",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:bradford-rocky-presses",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:butt-lift-bridge",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:butt-ups",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:cable-internal-rotation",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:cable-iron-cross",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:cable-judo-flip",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:car-drivers",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:carioca-quick-step",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:catch-and-overhead-throw",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:chain-handle-extension",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:chain-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:chest-push-with-run-release",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:circus-bell",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:clean-and-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:clean-and-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:clean-from-blocks",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:clean-pull",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:close-grip-dumbbell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:close-grip-ez-bar-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:cocoons",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:conan-s-wheel",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:cross-over-with-bands",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:crucifix",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:cuban-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:decline-smith-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:depth-jump-leap",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:double-kettlebell-alternating-hang-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:double-kettlebell-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:double-kettlebell-snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:double-kettlebell-windmill",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:double-leg-butt-kick",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:downward-facing-balance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:drop-push",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:dumbbell-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:dumbbell-incline-shoulder-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:dumbbell-lying-pronation",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:dumbbell-lying-supination",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:dumbbell-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:dumbbell-scaption",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:dumbbell-seated-box-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:exercise-ball-pull-in",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:extended-range-one-arm-kettlebell-floor-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:external-rotation",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:external-rotation-with-band",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:external-rotation-with-cable",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:farmer-s-walk",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:fast-skipping",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:floor-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:floor-press-with-chains",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:forward-drag-with-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:front-box-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:front-cone-hops-or-hurdle-hops",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:front-incline-dumbbell-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:front-two-dumbbell-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:gironda-sternum-chins",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hang-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hang-clean-below-the-knees",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hang-snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hang-snatch-below-knees",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hanging-pike",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:heaving-snatch-balance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:heavy-bag-thrust",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hip-extension-with-bands",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hip-flexion-with-band",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hip-lift-with-band",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:hurdle-hops",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:incline-bench-pull",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:incline-dumbbell-bench-with-palms-facing-in",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:incline-dumbbell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:internal-rotation-with-band",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:iron-cross",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:isometric-neck-exercise-front-and-back",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:isometric-neck-exercise-sides",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:isometric-wipers",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:jerk-balance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:keg-load",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-dead-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-figure-8",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-hang-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-pass-between-the-legs",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-pirate-ships",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-seated-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-seesaw-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-sumo-high-pull",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-thruster",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kettlebell-windmill",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:knee-hip-raise-on-parallel-bars",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:knee-tuck-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:kneeling-arm-drill",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:landmine-180-s",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:landmine-linear-jammer",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:lateral-bound",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:lateral-cone-hops",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:leg-lift",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:leg-over-floor-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:leg-pull-in",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:linear-3-part-start-technique",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:linear-acceleration-wall-drill",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:linear-depth-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:log-lift",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:london-bridges",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:lunge-sprint",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:lying-face-down-plate-neck-resistance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:lying-face-up-plate-neck-resistance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:machine-shoulder-military-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:medicine-ball-full-twist",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:medicine-ball-scoop-throw",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:mixed-grip-chin",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:monster-walk",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:mountain-climbers",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:moving-claw-series",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:muscle-snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:neck-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-floor-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-high-pulley-cable-side-bends",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-clean-and-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-floor-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-para-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-split-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-split-snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-kettlebell-swings",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-medicine-ball-slam",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-open-palm-kettlebell-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:one-arm-side-laterals",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:open-palm-kettlebell-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:otis-up",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:overhead-slam",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:physioball-hip-bridge",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:pin-presses",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:plate-pinch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:plate-twist",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:power-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:power-clean-from-blocks",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:power-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:power-partials",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:power-snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:power-snatch-from-blocks",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:power-stairs",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:quick-leap",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:rack-delivery",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:rack-pulls",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:return-push-from-stance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:rickshaw-carry",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:rocket-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:rope-climb",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:sandbag-load",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:scissors-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:seated-barbell-twist",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:seated-dumbbell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:seated-head-harness-neck-resistance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:seated-leg-tucks",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:see-saw-press-alternating-side-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:side-bridge",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:side-hop-sprint",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:side-jackknife",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:side-standing-long-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:side-to-side-box-shuffle",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:side-to-side-chins",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:single-arm-linear-jammer",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:single-cone-sprint-drill",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:single-dumbbell-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:single-leg-butt-kick",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:single-leg-hop-progression",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:single-leg-lateral-hop",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:single-leg-push-off",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:single-leg-stride-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:sled-drag-harness",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:sled-overhead-backward-walk",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:sled-push",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:sledgehammer-swings",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:smith-incline-shoulder-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:smith-machine-hang-power-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:smith-machine-hip-raise",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:snatch-balance",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:snatch-from-blocks",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:snatch-pull",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:spell-caster",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:spider-crawl",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:split-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:split-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:split-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:split-snatch",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-alternating-dumbbell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-barbell-press-behind-neck",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-bradford-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-cable-lift",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-dumbbell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-dumbbell-straight-arm-front-delt-raise-above-head",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-front-barbell-raise-over-head",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-long-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-olympic-plate-hand-squeeze",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-palm-in-one-arm-dumbbell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-palms-in-dumbbell-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:standing-two-arm-overhead-throw",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:star-jump",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:straight-arm-dumbbell-pullover",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:straight-raises-on-incline-bench",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:stride-jump-crossover",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:supine-one-arm-overhead-throw",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:supine-two-arm-overhead-throw",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:suspended-fallout",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:svend-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:tate-press",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:tire-flip",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:two-arm-kettlebell-clean",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:two-arm-kettlebell-jerk",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:vertical-swing",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:weighted-ball-side-bend",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:wide-grip-decline-barbell-pullover",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:wind-sprints",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  },
+  {
+    "exerciseId": "fdb:wrist-rotations-with-straight-bar",
+    "reason": "engine cannot classify this title (reason: unknown); needs curated mapping (Phase 9) or custom exercise"
+  },
+  {
+    "exerciseId": "fdb:yoke-walk",
+    "reason": "ranking engine deliberately skips this activity class (cardio/mobility/conditioning keyword)"
+  }
+]

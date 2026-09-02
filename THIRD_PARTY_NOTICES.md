@@ -37,9 +37,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## Free Exercise DB (exercise dataset, Phase 2)
+## Free Exercise DB (exercise dataset)
 
 - **Source:** https://github.com/yuhonas/free-exercise-db
+- **Pinned upstream commit:** `a859101d633a01c4a1a920d6a8ce41dabba0705f` (2026-08-30)
 - **License:** Unlicense (public domain)
-- **Status:** not yet vendored; will be pinned by commit in
-  `datasets/sources.lock.json` during Phase 2 (see `docs/DATA_SOURCES.md`).
+- **Included files:**
+  - `datasets/upstream/free-exercise-db/exercises.json` (byte-identical copy of
+    the upstream `dist/exercises.json` at the pinned commit; SHA-256
+    `5bb747e3fc658f095a60dcbf6d53c96627acdcc6ffb6fffde86f7e26995d40bf`)
+  - `datasets/upstream/free-exercise-db/LICENSE.md` (upstream Unlicense text)
+- **Derived artifact:** `packages/exercise-catalog/data/catalog.v1.json` is
+  generated from the pinned snapshot by `pnpm build:catalog`. Exercise images
+  are NOT bundled; image paths reference the upstream repository (see
+  `docs/DATA_SOURCES.md`).
+- **Provenance:** `datasets/sources.lock.json` (commit, checksum, import
+  timestamp). Integrity is verified by `pnpm licenses:check` and by
+  `scripts/build-exercise-catalog.ts` before every build.
+
+The Unlicense text is distributed verbatim in
+`datasets/upstream/free-exercise-db/LICENSE.md`.
