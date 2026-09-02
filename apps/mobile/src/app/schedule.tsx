@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { SchedulePauseOverlapError, RescheduleError, computeLogicalTrainingDate } from "@openrank/database";
 import type { ScheduleWeekday } from "@openrank/domain";
 import { useRepos } from "../db/DatabaseProvider";
@@ -20,15 +20,17 @@ export default function ScheduleScreen() {
   const repos = useRepos();
   const services = useServices();
   const [nonce, setNonce] = useState(0);
-  const [pauseDays, setPauseDays] = useState("3");
   const [pauseReason, setPauseReason] = useState("");
   const [reminderAskDismissed, setReminderAskDismissed] = useState(false);
+  const [pickerDay, setPickerDay] = useState<ScheduleWeekday | null>(null);
   const refresh = () => setNonce((n) => n + 1);
   void nonce;
 
   const profile = repos.profile.getDefault();
   const offset = -new Date().getTimezoneOffset();
   const todayLogical = computeLogicalTrainingDate(new Date().toISOString(), offset);
+  const [pauseFrom, setPauseFrom] = useState(todayLogical);
+  const [pauseTo, setPauseTo] = useState(todayLogical);
 
   const reconcileNotifications = () => {
     void services.notifications
@@ -42,7 +44,7 @@ export default function ScheduleScreen() {
   if (!profile) {
     return (
       <View style={styles.center}>
-        <Text style={styles.muted}>Finish onboarding first.</Text>
+        <Text style={styles.muted}>Internal state error - the local profile is missing. Restart the app to recover.</Text>
       </View>
     );
   }
@@ -87,14 +89,21 @@ export default function ScheduleScreen() {
     refresh(); reconcileNotifications();
   };
 
+  const isValidIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value + "T00:00:00Z"));
+
   const addPause = () => {
-    const days = Math.max(1, Math.min(30, Number(pauseDays) || 0));
-    if (days === 0) {
-      Alert.alert("Invalid length", "Enter the pause length in days (1-30).");
+    // Explicit validated From/To range (spec 27). The service layer keeps
+    // Phase 6 semantics: overlap rejection, no retroactive rescue.
+    if (!isValidIsoDate(pauseFrom.trim()) || !isValidIsoDate(pauseTo.trim())) {
+      Alert.alert("Invalid date", "Enter dates as YYYY-MM-DD.");
       return;
     }
-    const start = todayLogical;
-    const end = new Date(Date.parse(start + "T00:00:00Z") + (days - 1) * 86_400_000).toISOString().slice(0, 10);
+    const start = pauseFrom.trim();
+    const end = pauseTo.trim();
+    if (start > end) {
+      Alert.alert("Invalid range", "The start date must be on or before the end date.");
+      return;
+    }
     try {
       services.schedule.addPause(profile.id, start, end, pauseReason.trim() || null, { timezoneOffsetMinutes: offset });
       setPauseReason("");
@@ -148,20 +157,51 @@ export default function ScheduleScreen() {
           <Switch value={day.enabled} onValueChange={() => toggleDay(day.weekday)} />
           <Text style={[styles.body, day.enabled ? styles.bold : styles.muted]}>{DAY_NAMES[i]}</Text>
           {day.enabled ? (
-            <View style={styles.routinePicker}>
-              {routines.slice(0, 3).map((r) => (
-                <Pressable
-                  key={r.id}
-                  onPress={() => assignRoutine(day.weekday, day.routineId === r.id ? null : r.id)}
-                  style={[styles.chip, day.routineId === r.id && styles.chipActive]}
-                >
-                  <Text style={styles.chipText}>{r.name}</Text>
-                </Pressable>
-              ))}
-            </View>
+            <Pressable
+              onPress={() => setPickerDay(day.weekday)}
+              accessibilityLabel={"Choose routine for " + DAY_NAMES[i]}
+              style={styles.pickerButton}
+            >
+              <Text style={styles.pickerText}>{routineName(day.routineId)}</Text>
+              <Text style={styles.pickerCaret}>{"\u25BE"}</Text>
+            </Pressable>
           ) : null}
         </View>
       ))}
+
+      <Modal visible={pickerDay != null} transparent animationType="fade" onRequestClose={() => setPickerDay(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setPickerDay(null)}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>
+              {pickerDay ? "Routine for " + DAY_NAMES[(pickerDay - 1)] : "Choose routine"}
+            </Text>
+            <Pressable
+              onPress={() => {
+                if (pickerDay) assignRoutine(pickerDay, null);
+                setPickerDay(null);
+              }}
+              style={styles.modalRow}
+            >
+              <Text style={styles.modalRowText}>Freestyle (no routine)</Text>
+            </Pressable>
+            {routines.map((r) => (
+              <Pressable
+                key={r.id}
+                onPress={() => {
+                  if (pickerDay) assignRoutine(pickerDay, r.id);
+                  setPickerDay(null);
+                }}
+                style={styles.modalRow}
+              >
+                <Text style={styles.modalRowText}>{r.name}</Text>
+              </Pressable>
+            ))}
+            {routines.length === 0 ? (
+              <Text style={styles.muted}>No routines yet - create one from the Routines tab.</Text>
+            ) : null}
+          </View>
+        </Pressable>
+      </Modal>
 
       {anyDayEnabled && prefs && !prefs.trainingRemindersEnabled && !prefs.permissionPromptSeen && !reminderAskDismissed ? (
         (
@@ -192,23 +232,41 @@ export default function ScheduleScreen() {
         an already-finalized miss.
       </Text>
       <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          value={pauseDays}
-          onChangeText={setPauseDays}
-          placeholder="days"
-          keyboardType="number-pad"
-          placeholderTextColor={colors.textMuted}
-        />
+        <View style={styles.pauseField}>
+          <Text style={styles.pauseLabel}>From</Text>
+          <TextInput
+            style={styles.input}
+            value={pauseFrom}
+            onChangeText={setPauseFrom}
+            placeholder="YYYY-MM-DD"
+            autoCapitalize="none"
+            accessibilityLabel="Pause start date"
+            placeholderTextColor={colors.textMuted}
+          />
+        </View>
+        <View style={styles.pauseField}>
+          <Text style={styles.pauseLabel}>To</Text>
+          <TextInput
+            style={styles.input}
+            value={pauseTo}
+            onChangeText={setPauseTo}
+            placeholder="YYYY-MM-DD"
+            autoCapitalize="none"
+            accessibilityLabel="Pause end date"
+            placeholderTextColor={colors.textMuted}
+          />
+        </View>
+      </View>
+      <View style={styles.row}>
         <TextInput
           style={[styles.input, { flex: 2 }]}
           value={pauseReason}
           onChangeText={setPauseReason}
-          placeholder="reason (optional)"
+          placeholder="Reason (e.g. Vacation)"
           placeholderTextColor={colors.textMuted}
         />
         <Pressable style={styles.button} onPress={addPause}>
-          <Text style={styles.buttonText}>Add pause</Text>
+          <Text style={styles.buttonText}>SAVE</Text>
         </Pressable>
       </View>
       {pauses.map((p) => (
@@ -243,6 +301,26 @@ export default function ScheduleScreen() {
 }
 
 const styles = StyleSheet.create({
+  pickerButton: {
+    flex: 1,
+    minWidth: 140,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  pickerText: { color: colors.text, fontSize: 13 },
+  pickerCaret: { color: colors.textMuted },
+  modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" },
+  modalCard: { backgroundColor: colors.surface, borderRadius: 14, padding: spacing.lg, width: "86%", gap: 6 },
+  modalTitle: { color: colors.text, fontWeight: "700", marginBottom: 4 },
+  modalRow: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#232a36" },
+  modalRowText: { color: colors.text },
+  pauseField: { flex: 1 },
+  pauseLabel: { color: colors.textMuted, fontSize: 11, textTransform: "uppercase", marginBottom: 2, letterSpacing: 1 },
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },

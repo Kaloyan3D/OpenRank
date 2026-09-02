@@ -201,3 +201,17 @@ workout started elsewhere still satisfies the day's obligation (spec K/AT).
   reminders open Home (the user starts the session themselves - a tap
   never creates a workout); rest-timer taps open the active workout only
   if it still exists. docs/NOTIFICATIONS_SPEC.md.
+
+## Phase 7.1: workout-layer hardening
+
+- Canonical workout-exercise mutations (remove exercise, reorder, superset
+  grouping) are WorkoutService APIs; the active workout UI routes through
+  the service layer and never decides canonical persistence policy. The
+  route is decomposed into features/workout components (behavior
+  preserved; a source-level regression test keeps the repository calls out
+  of the UI).
+- Onboarding-created bodyweight is a single measurement updated in place
+  (same id/measured_at) - back-navigation cannot duplicate history.
+- Home: a FUTURE planned session renders as NEXT WORKOUT (VIEW PLAN +
+  explicit bonus start); it can never be started as today's planned
+  obligation. Manual bonus workouts remain bonus (streak untouched).

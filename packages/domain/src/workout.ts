@@ -101,6 +101,12 @@ export interface Profile {
   strengthStandard: "male" | "female";
   unitSystem: "metric" | "imperial";
   onboardingCompleted: boolean;
+  /**
+   * Phase 7.1: durable onboarding position (null before the flow starts and
+   * after completion). Survives process death - the resume route is derived
+   * from this, never from React state.
+   */
+  onboardingStep: string | null;
 }
 
 export interface BodyweightEntry {

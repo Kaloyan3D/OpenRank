@@ -19,6 +19,8 @@ export default function ProfileScreen() {
   const services = useServices();
   const units = useUnits();
   const [weightInput, setWeightInput] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
   const [nonce, setNonce] = useState(0);
   void nonce;
 
@@ -70,17 +72,57 @@ export default function ProfileScreen() {
   };
 
   if (!profile) {
+    // The root routing gate owns this; corruption recovery only (spec 23).
     return (
       <View style={styles.center}>
-        <Text style={styles.muted}>Profile appears after the first launch flow.</Text>
+        <Text style={styles.errorTitle}>Internal state error</Text>
+        <Text style={styles.muted}>The local profile is missing. Restart the app to recover.</Text>
       </View>
     );
   }
 
+  const saveName = () => {
+    try {
+      services.profile.updateDisplayName(profile.id, nameDraft);
+      setEditingName(false);
+      setNonce((n) => n + 1);
+    } catch (err) {
+      Alert.alert("Cannot rename", err instanceof Error ? err.message : String(err));
+    }
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.kicker}>PROFILE</Text>
-      <Text style={styles.title}>{profile.displayName}</Text>
+      {editingName ? (
+        <View style={styles.row}>
+          <TextInput
+            style={styles.input}
+            value={nameDraft}
+            onChangeText={setNameDraft}
+            autoFocus
+            maxLength={60}
+            accessibilityLabel="Display name"
+          />
+          <Pressable style={styles.button} onPress={saveName}>
+            <Text style={styles.buttonText}>Save</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <View style={styles.row}>
+          <Text style={styles.title}>{profile.displayName}</Text>
+          <Pressable
+            onPress={() => {
+              setNameDraft(profile.displayName);
+              setEditingName(true);
+            }}
+            accessibilityLabel="Edit display name"
+          >
+            <Text style={styles.linkText}>Edit</Text>
+          </Pressable>
+        </View>
+      )}
+      <Text style={styles.meta}>Local profile on this device - no account required.</Text>
 
       <Text style={styles.section}>Bodyweight</Text>
       {!latest ? (
@@ -108,6 +150,11 @@ export default function ProfileScreen() {
           {String(history.length) + " entries recorded - the newest at or before each workout is used for its ranks."}
         </Text>
       ) : null}
+
+      <Text style={styles.section}>Ranking reference</Text>
+      <Text style={styles.meta}>
+        {profile.strengthStandard === "male" ? "Male reference" : "Female reference"} - used to calculate your strength ranks.
+      </Text>
 
       <Text style={styles.section}>Ranking standard</Text>
       <Text style={styles.meta}>
@@ -193,4 +240,6 @@ const styles = StyleSheet.create({
   },
   buttonActive: { borderColor: colors.accent, borderWidth: 1 },
   buttonText: { color: colors.accent, fontWeight: "700" },
+  linkText: { color: colors.accent, fontWeight: "700", marginLeft: spacing.sm },
+  errorTitle: { color: "#ff6b6b", fontSize: 16, fontWeight: "700" },
 });

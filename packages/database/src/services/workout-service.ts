@@ -282,6 +282,24 @@ export class WorkoutService {
     this.repos.workout.updateExerciseNotes(workoutExerciseId, notes);
   }
 
+  /**
+   * Phase 7.1: canonical workout-exercise mutations move behind the service
+   * layer (UI -> service -> repository -> SQLite). Behavior-preserving
+   * delegation; the repository remains the only SQL consumer and keeps
+   * ownership of derived dirty markers.
+   */
+  removeExercise(workoutExerciseId: string): void {
+    this.repos.workout.removeExercise(workoutExerciseId);
+  }
+
+  reorderExercises(workoutId: string, orderedIds: string[]): void {
+    this.repos.workout.reorderExercises(workoutId, orderedIds);
+  }
+
+  updateSuperset(workoutExerciseId: string, supersetGroup: string | null): void {
+    this.repos.workout.updateWorkoutExercise(workoutExerciseId, { supersetGroup });
+  }
+
   updateWorkoutNotes(workoutId: string, notes: string | null): void {
     this.repos.workout.updateNotes(workoutId, notes);
   }

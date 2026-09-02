@@ -33,6 +33,7 @@ export function mapProfile(row: SqlRow): Profile {
     strengthStandard: String(row.strength_standard) as Profile["strengthStandard"],
     unitSystem: String(row.unit_system) as Profile["unitSystem"],
     onboardingCompleted: toBool(row.onboarding_completed),
+    onboardingStep: row.onboarding_step == null ? null : String(row.onboarding_step),
   };
 }
 

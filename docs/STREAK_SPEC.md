@@ -262,3 +262,9 @@ The reconciler derives every reminder from the session ledger, so the
 above semantics flow through: a session that completes, lapses, pauses,
 cancels or is disabled stops producing reminders within one reconcile -
 see docs/NOTIFICATIONS_SPEC.md.
+
+## Phase 7.1 note: pause UX only
+
+The pause screen gained an explicit validated From/To date range. The
+SERVICE semantics are untouched: overlap rejection, no retroactive rescue
+of finalized misses, historical pause immutability, streak neutrality.

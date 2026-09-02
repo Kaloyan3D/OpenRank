@@ -10,9 +10,9 @@ jobs:
     name: lint + typecheck + tests + licenses
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -37,20 +37,21 @@ jobs:
     name: Android build smoke test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Prebuild native project
-        run: pnpm --filter @openrank/mobile exec expo prebuild --platform android --no-install
-      - name: Assemble debug APK
-        run: pnpm --filter @openrank/mobile exec gradle assembleDebug
         working-directory: apps/mobile
+        run: pnpm exec expo prebuild --platform android --no-install
+      - name: Assemble debug APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug

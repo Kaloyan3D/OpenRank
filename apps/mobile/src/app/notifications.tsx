@@ -47,7 +47,7 @@ export default function NotificationsScreen() {
   if (!profile) {
     return (
       <View style={styles.center}>
-        <Text style={styles.muted}>Finish onboarding first.</Text>
+        <Text style={styles.muted}>Internal state error - the local profile is missing. Restart the app to recover.</Text>
       </View>
     );
   }

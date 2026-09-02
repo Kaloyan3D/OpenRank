@@ -159,6 +159,8 @@ export {
   SchedulePauseOverlapError, RescheduleError, computeStreakState, isPerfectWeek, STREAK_MILESTONES,
   isoWeekKey, isoWeekdayOf, addDays, startOfIsoWeek, datesBetween,
   NotificationService, NullNotificationPlatform, NOTIFICATION_HORIZON_DAYS,
+  ProfileService, ONBOARDING_STEPS, ONBOARDING_BODYWEIGHT_SOURCE, resolveRootRoute, resolveResumeStep,
+  resolveHomeSessionView,
   reminderInstant, logicalDayEndInstant, localWallInstant,
   primaryReminderContent, secondaryReminderContent, restTimerContent,
   validateNotificationPayload, resolveNotificationRoute, trainingDedupeKey, restDedupeKey,
@@ -166,6 +168,7 @@ export {
 export type {
   NotificationPlatform, PlatformNotificationRequest, NotificationChannelId,
   NotificationReconcileReport, NotificationReconcileOptions,
+  OnboardingStep, LocalProfileInput, LocalProfileResult, HomeSessionView,
 } from "./services";
 export { SqliteRestTimerRepository } from "./repositories/rest-timer";
 export { catalogFingerprint, installedFingerprint, seedCatalog, stableHash } from "./seed";

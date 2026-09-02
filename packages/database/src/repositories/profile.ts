@@ -57,11 +57,17 @@ export class SqliteProfileRepository implements ProfileRepository {
 
   completeOnboarding(id: string): void {
     this.update(id, { onboarding_completed: 1 });
+    // Completion clears the step pointer - onboarding state is then history.
+    this.setOnboardingStep(id, null);
+  }
+
+  setOnboardingStep(id: string, step: string | null): void {
+    this.update(id, { onboarding_step: step }, { markDirty: false });
   }
 
   private update(
     id: string,
-    fields: Record<string, string | number>,
+    fields: Record<string, string | number | null>,
     opts: { markDirty?: boolean } = {},
   ): void {
     const keys = Object.keys(fields);
@@ -69,7 +75,7 @@ export class SqliteProfileRepository implements ProfileRepository {
     const set = keys.map((k) => k + " = ?").join(", ");
     const result = this.driver.run(
       "UPDATE profiles SET " + set + ", updated_at = ? WHERE id = ?",
-      [...keys.map((k) => fields[k] as string | number), nowUtc(), id],
+      [...keys.map((k) => fields[k] ?? null), nowUtc(), id],
     );
     if (result.changes === 0) throw new Error("profile not found: " + id);
     if (opts.markDirty !== false) {
@@ -134,5 +140,19 @@ export class SqliteBodyweightRepository implements BodyweightRepository {
     if (row?.profile_id != null) {
       this.dirty.mark(String(row.profile_id), "bodyweight_entry", id, "bodyweight_changed");
     }
+  }
+
+  updateWeight(id: string, weightKg: number): void {
+    if (!(weightKg > 0) || !Number.isFinite(weightKg)) {
+      throw new Error("bodyweight must be a positive finite number of kilograms");
+    }
+    const row = this.driver.get("SELECT profile_id FROM bodyweight_entries WHERE id = ?", [id]);
+    if (!row) throw new Error("bodyweight entry not found: " + id);
+    // Same measured_at: the UNIQUE (profile_id, measured_at) invariant holds
+    // and the entry keeps its identity (no duplicate history rows).
+    this.driver.transaction(() => {
+      this.driver.run("UPDATE bodyweight_entries SET weight_kg = ? WHERE id = ?", [weightKg, id]);
+      this.dirty.mark(String(row.profile_id), "bodyweight_entry", id, "bodyweight_changed");
+    });
   }
 }

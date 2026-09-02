@@ -13,7 +13,7 @@
 
 import type { DatabaseDriver } from "./driver";
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export interface Migration {
   version: number;
@@ -558,12 +558,30 @@ const V5_STATEMENTS: string[] = [
     ON notification_jobs(profile_id, state, scheduled_for)`,
 ];
 
+// ---------------------------------------------------------------------------
+// Schema v6 (Phase 7.1): durable onboarding state.
+// - profiles.onboarding_step: the current first-launch step (TEXT, nullable).
+//   Durable + restart-safe; the resume route derives from this column, never
+//   from React state. NULL before the flow starts and after completion.
+// - Compatibility migration: every profile that exists in a v1-v5 database
+//   predates the onboarding flow entirely - it was created by an app version
+//   whose screens assumed a usable profile. Deterministic schema semantics
+//   (no timestamps, no device-clock heuristics): such profiles are marked
+//   onboarding_completed = 1 so existing users never see first-launch UI.
+//   Fresh installs have NO profile row and therefore require onboarding.
+// ---------------------------------------------------------------------------
+const V6_STATEMENTS: string[] = [
+  `ALTER TABLE profiles ADD COLUMN onboarding_step TEXT`,
+  `UPDATE profiles SET onboarding_completed = 1 WHERE onboarding_completed = 0`,
+];
+
 export const MIGRATIONS: readonly Migration[] = [
   { version: 1, name: "schema_v1_core", statements: V1_STATEMENTS },
   { version: 2, name: "schema_v2_workout_session", statements: V2_STATEMENTS },
   { version: 3, name: "schema_v3_derived_state", statements: V3_STATEMENTS },
   { version: 4, name: "schema_v4_scheduled_streaks", statements: V4_STATEMENTS },
   { version: 5, name: "schema_v5_notifications", statements: V5_STATEMENTS },
+  { version: 6, name: "schema_v6_onboarding_state", statements: V6_STATEMENTS },
 ];
 
 /** Current PRAGMA user_version (0 on a fresh database). */

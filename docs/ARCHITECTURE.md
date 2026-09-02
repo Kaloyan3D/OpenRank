@@ -281,3 +281,24 @@ triggers: docs/NOTIFICATIONS_SPEC.md is the contract.
 - Phase 7 also hardened the ledger itself (pending_until temporal
   validity, disable-cancels-past-due, reschedule generation skip) -
   docs/STREAK_SPEC.md.
+
+## Phase 7.1: first launch, local profile onboarding & hardening
+
+- ProfileService owns the LOCAL profile lifecycle (account-free; v1 is
+  exactly one active profile; future remote accounts BIND to it, never
+  replace it). Onboarding state is durable (schema v6) and every step
+  persists before routing - process death resumes from the database.
+- The root RoutingGate owns the onboarding invariant (no profile ->
+  /onboarding; incomplete -> /onboarding/resume; complete -> main app).
+  Main screens assume a valid completed profile; deep links received
+  before onboarding are safely routed and never mutate canonical state.
+- Home never silently reinterprets a future obligation (pure
+  resolveHomeSessionView decision); manual/bonus workout semantics are
+  unchanged. docs/ONBOARDING_SPEC.md is the full contract.
+- Active-workout canonical mutations moved behind WorkoutService; the
+  active workout route is decomposed into features/workout components.
+- Android CI smoke now builds a REAL debug APK (prebuild + gradlew
+  assembleDebug from apps/mobile/android).
+- Vendored data integrity: .gitattributes -text pins raw bytes for
+  upstream datasets and the catalog data, making the license/integrity
+  hash gate platform-independent.

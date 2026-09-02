@@ -87,6 +87,8 @@ export interface ProfileRepository {
   updateUnitSystem(id: string, unitSystem: "metric" | "imperial"): void;
   updateStrengthStandard(id: string, strengthStandard: "male" | "female"): void;
   completeOnboarding(id: string): void;
+  /** Phase 7.1: persist the current onboarding step (null = none/done). */
+  setOnboardingStep(id: string, step: string | null): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -105,6 +107,13 @@ export interface BodyweightAddInput {
 
 export interface BodyweightRepository {
   add(input: BodyweightAddInput): BodyweightEntry;
+  /**
+   * Phase 7.1: update a measurement in place (same id and measured_at).
+   * Backing for deterministic onboarding semantics: re-entering bodyweight
+   * during onboarding updates THE onboarding measurement instead of adding
+   * accidental history rows.
+   */
+  updateWeight(id: string, weightKg: number): void;
   /** Entries for a profile, newest first. */
   history(profileId: string): BodyweightEntry[];
   /**

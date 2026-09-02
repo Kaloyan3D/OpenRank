@@ -408,3 +408,20 @@ Notification rows are projections: they are rebuildable from
 time, so deleting canonical rows must never be blocked by them. A fresh
 reconcile on an empty job table repairs the OS scheduler from scratch
 (drift repair, spec AC).
+
+## Phase 7.1 additions (schema v6): onboarding state
+
+Migration `schema_v6_onboarding_state`:
+
+- `profiles.onboarding_step` (nullable TEXT) - durable first-launch step
+  pointer; the resume route derives from it, never from React state. NULL
+  before the flow starts and after completion.
+- Compatibility migration: `UPDATE profiles SET onboarding_completed = 1
+  WHERE onboarding_completed = 0` - every profile from a v1-v5 database
+  predates the onboarding flow and stays fully usable without seeing
+  first-launch UI. Fresh installs have no profile row and onboard.
+
+Vendored-data integrity is now pinned byte-exact: .gitattributes marks
+`datasets/upstream/**`, the legacy engine files and the catalog data
+files `-text`, so raw working-tree bytes equal the committed blobs on
+every platform and the license/integrity hashes are machine-independent.

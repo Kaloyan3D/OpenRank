@@ -147,3 +147,17 @@ Every failure mode degrades to "no notifications": reconcile errors are
 swallowed and retried at the next natural point; OS drift is repaired on
 the next reconcile; a denied permission simply means silence. The
 training plan itself is fully usable with notifications entirely off.
+
+## 10. Onboarding integration (Phase 7.1)
+
+The first-launch flow REUSES this stack end to end - no second notification
+implementation exists. After schedule selection, onboarding shows the
+pre-permission explainer, suggests a visible default reminder time (17:30)
+and applies per-day times only on the user's explicit Enable press
+(NotificationService.requestPermission -> preferences -> setDayReminderTime
+-> reconcile). Permission denial never blocks onboarding. With ZERO
+training days, onboarding does not request training-reminder permission;
+it explains reminders become available after a schedule is configured.
+Deep links received while onboarding is incomplete are intercepted by the
+root routing gate: the destination never renders, nothing is created, and
+the app resumes onboarding (docs/ONBOARDING_SPEC.md).

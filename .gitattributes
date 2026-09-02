@@ -1,5 +1,7 @@
-# Vendored upstream artifacts are pinned by sha256 - line-ending translation
-# must never touch them (core.autocrlf=true otherwise rewrites them on
-# checkout and breaks licenses:check / build:catalog byte checks).
+# Vendored third-party data must survive every platform's line-ending
+# configuration byte-for-byte: integrity gates hash the raw working-tree
+# files. Disable ALL git text conversion for these pinned sources.
 datasets/upstream/** -text
 packages/ranking-core/src/legacy/** -text
+packages/exercise-catalog/data/catalog.v1.json -text
+packages/exercise-catalog/data/ranking-coverage-exceptions.json -text

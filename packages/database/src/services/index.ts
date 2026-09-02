@@ -21,6 +21,15 @@ export { computeStreakState, STREAK_MILESTONES, isPerfectWeek } from "./streak-e
 export type { StreakComputation, SessionStreakMark } from "./streak-engine";
 export { isoWeekKey, isoWeekdayOf, addDays, startOfIsoWeek, datesBetween } from "./iso-week";
 export { NotificationService, NOTIFICATION_HORIZON_DAYS } from "./notifications/notification-service";
+export {
+  ProfileService, ONBOARDING_STEPS, ONBOARDING_BODYWEIGHT_SOURCE,
+  resolveRootRoute, resolveResumeStep,
+} from "./profile-service";
+export { resolveHomeSessionView } from "./home-view";
+export type { HomeSessionView, HomeSessionInput, WeekDayStateName } from "./home-view";
+export type {
+  OnboardingStep, LocalProfileInput, LocalProfileResult, ProfileServiceDeps,
+} from "./profile-service";
 export type { NotificationReconcileReport, ReconcileOptions as NotificationReconcileOptions } from "./notifications/notification-service";
 export { NullNotificationPlatform } from "./notifications/platform";
 export type { NotificationPlatform, PlatformNotificationRequest, NotificationChannelId } from "./notifications/platform";
@@ -38,6 +47,7 @@ import { ScheduleService } from "./schedule-service";
 import { StreakService } from "./streak-service";
 import { SqliteRestTimerRepository } from "../repositories/rest-timer";
 import { NotificationService } from "./notifications/notification-service";
+import { ProfileService } from "./profile-service";
 import { NullNotificationPlatform } from "./notifications/platform";
 import type { NotificationPlatform } from "./notifications/platform";
 
@@ -53,6 +63,8 @@ export interface OpenRankServices {
   streak: StreakService;
   /** Phase 7: local notification scheduling/reconciliation (opt-in). */
   notifications: NotificationService;
+  /** Phase 7.1: local-profile lifecycle + onboarding state. */
+  profile: ProfileService;
 }
 
 /** Build the service layer over an opened database (call once per app run). */
@@ -64,6 +76,10 @@ export function createServices(
   const nowFn = options.now ?? (() => new Date().toISOString());
   const newIdFn = repos.newId ?? (() => crypto.randomUUID());
   const notificationPlatform = options.notificationPlatform ?? new NullNotificationPlatform();
+  const profile = new ProfileService(driver, {
+    profile: repos.profile,
+    bodyweight: repos.bodyweight,
+  });
   const notifications = new NotificationService(
     driver,
     {
@@ -133,5 +149,6 @@ export function createServices(
     schedule,
     streak,
     notifications,
+    profile,
   };
 }
