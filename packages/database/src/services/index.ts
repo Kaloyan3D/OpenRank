@@ -26,6 +26,14 @@ export {
   resolveRootRoute, resolveResumeStep,
 } from "./profile-service";
 export { resolveHomeSessionView } from "./home-view";
+export { AnalyticsService } from "./analytics-service";
+export type {
+  BodyweightPoint, E1rmPoint, RankTimelinePoint, WeeklyActivityBucket,
+  WorkoutVolumeSlice, StrengthProfileGroupSummary,
+} from "./analytics-service";
+export { ACHIEVEMENT_DEFINITIONS, evaluateAchievements } from "./achievement-definitions";
+export { AchievementService } from "./achievement-service";
+export type { AchievementStats, AchievementDefinition, AchievementView } from "./achievement-definitions";
 export type { HomeSessionView, HomeSessionInput, WeekDayStateName } from "./home-view";
 export type {
   OnboardingStep, LocalProfileInput, LocalProfileResult, ProfileServiceDeps,
@@ -48,6 +56,8 @@ import { StreakService } from "./streak-service";
 import { SqliteRestTimerRepository } from "../repositories/rest-timer";
 import { NotificationService } from "./notifications/notification-service";
 import { ProfileService } from "./profile-service";
+import { AnalyticsService } from "./analytics-service";
+import { AchievementService } from "./achievement-service";
 import { NullNotificationPlatform } from "./notifications/platform";
 import type { NotificationPlatform } from "./notifications/platform";
 
@@ -65,6 +75,10 @@ export interface OpenRankServices {
   notifications: NotificationService;
   /** Phase 7.1: local-profile lifecycle + onboarding state. */
   profile: ProfileService;
+  /** Phase 8: deterministic analytics projections (charts, timelines). */
+  analytics: AnalyticsService;
+  /** Phase 8: local achievement read model (pure projection). */
+  achievements: AchievementService;
 }
 
 /** Build the service layer over an opened database (call once per app run). */
@@ -141,6 +155,22 @@ export function createServices(
     nowFn,
     newIdFn,
   );
+  const analytics = new AnalyticsService(
+    {
+      bodyweight: repos.bodyweight,
+      personalRecords: repos.personalRecords,
+      rankSnapshots: repos.rankSnapshots,
+      workout: repos.workout,
+    },
+    nowFn,
+  );
+  const achievements = new AchievementService({
+    workout: repos.workout,
+    personalRecords: repos.personalRecords,
+    rankSnapshots: repos.rankSnapshots,
+    bodyweight: repos.bodyweight,
+    bestStreakOf: (profileId) => streak.getCurrentState(profileId).cache.bestStreak,
+  });
   return {
     workout: new WorkoutService(driver, repos, restTimer, options.now, repos.streakDirty),
     routine: new RoutineService(repos),
@@ -150,5 +180,7 @@ export function createServices(
     streak,
     notifications,
     profile,
+    analytics,
+    achievements,
   };
 }

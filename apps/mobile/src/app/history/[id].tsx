@@ -8,6 +8,7 @@ import { formatDateTime, formatDurationRough, formatVolume } from "../../ui/form
 import { formatSetSummary } from "../../ui/format";
 import { formatRankLabel } from "../../ui/format";
 import { colors, spacing, typography } from "../../theme/tokens";
+import { BarChart } from "../../features/charts/BarChart";
 
 /**
  * Workout detail / Phase 4 summary (tasks X/Y): canonical, non-derived
@@ -171,6 +172,26 @@ export default function HistoryDetailScreen() {
       </View>
       <Text style={styles.volumeNote}>Logged volume is a basic training statistic, not a ranking score.</Text>
 
+      {data.completedSetCount > 0 ? (
+        <>
+          <Text style={styles.sectionLabel}>Volume by exercise</Text>
+          <BarChart
+            points={services.analytics
+              .workoutVolumeBreakdown(workoutId, (id) => repos.exercise.findById(id)?.name ?? null)
+              .map((s) => ({
+                label: (s.exerciseName ?? "exercise").split(" ")[0]!,
+                value: s.volumeKg,
+                accessibilityLabel:
+                  (s.exerciseName ?? "exercise") + ": " + formatVolume(s.volumeKg, units.weightLabel) +
+                  " across " + String(s.completedSets) + " completed sets",
+              }))}
+            unitLabel={"Completed volume per exercise (" + units.weightLabel + ")"}
+            highlightFraction={0.999}
+            emptyText="No completed sets in this workout."
+          />
+        </>
+      ) : null}
+
       {routineName ? <Text style={styles.origin}>from routine: {routineName}</Text> : null}
       {workout.finishedAt ? (
         <Text style={styles.origin}>finished {formatDateTime(workout.finishedAt)}</Text>
@@ -216,6 +237,7 @@ const styles = StyleSheet.create({
   summaryItem: { alignItems: "flex-start" },
   summaryValue: { color: colors.text, fontSize: 16, fontWeight: "700", fontVariant: ["tabular-nums"] },
   summaryLabel: { color: colors.textMuted, fontSize: 11, textTransform: "uppercase" },
+  sectionLabel: { ...typography.title, color: colors.text, fontSize: 18, marginTop: spacing.sm },
   volumeNote: { ...typography.caption, color: colors.textMuted, fontStyle: "italic" },
   origin: { ...typography.caption, color: colors.textMuted },
   notes: { ...typography.body, color: colors.text, marginTop: spacing.xs },

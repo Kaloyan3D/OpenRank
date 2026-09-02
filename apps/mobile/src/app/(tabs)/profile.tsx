@@ -6,6 +6,7 @@ import { useServices } from "../../services/ServicesProvider";
 import { useUnits } from "../../ui/units";
 import { formatDateTime } from "../../ui/format";
 import { colors, spacing, typography } from "../../theme/tokens";
+import { BarChart } from "../../features/charts/BarChart";
 
 /**
  * Profile (Phase 5 scope): bodyweight management (ranks REQUIRE a bodyweight
@@ -81,6 +82,12 @@ export default function ProfileScreen() {
     );
   }
 
+  const achievementViews = services.achievements.list(profile.id);
+  const achievements = {
+    unlocked: achievementViews.filter((a) => a.unlocked).length,
+    total: achievementViews.length,
+  };
+
   const saveName = () => {
     try {
       services.profile.updateDisplayName(profile.id, nameDraft);
@@ -146,9 +153,23 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
       {history.length > 0 ? (
-        <Text style={styles.meta}>
-          {String(history.length) + " entries recorded - the newest at or before each workout is used for its ranks."}
-        </Text>
+        <>
+          <Text style={styles.meta}>
+            {String(history.length) + " entries recorded - the newest at or before each workout is used for its ranks."}
+          </Text>
+          <BarChart
+            points={services.analytics
+              .bodyweightSeries(profile.id)
+              .slice(-10)
+              .map((pt) => ({
+                label: pt.at.slice(5, 10),
+                value: pt.weightKg,
+                accessibilityLabel:
+                  "Bodyweight " + units.toDisplay(pt.weightKg) + " " + units.weightLabel + " on " + pt.at.slice(0, 10),
+              }))}
+            unitLabel={"Recent measurements (" + units.weightLabel + ")"}
+          />
+        </>
       ) : null}
 
       <Text style={styles.section}>Ranking reference</Text>
@@ -173,6 +194,19 @@ export default function ProfileScreen() {
           onPress={() => setStandard("female")}
         >
           <Text style={styles.buttonText}>Female reference</Text>
+        </Pressable>
+      </View>
+
+      <Text style={styles.section}>Progress & achievements</Text>
+      <Text style={styles.meta}>
+        {String(achievements.unlocked) + " of " + String(achievements.total) + " milestones unlocked."}
+      </Text>
+      <View style={styles.row}>
+        <Pressable style={styles.button} onPress={() => router.push("/achievements")}>
+          <Text style={styles.buttonText}>Achievements</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => router.push("/progress")}>
+          <Text style={styles.buttonText}>Progress charts</Text>
         </Pressable>
       </View>
 

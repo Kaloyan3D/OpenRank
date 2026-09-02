@@ -5,6 +5,7 @@ import { useServices } from "../../services/ServicesProvider";
 import { useUnits } from "../../ui/units";
 import { formatDateTime, formatProgressPercent, formatRankLabel } from "../../ui/format";
 import { colors, spacing, typography } from "../../theme/tokens";
+import { AnimatedProgress } from "../../ui/AnimatedProgress";
 
 /**
  * Ranks tab (Phase 5, spec Y): the Strength Profile - exactly the six muscle
@@ -59,9 +60,7 @@ export default function RanksScreen() {
             )}
           </View>
           {g.tierName && g.progress != null ? (
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: `${Math.max(2, Math.round((g.progress ?? 0) * 100))}%` as const }]} />
-            </View>
+            <AnimatedProgress value={g.progress ?? 0} />
           ) : null}
           <Text style={styles.meta}>
             {g.tierName && g.progress != null
@@ -123,6 +122,8 @@ const styles = StyleSheet.create({
   title: { ...typography.title, color: colors.text },
   meta: { ...typography.caption },
   muted: { ...typography.caption, color: colors.textMuted },
+  progressLink: { alignSelf: "flex-start", paddingVertical: 4 },
+  progressLinkText: { ...typography.caption, color: colors.accent, fontWeight: "700" },
   cta: { backgroundColor: colors.surface, borderColor: colors.accent, borderWidth: 1, borderRadius: 10, padding: spacing.md },
   ctaText: { color: colors.accent, fontWeight: "700" },
   card: { backgroundColor: colors.surface, borderRadius: 10, padding: spacing.md, gap: spacing.xs },

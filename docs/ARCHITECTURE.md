@@ -302,3 +302,13 @@ triggers: docs/NOTIFICATIONS_SPEC.md is the contract.
 - Vendored data integrity: .gitattributes -text pins raw bytes for
   upstream datasets and the catalog data, making the license/integrity
   hash gate platform-independent.
+
+## Phase 8: analytics + polish
+
+- AnalyticsService and the achievement catalog are pure, side-effect-free
+  projections over canonical + derived data (docs/ANALYTICS_SPEC.md) - no
+  telemetry, no writes, no rank math outside the engines.
+- Charts are pure React Native views (no chart library, no native
+  dependency); the native graph is unchanged.
+- New screens: /progress (analytics hub) and /achievements; exercise,
+  muscle-group, workout-summary and profile screens gained chart sections.

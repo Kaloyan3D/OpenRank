@@ -169,6 +169,9 @@ export type {
   NotificationPlatform, PlatformNotificationRequest, NotificationChannelId,
   NotificationReconcileReport, NotificationReconcileOptions,
   OnboardingStep, LocalProfileInput, LocalProfileResult, HomeSessionView,
+  BodyweightPoint, E1rmPoint, RankTimelinePoint, WeeklyActivityBucket,
+  WorkoutVolumeSlice, StrengthProfileGroupSummary,
+  AchievementStats, AchievementDefinition, AchievementView,
 } from "./services";
 export { SqliteRestTimerRepository } from "./repositories/rest-timer";
 export { catalogFingerprint, installedFingerprint, seedCatalog, stableHash } from "./seed";

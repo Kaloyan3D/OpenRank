@@ -3,6 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 import { GROUPS } from "@openrank/ranking-core";
 import type { GroupKey } from "@openrank/ranking-core";
 import { useRepos } from "../../db/DatabaseProvider";
+import { TierTimeline } from "../../features/charts/TierTimeline";
 import { useServices } from "../../services/ServicesProvider";
 import { formatDateTime, formatProgressPercent, formatRankLabel } from "../../ui/format";
 import { colors, spacing, typography } from "../../theme/tokens";
@@ -96,6 +97,16 @@ export default function MuscleDetailScreen() {
       ) : null}
 
       <Text style={styles.section}>Rank history</Text>
+      <TierTimeline
+        points={view.rankHistory.map((snap) => ({
+          at: snap.calculatedAt,
+          score: snap.score,
+          tierIndex: snap.tierIndex,
+          tierName: snap.tierName,
+          division: snap.division,
+          progress: snap.progress,
+        }))}
+      />
       {view.rankHistory.length === 0 ? (
         <Text style={styles.meta}>No rank history yet.</Text>
       ) : (

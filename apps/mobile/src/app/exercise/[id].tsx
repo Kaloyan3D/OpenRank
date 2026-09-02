@@ -5,6 +5,7 @@ import { useServices } from "../../services/ServicesProvider";
 import { useUnits } from "../../ui/units";
 import { formatDateTime, formatProgressPercent, formatRankLabel, formatWeight } from "../../ui/format";
 import { colors, spacing, typography } from "../../theme/tokens";
+import { BarChart, formatShort } from "../../features/charts/BarChart";
 
 /**
  * Exercise details (spec section 49 route exercise/[id], Phase 5 upgrade):
@@ -128,6 +129,25 @@ export default function ExerciseDetailScreen() {
               ))}
             </>
           ) : null}
+        </>
+      ) : null}
+
+      {profile ? (
+        <>
+          <Text style={styles.section}>e1RM progression</Text>
+          <BarChart
+            points={services.analytics
+              .e1rmProgression(profile.id, exercise.id, 12)
+              .map((p) => ({
+                label: p.at.slice(5, 10),
+                value: p.e1rmKg,
+                accessibilityLabel:
+                  "Estimated 1RM " + formatShort(p.e1rmKg) + " " + units.weightLabel + " on " + p.at.slice(0, 10),
+              }))}
+            unitLabel={"Best estimated 1RM (" + units.weightLabel + ") - each bar is a new personal record"}
+            highlightFraction={0.999}
+            emptyText="Complete sets on this exercise to build your estimated 1RM history."
+          />
         </>
       ) : null}
 

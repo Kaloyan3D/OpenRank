@@ -41,6 +41,8 @@ export default function RootLayout() {
                   <Stack.Screen name="onboarding/ready" options={{ headerShown: false }} />
                   <Stack.Screen name="onboarding/resume" options={{ headerShown: false }} />
                   <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
+        <Stack.Screen name="progress" options={{ headerShown: false }} />
+        <Stack.Screen name="achievements" options={{ headerShown: true, title: "Achievements", headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text }} />
                 </Stack>
               </RoutingGate>
             </NotificationTapHandler>
