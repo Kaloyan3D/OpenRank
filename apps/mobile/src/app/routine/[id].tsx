@@ -6,7 +6,8 @@ import { ActiveWorkoutConflictError } from "@openrank/database";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
 import { supersetChoices } from "../../ui/supersets";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { spacing, typography } from "../../theme/tokens";
 
 /**
  * Routine builder (Phase 4, tasks R/S): rename, archive, delete, exercises
@@ -344,9 +345,9 @@ function reorder(
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg },
   muted: { color: colors.textMuted },
   titleRow: { flexDirection: "row", alignItems: "center" },
   title: { ...typography.title, color: colors.text, flex: 1 },
@@ -354,11 +355,11 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: "row", gap: 8 },
   button: { borderRadius: 10, paddingVertical: 12, paddingHorizontal: 14, alignItems: "center", minHeight: 44, justifyContent: "center", flex: 1 },
   primary: { backgroundColor: colors.accent },
-  primaryText: { color: "#0b1220", fontWeight: "700" },
+  primaryText: { color: colors.textOnAccent, fontWeight: "700" },
   secondary: { borderWidth: 1, borderColor: colors.textMuted },
   secondaryText: { color: colors.text },
-  danger: { borderWidth: 1, borderColor: "#a05a5a" },
-  dangerText: { color: "#e8a0a0" },
+  danger: { borderWidth: 1, borderColor: colors.danger },
+  dangerText: { color: colors.danger },
   card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, gap: 6 },
   cardSuperset: { borderLeftWidth: 3, borderLeftColor: colors.accent },
   cardHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
@@ -366,22 +367,22 @@ const styles = StyleSheet.create({
   exerciseName: { ...typography.body, color: colors.text, fontWeight: "600" },
   exerciseMeta: { ...typography.caption, color: colors.textMuted },
   iconBtn: { paddingHorizontal: 8, paddingVertical: 4 },
-  deleteText: { color: "#e8a0a0", fontSize: 18 },
+  deleteText: { color: colors.danger, fontSize: 18 },
   targetLine: { ...typography.caption, color: colors.text, paddingLeft: 28 },
   targetEditor: { paddingLeft: 28, gap: 4 },
   editorLabel: { color: colors.textMuted, fontSize: 10, textTransform: "uppercase" },
   targetRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  targetType: { color: "#e0b45a", fontSize: 12, width: 64, textTransform: "capitalize" },
+  targetType: { color: colors.accent, fontSize: 12, width: 64, textTransform: "capitalize" },
   targetReps: { color: colors.text, fontSize: 12, flex: 1 },
   editorRow: { flexDirection: "row", gap: 8, marginTop: 2 },
   editorBtn: { paddingVertical: 6 },
   optionsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  optionBtn: { borderWidth: 1, borderColor: "#2a3242", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7 },
+  optionBtn: { borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7 },
   optionText: { color: colors.text, fontSize: 12 },
-  addExercise: { borderWidth: 1, borderColor: "#2a3242", borderRadius: 12, paddingVertical: 14 },
+  addExercise: { borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 12, paddingVertical: 14 },
   addExerciseText: { color: colors.accent, fontWeight: "700", textAlign: "center" },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" },
   modalCard: { backgroundColor: colors.surface, borderRadius: 14, padding: spacing.lg, width: "86%", gap: 12 },
   modalTitle: { ...typography.body, color: colors.text, fontWeight: "700" },
-  input: { backgroundColor: "#1c2330", color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, minHeight: 44 },
+  input: { backgroundColor: colors.surfacePressed, color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, minHeight: 44 },
 });

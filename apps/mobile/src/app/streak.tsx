@@ -1,7 +1,10 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
-import { colors, spacing, typography } from "../theme/tokens";
+import { colors } from "../design/colors";
+import { radius } from "../design/radii";
+import { space } from "../design/spacing";
+import { type } from "../design/typography";
 
 /**
  * Streak history (Phase 6, spec AQ/AR): full transparency. The ledger is the
@@ -26,9 +29,9 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Cancelled (schedule off)",
 };
 const STATUS_COLOR: Record<string, string> = {
-  completed: colors.accent,
-  missed: colors.text,
-  pending: colors.text,
+  completed: colors.success,
+  missed: colors.danger,
+  pending: colors.textSecondary,
   paused: colors.textMuted,
   rescheduled: colors.textMuted,
   cancelled: colors.textMuted,
@@ -54,7 +57,8 @@ export default function StreakHistoryScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{"\u{1F525} " + String(state.cache.currentStreak) + " session streak"}</Text>
+      <Text style={styles.heroNumber}>{String(state.cache.currentStreak)}</Text>
+      <Text style={styles.heroCaption}>{"\u{1F525} session streak"}</Text>
       <Text style={styles.muted}>
         {"Best: " + String(state.cache.bestStreak) + "  \u00B7  Perfect weeks: " + String(state.cache.perfectWeeks)}
       </Text>
@@ -106,15 +110,16 @@ export default function StreakHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
-  title: { ...typography.title, color: colors.text },
-  section: { ...typography.title, color: colors.text, fontSize: 14, marginTop: spacing.md, letterSpacing: 1 },
-  body: { ...typography.body, color: colors.text },
-  muted: { ...typography.caption, color: colors.textMuted },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, marginTop: spacing.sm, gap: spacing.xs },
-  cardTitle: { ...typography.body, color: colors.text, fontWeight: "700" },
-  row: { flexDirection: "row", gap: spacing.sm, alignItems: "center", marginTop: spacing.xs },
-  glyph: { fontSize: 16, fontWeight: "800", width: 20 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: space.lg, gap: space.xs, paddingBottom: 60 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg },
+  heroNumber: { ...type.metricLarge, color: colors.text, fontVariant: ["tabular-nums"] },
+  heroCaption: { ...type.label, color: colors.textSecondary, letterSpacing: 1.2 },
+  section: { ...type.sectionTitle, color: colors.text, fontSize: 14, marginTop: space.md, letterSpacing: 1 },
+  body: { ...type.body, color: colors.text },
+  muted: { ...type.caption, color: colors.textMuted },
+  card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md, marginTop: space.sm, gap: space.xs },
+  cardTitle: { ...type.body, color: colors.text, fontWeight: "700" },
+  row: { flexDirection: "row", gap: space.sm, alignItems: "center", marginTop: space.xs },
+  glyph: { ...type.bodyStrong, fontSize: 16, width: 20, textAlign: "center" },
 });

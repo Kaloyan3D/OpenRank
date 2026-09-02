@@ -407,6 +407,8 @@ export interface PersonalRecordRepository {
   listEventsForExercise(profileId: string, exerciseId: string, limit?: number): PersonalRecordEvent[];
   /** "Which PRs were achieved by this workout?" (workout summary). */
   listEventsForWorkout(workoutId: string): PersonalRecordEvent[];
+  /** Recent PR events across all exercises, newest first (Home wins feed). */
+  listEventsForProfile(profileId: string, limit?: number): PersonalRecordEvent[];
 }
 
 export interface RankSnapshotRepository {

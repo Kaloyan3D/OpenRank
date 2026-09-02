@@ -1,12 +1,16 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, spacing } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { radius } from "../../design/radii";
+import { type } from "../../design/typography";
 import { useServices } from "../../services/ServicesProvider";
+import { Card } from "../../components/ui/Card";
 import { OnboardingShell } from "../../features/onboarding/OnboardingShell";
 
 /**
- * Onboarding - Training plan review (spec 16). Zero days is a valid,
- * neutral outcome: "No scheduled training days yet."
+ * Onboarding - Training plan review (spec 16; Phase 8.1 restyle only). Zero
+ * days is a valid, neutral outcome: "No scheduled training days yet."
  */
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -26,31 +30,29 @@ export default function OnboardingReview() {
       onBack={() => router.push("/onboarding/days")}
       continueLabel={enabled.length > 0 ? "LOOKS GOOD" : "CONTINUE"}
     >
-      <View style={styles.planCard}>
+      <Card variant="elevated" style={styles.planCard}>
         {enabled.length > 0 ? (
           <>
-            <Text style={styles.planText}>{enabled.join(" \u00B7 ")}</Text>
+            <Text style={styles.planDays}>{enabled.join(" · ")}</Text>
             <Text style={styles.planNote}>Rest days don't break your streak.</Text>
           </>
         ) : (
           <>
-            <Text style={styles.planText}>No scheduled training days yet.</Text>
+            <Text style={styles.planDays}>No scheduled training days yet.</Text>
             <Text style={styles.planNote}>You can configure your schedule later.</Text>
           </>
         )}
-      </View>
+      </Card>
     </OnboardingShell>
   );
 }
 
 const styles = StyleSheet.create({
   planCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    marginTop: spacing.sm,
+    borderRadius: radius.lg,
+    padding: space[4],
+    gap: space[2],
   },
-  planText: { color: colors.text, fontSize: 24, fontWeight: "800", letterSpacing: 1 },
-  planNote: { color: colors.textMuted, fontSize: 13 },
+  planDays: { ...type.cardTitle, color: colors.text, letterSpacing: 0.4 },
+  planNote: { ...type.caption, color: colors.textMuted },
 });

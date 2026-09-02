@@ -1,16 +1,20 @@
 import { useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, spacing } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { radius } from "../../design/radii";
+import { type } from "../../design/typography";
 import { useServices } from "../../services/ServicesProvider";
 import { useUnits } from "../../ui/units";
 import { OnboardingShell } from "../../features/onboarding/OnboardingShell";
 
 /**
- * Onboarding - Bodyweight (spec 13/14). Required for strength ranks, but
- * skippable: skip stores NOTHING fake. Entering persists immediately, and
- * re-entry/back-navigation UPDATES the single onboarding measurement in
- * place - one intentional measurement, never accidental history rows.
+ * Onboarding - Bodyweight (spec 13/14; Phase 8.1 restyle only). Required for
+ * strength ranks, but skippable: skip stores NOTHING fake. Entering persists
+ * immediately, and re-entry/back-navigation UPDATES the single onboarding
+ * measurement in place - one intentional measurement, never accidental
+ * history rows.
  */
 export default function OnboardingBodyweight() {
   const router = useRouter();
@@ -55,7 +59,7 @@ export default function OnboardingBodyweight() {
           onChangeText={setText}
           keyboardType="decimal-pad"
           placeholder={"0"}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.textDisabled}
           accessibilityLabel={"Current bodyweight in " + units.weightLabel}
         />
         <Text style={styles.unit}>{units.weightLabel}</Text>
@@ -70,17 +74,23 @@ export default function OnboardingBodyweight() {
 }
 
 const styles = StyleSheet.create({
-  inputRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginTop: spacing.sm },
+  inputRow: { flexDirection: "row", alignItems: "center", gap: space[3] },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfacePressed,
     color: colors.text,
-    borderRadius: 12,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    fontSize: 22,
-    minWidth: 140,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    minHeight: 44,
+    paddingHorizontal: space[3],
+    paddingVertical: space[3],
+    minWidth: 150,
+    fontSize: type.metricMedium.fontSize,
+    fontWeight: type.metricMedium.fontWeight,
+    lineHeight: type.metricMedium.lineHeight,
     textAlign: "center",
+    fontVariant: ["tabular-nums"],
   },
-  unit: { color: colors.textMuted, fontSize: 18 },
-  note: { color: colors.textMuted, fontSize: 12, marginTop: spacing.sm },
+  unit: { ...type.bodyStrong, color: colors.textSecondary },
+  note: { ...type.caption, color: colors.textMuted },
 });

@@ -1,12 +1,16 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { resolveResumeStep } from "@openrank/database";
-import { colors, spacing, typography } from "../../theme/tokens";
 import { useServices } from "../../services/ServicesProvider";
 import { routeForStep } from "../../features/onboarding/steps";
+import { Button } from "../../components/ui/Button";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 
 /**
- * Onboarding - Welcome (Phase 7.1, spec 9). Honest first screen: OpenRank is
+ * Onboarding - Welcome (Phase 7.1, spec 9; Phase 8.1 restyle - design tokens
+ * only, all copy/navigation untouched). Honest first screen: OpenRank is
  * free, open source and account-free, and all data stays on this device.
  * No cloud / sync / server claims - those features do not exist.
  */
@@ -31,7 +35,7 @@ export default function OnboardingWelcome() {
   return (
     <View style={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.title}>OpenRank</Text>
+        <Text style={styles.brand}>OpenRank</Text>
         <Text style={styles.tagline}>Train. Rank up. Stay consistent.</Text>
       </View>
 
@@ -41,32 +45,26 @@ export default function OnboardingWelcome() {
         <Text style={styles.point}>No account required.</Text>
       </View>
 
-      <Text style={styles.privacy}>
-        Your workout data is stored locally on this device.
-      </Text>
+      <Text style={styles.privacy}>Your workout data is stored locally on this device.</Text>
 
-      <Pressable style={styles.button} onPress={start} accessibilityLabel="Get started">
-        <Text style={styles.buttonText}>GET STARTED</Text>
-      </Pressable>
+      <Button label="GET STARTED" variant="primary" onPress={start} fullWidth accessibilityLabel="Get started" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.xl, justifyContent: "center", gap: spacing.xl },
-  hero: { gap: spacing.sm },
-  title: { ...typography.title, color: colors.text, fontSize: 42, letterSpacing: 1 },
-  tagline: { ...typography.body, color: colors.textMuted, fontSize: 16 },
-  points: { gap: spacing.xs },
-  point: { ...typography.body, color: colors.text, fontSize: 16, fontWeight: "600" },
-  privacy: { ...typography.caption, color: colors.textMuted },
-  button: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    minHeight: 52,
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    paddingHorizontal: space[4],
+    paddingVertical: space[6],
     justifyContent: "center",
+    gap: space[6],
   },
-  buttonText: { color: "#0b1220", fontWeight: "800", letterSpacing: 1.2 },
+  hero: { gap: space[3] },
+  brand: { ...type.display, color: colors.text, letterSpacing: 0.5 },
+  tagline: { ...type.caption, color: colors.textMuted },
+  points: { gap: space[2] },
+  point: { ...type.bodyStrong, color: colors.text },
+  privacy: { ...type.caption, color: colors.textMuted },
 });

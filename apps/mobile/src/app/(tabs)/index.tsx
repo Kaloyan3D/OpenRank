@@ -4,20 +4,27 @@ import { useRouter } from "expo-router";
 import { ActiveWorkoutConflictError, computeLogicalTrainingDate, resolveHomeSessionView } from "@openrank/database";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { Button } from "../../components/ui/Button";
+import { Card } from "../../components/ui/Card";
+import { RankBadge } from "../../components/ui/RankBadge";
+import { ProgressBar } from "../../components/ui/ProgressBar";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 
 /**
- * Home (Phase 6 spec AD/AE/AF/AT + Phase 7.1 spec 23/24/25).
+ * Home (Phase 8.1 approved structure, spec 18/19) - "What should I do
+ * today?". Greeting -> TODAY card -> streak/week strip -> strength profile
+ * -> recent wins. All Phase 6/7.1 correctness semantics are preserved:
  *
- * - The root onboarding gate owns profile state; if Home ever renders without
- *   a profile (corruption) it shows a recoverable internal-state error and
- *   NEVER silently creates a replacement profile.
- * - Future obligations are never silently reinterpreted: a planned session
- *   belonging to a FUTURE logical training day renders as NEXT WORKOUT with
- *   VIEW PLAN + an explicit BONUS choice - starting it cannot satisfy the
- *   future obligation (that requires an explicit reschedule to today).
- * - Week strip: compact glyphs with full textual accessibility labels (never
- *   color alone).
+ * - The root onboarding gate owns profile state; corruption shows a
+ *   recoverable error and NEVER fabricates a profile.
+ * - Future obligations are never silently reinterpreted (NEXT WORKOUT +
+ *   VIEW PLAN + explicit bonus only; satisfaction requires an explicit
+ *   reschedule).
+ * - Recent wins are CANONICAL events only: personal-record events, rank
+ *   events, streak state. Achievements never redefine these systems.
  */
 
 const WEEKDAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"] as const;
@@ -39,11 +46,12 @@ const WEEK_STATE_LABEL: Record<string, string> = {
   paused: "Paused",
   rescheduled: "Rescheduled",
 };
+/** Green = completed only (spec 3); everything else neutral/amber-today. */
 const WEEK_STATE_COLOR: Record<string, string> = {
-  completed: colors.accent,
-  planned: colors.text,
+  completed: colors.success,
+  planned: colors.textSecondary,
   rest: colors.textMuted,
-  missed: "#e8a0a0",
+  missed: colors.danger,
   paused: colors.textMuted,
   rescheduled: colors.textMuted,
 };
@@ -57,8 +65,6 @@ export default function HomeScreen() {
 
   const profile = repos.profile.getDefault();
   if (!profile) {
-    // The root gate owns this; reaching here means state corruption. Never
-    // fabricate a profile (spec 23).
     return (
       <View style={styles.center}>
         <Text style={styles.errorTitle}>Internal state error</Text>
@@ -71,6 +77,7 @@ export default function HomeScreen() {
   const now = new Date();
   const hour = now.getHours();
   const greeting = hour < 5 ? "Good night" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const dateLabel = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 
   const schedule = services.schedule.getSchedule(profile.id);
   const week = services.schedule.getWeekState(profile.id, { timezoneOffsetMinutes: offset });
@@ -78,6 +85,9 @@ export default function HomeScreen() {
   const next = upcoming[0] ?? null;
   const streak = services.streak.getCurrentState(profile.id);
   const cache = streak.cache;
+  const strength = services.derived.getStrengthProfile(profile.id);
+  const recentPrs = repos.personalRecords.listEventsForProfile(profile.id, 3);
+  const recentRankUps = services.derived.recentRankEvents(profile.id, 6).filter((e) => e.direction === "up").slice(0, 3);
 
   const todayLogical = computeLogicalTrainingDate(now.toISOString(), offset);
   const stateFor = (date: string) => week.find((d) => d.date === date)?.state ?? "rest";
@@ -123,131 +133,199 @@ export default function HomeScreen() {
   const nextLabel = next
     ? WEEKDAY_LONG[(new Date(next.scheduledDate + "T00:00:00Z").getUTCDay() + 6) % 7]
     : null;
-  const sectionTitle =
-    view.kind === "today_planned"
-      ? "TODAY - TRAINING DAY"
-      : view.kind === "today_completed"
-        ? "TODAY - DONE"
-        : view.kind === "today_missed"
-          ? "TODAY - TRAINING DAY (MISSED)"
-          : next
-            ? "NEXT WORKOUT"
-            : "NO PLANNED SESSIONS";
 
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.greeting}>{greeting}</Text>
-      <Text style={styles.streakLine}>
-        {"\u{1F525} " + String(cache.currentStreak) + " session" + (cache.currentStreak === 1 ? "" : "s") + " streak"}
-      </Text>
-      <Text style={styles.muted}>A streak counts planned training sessions, not calendar days.</Text>
-
-      <Text style={styles.section}>THIS WEEK</Text>
-      <View style={styles.weekRow}>
-        {week.map((day, i) => (
-          <View
-            key={day.date}
-            style={[styles.weekCell, day.date === todayLogical && styles.weekCellToday]}
-            accessibilityLabel={
-              WEEKDAY_LONG[i] + (day.date === todayLogical ? " (today)" : "") + ": " + (WEEK_STATE_LABEL[day.state] ?? day.state)
-            }
-          >
-            <Text style={[styles.weekLetter, day.state === "rest" && styles.muted]}>{WEEKDAY_LABELS[i]}</Text>
-            <Text style={[styles.weekGlyph, { color: WEEK_STATE_COLOR[day.state] ?? colors.text }]}>
-              {WEEK_STATE_GLYPH[day.state] ?? "\u00B7"}
-            </Text>
-          </View>
-        ))}
-      </View>
-      <Text style={styles.legend}>
-        {"\u2713 Completed   \u25CB Planned   \u00B7 Rest   \u2715 Missed   \u23F8 Paused   \u21BB Rescheduled"}
-      </Text>
-
-      <Text style={styles.section}>{sectionTitle}</Text>
-      {view.kind === "today_planned" && next ? (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>{nextLabel + " - " + routineFor(next.routineId)}</Text>
-          {schedule.schedule.enabled ? null : (
-            <Text style={styles.muted}>Schedule is disabled - obligations paused for now.</Text>
-          )}
-          <Pressable style={styles.primaryButton} onPress={startPlanned}>
-            <Text style={styles.primaryButtonText}>START WORKOUT</Text>
-          </Pressable>
+  // Today card content per approved state variants (spec 19).
+  const todayCard = (() => {
+    if (view.kind === "today_planned" && next) {
+      return (
+        <>
+          <Text style={styles.cardKicker}>TODAY</Text>
+          <Text style={styles.cardTitle}>{routineFor(next.routineId)}</Text>
+          <Text style={styles.cardMeta}>
+            {schedule.schedule.enabled
+              ? "Your planned session is ready."
+              : "Schedule is disabled - obligations paused for now."}
+          </Text>
+          <Button label="START WORKOUT" onPress={startPlanned} fullWidth accessibilityLabel="Start today's planned workout" />
           <Pressable onPress={() => router.push("/reschedule/" + next.id)} accessibilityLabel="Reschedule this session">
             <Text style={styles.linkText}>Reschedule</Text>
           </Pressable>
-        </View>
-      ) : view.kind === "future" && next ? (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>{nextLabel + " - " + routineFor(next.routineId)}</Text>
-          <Text style={styles.muted}>
-            {"Planned for " + next.scheduledDate + ". Starting today is a bonus workout - it does not move the plan."}
+        </>
+      );
+    }
+    if (view.kind === "future" && next) {
+      return (
+        <>
+          <Text style={styles.cardKicker}>NEXT WORKOUT</Text>
+          <Text style={styles.cardTitle}>{routineFor(next.routineId)}</Text>
+          <Text style={styles.cardMeta}>
+            {"Planned for " + WEEKDAY_LONG[(new Date(next.scheduledDate + "T00:00:00Z").getUTCDay() + 6) % 7] +
+              " (" + next.scheduledDate + "). Starting today is a bonus workout - it does not move the plan."}
           </Text>
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/schedule")}>
-            <Text style={styles.primaryButtonText}>VIEW PLAN</Text>
-          </Pressable>
+          <Button label="VIEW PLAN" variant="primary" onPress={() => router.push("/schedule")} fullWidth />
           <Pressable onPress={startBonus} accessibilityLabel="Start a bonus workout">
             <Text style={styles.linkText}>Start bonus workout</Text>
           </Pressable>
           <Pressable onPress={() => router.push("/reschedule/" + next.id)} accessibilityLabel="Reschedule this session">
             <Text style={styles.linkText}>Reschedule</Text>
           </Pressable>
-        </View>
-      ) : view.kind === "today_completed" ? (
-        <View style={styles.card}>
-          <Text style={styles.muted}>{"Today's session is done. Bonus training is always welcome."}</Text>
-          <Pressable style={styles.secondaryBigButton} onPress={startBonus}>
-            <Text style={styles.secondaryBigText}>START BONUS WORKOUT</Text>
-          </Pressable>
-        </View>
-      ) : view.kind === "today_missed" ? (
-        <View style={styles.card}>
-          <Text style={styles.muted}>
-            {"Today was a training day. The next planned session starts a fresh streak - no drama."}
+        </>
+      );
+    }
+    if (view.kind === "today_completed") {
+      return (
+        <>
+          <Text style={styles.cardKicker}>TRAINING COMPLETE</Text>
+          <Text style={styles.cardTitle}>{routineFor(next?.routineId ?? null)}</Text>
+          <Text style={styles.cardMeta}>{"Today's session is done. Bonus training is always welcome."}</Text>
+          <Button label="START BONUS WORKOUT" variant="secondary" onPress={startBonus} fullWidth />
+        </>
+      );
+    }
+    if (view.kind === "today_missed") {
+      return (
+        <>
+          <Text style={styles.cardKicker}>REST DAY</Text>
+          <Text style={styles.cardMeta}>
+            Today was a planned training day. The next planned session starts a fresh streak - no drama.
           </Text>
-          <Pressable style={styles.secondaryBigButton} onPress={startBonus}>
-            <Text style={styles.secondaryBigText}>START BONUS WORKOUT</Text>
-          </Pressable>
-        </View>
-      ) : view.kind === "none" && next ? (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>{nextLabel + " - " + routineFor(next.routineId)}</Text>
-          <Text style={styles.muted}>No pending obligation right now.</Text>
-          <Pressable style={styles.secondaryBigButton} onPress={startBonus}>
-            <Text style={styles.secondaryBigText}>START BONUS WORKOUT</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <View style={styles.card}>
-          <Text style={styles.muted}>No upcoming planned sessions. Enable training days in your schedule.</Text>
-          <Pressable style={styles.primaryButton} onPress={() => router.push("/schedule")}>
-            <Text style={styles.primaryButtonText}>EDIT SCHEDULE</Text>
-          </Pressable>
-        </View>
-      )}
+          <Button label="START BONUS WORKOUT" variant="secondary" onPress={startBonus} fullWidth />
+        </>
+      );
+    }
+    if (view.kind === "none" && next) {
+      return (
+        <>
+          <Text style={styles.cardKicker}>REST DAY</Text>
+          <Text style={styles.cardTitle}>{routineFor(next.routineId)}</Text>
+          <Text style={styles.cardMeta}>{"Next: " + nextLabel + " (" + next.scheduledDate + ")"}</Text>
+          <Button label="START BONUS WORKOUT" variant="secondary" onPress={startBonus} fullWidth />
+        </>
+      );
+    }
+    return (
+      <>
+        <Text style={styles.cardKicker}>NO PLANNED SESSIONS</Text>
+        <Text style={styles.cardMeta}>No upcoming planned sessions. Enable training days in your schedule.</Text>
+        <Button label="EDIT SCHEDULE" variant="secondary" onPress={() => router.push("/schedule")} fullWidth />
+      </>
+    );
+  })();
 
-      <View style={styles.streakCard}>
-        <Text style={styles.cardTitle}>{"\u{1F525} Current streak: " + String(cache.currentStreak)}</Text>
-        <Text style={styles.cardTitle}>{"\u{1F3C6} Best streak: " + String(cache.bestStreak)}</Text>
-        <Text style={styles.cardTitle}>{"\u{1F4C5} Perfect weeks: " + String(cache.perfectWeeks)}</Text>
-        {streak.lastMissedSessionDate ? (
-          <Text style={styles.muted}>
-            {"Last miss: " + streak.lastMissedSessionDate + " - completed since: " + String(streak.completedSinceLastMiss)}
-          </Text>
-        ) : (
-          <Text style={styles.muted}>No missed planned sessions recorded.</Text>
-        )}
-        <Pressable onPress={() => router.push("/streak")}>
+  const hasWins = recentPrs.length > 0 || recentRankUps.length > 0;
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.greeting}>{greeting},</Text>
+      <Text style={styles.name}>{profile.displayName}</Text>
+      <Text style={styles.date}>{dateLabel}</Text>
+
+      <Card variant="elevated" style={styles.todayCard}>
+        {todayCard}
+      </Card>
+
+      <Card>
+        <Text style={styles.streakMetric}>
+          {String(cache.currentStreak) + " SESSION STREAK"}
+        </Text>
+        <Text style={styles.cardMeta}>{"Best " + String(cache.bestStreak) + " - " + String(cache.perfectWeeks) + " perfect weeks"}</Text>
+        <View style={styles.weekRow}>
+          {week.map((day, i) => (
+            <View
+              key={day.date}
+              accessible
+              accessibilityLabel={
+                WEEKDAY_LONG[i] + (day.date === todayLogical ? " (today)" : "") + ": " + (WEEK_STATE_LABEL[day.state] ?? day.state)
+              }
+              style={[styles.weekCell, day.date === todayLogical ? styles.weekCellToday : null]}
+            >
+              <Text style={[styles.weekLetter, day.state === "rest" ? styles.weekLetterMuted : null]}>{WEEKDAY_LABELS[i]}</Text>
+              <Text style={[styles.weekGlyph, { color: WEEK_STATE_COLOR[day.state] ?? colors.textMuted }]}>
+                {WEEK_STATE_GLYPH[day.state] ?? "\u00B7"}
+              </Text>
+            </View>
+          ))}
+        </View>
+        <Pressable onPress={() => router.push("/streak")} accessibilityLabel="Open streak history">
           <Text style={styles.linkText}>Streak history</Text>
         </Pressable>
-      </View>
+      </Card>
 
-      <View style={styles.row}>
-        <Pressable style={styles.secondaryButton} onPress={() => router.push("/schedule")}>
-          <Text style={styles.secondaryButtonText}>Training schedule</Text>
+      <Text style={styles.section}>STRENGTH PROFILE</Text>
+      <Card>
+        {strength.groups.map((g) => (
+          <Pressable
+            key={g.key}
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={g.label + ": " + (g.tierName ? g.tierName + (g.division ? " " + g.division : "") : "no rank") + ", open rank detail"}
+            onPress={() => router.push("/muscle/" + g.key)}
+            style={styles.profileRow}
+          >
+            <Text style={styles.profileGroup}>{g.label}</Text>
+            <View style={styles.profileRight}>
+              <RankBadge tierName={g.tierName} division={g.division} size="sm" />
+              <View style={styles.profileProgress}>
+                {g.progress != null ? <ProgressBar value={g.progress} height={4} showValue={false} accessibilityLabel={g.label + " tier progress"} /> : null}
+              </View>
+            </View>
+          </Pressable>
+        ))}
+        <Pressable onPress={() => router.push("/progress")} accessibilityLabel="View progress hub">
+          <Text style={styles.linkText}>View progress \u2192</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => router.push("/(tabs)/ranks")}>
-          <Text style={styles.secondaryButtonText}>Strength Profile</Text>
+      </Card>
+
+      {hasWins ? (
+        <>
+          <Text style={styles.section}>RECENT WINS</Text>
+          <Card>
+            {recentPrs.map((pr) => (
+              <View key={pr.id} style={styles.winRow}>
+                <Text style={styles.winBadge}>PR</Text>
+                <Text style={styles.winText}>
+                  {(repos.exercise.findById(pr.exerciseId)?.name ?? "Exercise") +
+                    (pr.recordType === "max_weight"
+                      ? " - " + String(Math.round(pr.value * 100) / 100) + " " + "kg"
+                      : pr.recordType === "max_e1rm"
+                        ? " - est. 1RM " + String(Math.round(pr.value * 10) / 10) + " kg"
+                        : pr.recordType === "max_set_volume"
+                          ? " - set volume " + String(Math.round(pr.value)) + " kg"
+                          : " - " + String(Math.round(pr.value)) + " reps")}
+                </Text>
+              </View>
+            ))}
+            {recentRankUps.map((e) => (
+              <View key={e.id} style={styles.winRow}>
+                <Text style={[styles.winBadge, styles.winBadgeRank]}>RANK UP</Text>
+                <Text style={styles.winText}>
+                  {(e.scopeType === "muscle" ? (strength.groups.find((g) => g.key === e.scopeKey)?.label ?? e.scopeKey) : (repos.exercise.findById(e.scopeKey)?.name ?? e.scopeKey)) +
+                    " \u2192 " + e.toTier + (e.toDivision ? " " + e.toDivision : "")}
+                </Text>
+              </View>
+            ))}
+          </Card>
+        </>
+      ) : null}
+
+      <View style={styles.quickRow}>
+        <Pressable
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Browse the exercise catalog"
+          onPress={() => router.push("/(tabs)/exercises")}
+          style={styles.quickLink}
+        >
+          <Text style={styles.quickLinkText}>Browse exercises</Text>
+        </Pressable>
+        <Pressable
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Open training schedule"
+          onPress={() => router.push("/schedule")}
+          style={styles.quickLink}
+        >
+          <Text style={styles.quickLinkText}>Training schedule</Text>
         </Pressable>
       </View>
     </ScrollView>
@@ -255,50 +333,54 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background, padding: spacing.lg, gap: 8 },
-  errorTitle: { color: "#ff6b6b", fontSize: 16, fontWeight: "700" },
-  greeting: { ...typography.title, color: colors.text },
-  streakLine: { ...typography.title, color: colors.accent, fontSize: 22 },
-  section: { ...typography.title, color: colors.text, fontSize: 14, marginTop: spacing.md, letterSpacing: 1 },
-  muted: { ...typography.caption, color: colors.textMuted },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, marginTop: spacing.sm, gap: spacing.xs },
-  streakCard: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, marginTop: spacing.md, gap: spacing.xs },
-  cardTitle: { ...typography.body, color: colors.text, fontWeight: "700" },
-  weekRow: { flexDirection: "row", justifyContent: "space-between", marginTop: spacing.sm },
-  weekCell: { alignItems: "center", flex: 1, gap: 2, paddingBottom: 2 },
-  weekCellToday: { borderBottomWidth: 2, borderBottomColor: colors.accent },
-  weekLetter: { color: colors.text, fontSize: 12, fontWeight: "700" },
-  weekGlyph: { fontSize: 18, fontWeight: "700" },
-  legend: { color: colors.textMuted, fontSize: 10, marginTop: spacing.xs },
-  primaryButton: {
-    backgroundColor: colors.accent,
-    borderRadius: 10,
-    paddingVertical: spacing.sm,
-    alignItems: "center",
-    marginTop: spacing.xs,
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { paddingHorizontal: space[4], paddingTop: space[5], gap: space[3], paddingBottom: space[10] },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg, padding: space[5], gap: space[2] },
+  errorTitle: { ...type.cardTitle, color: colors.danger },
+  muted: { ...type.caption, color: colors.textMuted },
+  greeting: { ...type.body, color: colors.textSecondary },
+  name: { ...type.pageTitle, color: colors.text },
+  date: { ...type.caption, color: colors.textMuted },
+  todayCard: { gap: space[2], padding: space[5] },
+  cardKicker: { ...type.label, color: colors.accent, letterSpacing: 1.2 },
+  cardTitle: { ...type.cardTitle, color: colors.text },
+  cardMeta: { ...type.caption, color: colors.textMuted },
+  streakMetric: { ...type.metricSmall, color: colors.text, letterSpacing: 0.5 },
+  section: { ...type.label, color: colors.textSecondary, letterSpacing: 1.2, marginTop: space[2] },
+  weekRow: { flexDirection: "row", justifyContent: "space-between", marginTop: space[2] },
+  weekCell: { alignItems: "center", flex: 1, gap: 2, paddingBottom: 3, borderBottomWidth: 2, borderBottomColor: "transparent" },
+  weekCellToday: { borderBottomColor: colors.accent },
+  weekLetter: { ...type.label, color: colors.textSecondary },
+  weekLetterMuted: { color: colors.textMuted },
+  weekGlyph: { ...type.bodyStrong, fontSize: 16 },
+  profileRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: space[2] },
+  profileGroup: { ...type.body, color: colors.text },
+  profileRight: { flexDirection: "row", alignItems: "center", gap: space[3], flex: 1, justifyContent: "flex-end" },
+  profileProgress: { width: 90 },
+  winRow: { flexDirection: "row", alignItems: "center", gap: space[3], paddingVertical: space[1] },
+  winBadge: {
+    ...type.label,
+    color: colors.accent,
+    backgroundColor: colors.accentSubtle,
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    overflow: "hidden",
+    minWidth: 36,
+    textAlign: "center",
   },
-  primaryButtonText: { color: colors.background, fontWeight: "800", letterSpacing: 1 },
-  secondaryBigButton: {
-    borderWidth: 1,
-    borderColor: "#2a3242",
-    borderRadius: 10,
-    paddingVertical: spacing.sm,
-    alignItems: "center",
-    marginTop: spacing.xs,
-  },
-  secondaryBigText: { color: colors.text, fontWeight: "700", letterSpacing: 0.5 },
-  secondaryButton: {
-    backgroundColor: colors.surface,
-    borderRadius: 10,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.sm,
+  winBadgeRank: { color: colors.info, backgroundColor: "rgba(96,165,250,0.12)" },
+  winText: { ...type.caption, color: colors.text, flex: 1 },
+  quickRow: { flexDirection: "row", gap: space[3], marginTop: space[2] },
+  quickLink: {
     flex: 1,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingVertical: space[3],
     alignItems: "center",
   },
-  secondaryButtonText: { color: colors.accent, fontWeight: "700" },
-  linkText: { color: colors.accent, marginTop: spacing.xs },
-  row: { flexDirection: "row", gap: spacing.sm },
+  quickLinkText: { ...type.caption, color: colors.textSecondary },
+  linkText: { ...type.caption, color: colors.accent, fontWeight: "600", paddingVertical: space[1] },
 });

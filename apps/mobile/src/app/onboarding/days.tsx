@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, spacing } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { radius } from "../../design/radii";
+import { type } from "../../design/typography";
 import { useServices } from "../../services/ServicesProvider";
 import { OnboardingShell } from "../../features/onboarding/OnboardingShell";
 
 /**
- * Onboarding - Training days (spec 15). Reuses ScheduleService entirely:
- * setScheduleEnabled(true) + updateWeeklySchedule over all 7 weekdays.
- * Zero selected days is VALID onboarding - no forced obligations.
+ * Onboarding - Training days (spec 15; Phase 8.1 restyle only). Reuses
+ * ScheduleService entirely: setScheduleEnabled(true) + updateWeeklySchedule
+ * over all 7 weekdays. Zero selected days is VALID onboarding - no forced
+ * obligations. Selected days are filled amber circles; unselected days are
+ * neutral surface circles.
  */
 
 const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
@@ -57,11 +62,15 @@ export default function OnboardingDays() {
           <Pressable
             key={label}
             onPress={() => toggle(i)}
-            style={[styles.day, selected[i] && styles.dayOn]}
+            style={({ pressed }) => [
+              styles.day,
+              selected[i] ? styles.dayOn : null,
+              pressed ? styles.dayPressed : null,
+            ]}
             accessibilityLabel={label + (selected[i] ? " selected" : " not selected")}
             accessibilityRole="button"
           >
-            <Text style={[styles.dayText, selected[i] && styles.dayTextOn]}>{label}</Text>
+            <Text style={[styles.dayText, selected[i] ? styles.dayTextOn : null]}>{label}</Text>
           </Pressable>
         ))}
       </View>
@@ -75,18 +84,20 @@ export default function OnboardingDays() {
 }
 
 const styles = StyleSheet.create({
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, marginTop: spacing.sm },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: space[2] },
   day: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: "#2a3242",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    minWidth: 64,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
     alignItems: "center",
+    justifyContent: "center",
   },
-  dayOn: { borderColor: colors.accent, backgroundColor: "rgba(94,200,255,0.12)" },
-  dayText: { color: colors.textMuted, fontWeight: "700", letterSpacing: 1 },
-  dayTextOn: { color: colors.accent },
-  note: { color: colors.textMuted, fontSize: 12, marginTop: spacing.sm },
+  dayOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  dayPressed: { opacity: 0.85 },
+  dayText: { ...type.label, color: colors.textSecondary, letterSpacing: 1 },
+  dayTextOn: { color: colors.textOnAccent },
+  note: { ...type.caption, color: colors.textMuted },
 });

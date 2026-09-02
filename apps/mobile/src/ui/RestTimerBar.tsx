@@ -1,13 +1,17 @@
 /**
- * Rest timer bar (Phase 4, tasks O/P).
+ * Rest timer bar (Phase 4 tasks O/P; Phase 8.1 approved styling, spec 27).
  *
  * Pure view over the persisted timer state: remaining time is derived from
  * ends_at on every tick. -15 / +15 / Skip call the service (persisted
  * immediately); expiry keeps the bar visible with a "done" state until the
- * user skips or a new rest starts.
+ * user skips or a new rest starts. Semantics unchanged.
  */
 
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { colors } from "../design/colors";
+import { radius } from "../design/radii";
+import { space } from "../design/spacing";
+import { type } from "../design/typography";
 import { formatDuration } from "./format";
 
 export interface RestBarState {
@@ -24,31 +28,34 @@ export function RestTimerBar(props: {
   const { rest } = props;
   return (
     <View style={[styles.bar, rest.expired ? styles.expired : null]}>
-      <Text style={styles.label} accessibilityLabel={rest.expired ? "Rest complete" : "Rest timer"}>
-        {rest.expired ? "REST COMPLETE" : "REST"}
-      </Text>
-      <Text style={styles.time}>{rest.expired ? "done" : formatDuration(rest.remainingSeconds)}</Text>
+      <View accessible accessibilityLabel={rest.expired ? "Rest complete" : "Rest timer"}>
+        <Text style={styles.label}>{rest.expired ? "REST COMPLETE" : "REST"}</Text>
+        <Text style={styles.time}>{rest.expired ? "done" : formatDuration(rest.remainingSeconds)}</Text>
+      </View>
       <View style={styles.actions}>
         <Pressable
           accessibilityLabel="Subtract 15 seconds from rest"
+          accessibilityRole="button"
           onPress={() => props.onAdjust(-15)}
-          style={styles.chip}
+          style={[styles.chip, styles.minus]}
         >
-          <Text style={styles.chipText}>-15s</Text>
-        </Pressable>
-        <Pressable
-          accessibilityLabel="Add 15 seconds to rest"
-          onPress={() => props.onAdjust(15)}
-          style={styles.chip}
-        >
-          <Text style={styles.chipText}>+15s</Text>
+          <Text style={[styles.chipText, styles.minusText]}>-15</Text>
         </Pressable>
         <Pressable
           accessibilityLabel="Skip rest timer"
+          accessibilityRole="button"
           onPress={props.onSkip}
           style={[styles.chip, styles.skip]}
         >
-          <Text style={[styles.chipText, styles.skipText]}>Skip</Text>
+          <Text style={[styles.chipText, styles.skipText]}>SKIP</Text>
+        </Pressable>
+        <Pressable
+          accessibilityLabel="Add 15 seconds to rest"
+          accessibilityRole="button"
+          onPress={() => props.onAdjust(15)}
+          style={[styles.chip, styles.plus]}
+        >
+          <Text style={[styles.chipText, styles.plusText]}>+15</Text>
         </Pressable>
       </View>
     </View>
@@ -59,24 +66,31 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#12314e",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 12,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: radius.md,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    gap: space[3],
   },
-  expired: { backgroundColor: "#1d3a25" },
-  label: { color: "#8ab4e0", fontSize: 12, fontWeight: "700", letterSpacing: 1 },
-  time: { color: "#e8eef5", fontSize: 22, fontWeight: "700", fontVariant: ["tabular-nums"], minWidth: 74 },
-  actions: { flexDirection: "row", gap: 8, marginLeft: "auto" },
+  expired: { borderColor: colors.success },
+  label: { ...type.label, color: colors.textMuted, letterSpacing: 1.2 },
+  time: { ...type.metricMedium, color: colors.text, fontVariant: ["tabular-nums"] },
+  actions: { flexDirection: "row", gap: space[2], marginLeft: "auto" },
   chip: {
     borderWidth: 1,
-    borderColor: "#3a5a7c",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderRadius: radius.pill,
+    paddingHorizontal: space[3],
+    paddingVertical: space[2],
+    minHeight: 36,
+    justifyContent: "center",
   },
-  chipText: { color: "#cfe2f5", fontSize: 13 },
-  skip: { borderColor: "#a05a5a" },
-  skipText: { color: "#e8a0a0" },
+  minus: { backgroundColor: colors.dangerSubtle, borderColor: colors.danger },
+  minusText: { color: colors.danger, fontWeight: "700" },
+  skip: { backgroundColor: colors.surfacePressed, borderColor: colors.borderStrong },
+  skipText: { color: colors.text, fontWeight: "700" },
+  plus: { backgroundColor: colors.accentSubtle, borderColor: colors.accent },
+  plusText: { color: colors.accent, fontWeight: "700" },
+  chipText: { ...type.caption, fontWeight: "700" },
 });

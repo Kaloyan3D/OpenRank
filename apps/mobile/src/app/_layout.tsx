@@ -4,7 +4,7 @@ import { DatabaseGate, DatabaseProvider } from "../db/DatabaseProvider";
 import { ServicesProvider } from "../services/ServicesProvider";
 import { NotificationTapHandler } from "../services/notifications/NotificationTapHandler";
 import { RoutingGate } from "../features/onboarding/RoutingGate";
-import { colors } from "../theme/tokens";
+import { colors } from "../design/colors";
 
 /**
  * Root layout (Phase 3/4/7.1): the database initializes on boot - open ->
@@ -26,7 +26,7 @@ export default function RootLayout() {
                   screenOptions={{
                     headerStyle: { backgroundColor: colors.surface },
                     headerTintColor: colors.text,
-                    contentStyle: { backgroundColor: colors.background },
+                    contentStyle: { backgroundColor: colors.bg },
                   }}
                 >
                   <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -42,7 +42,7 @@ export default function RootLayout() {
                   <Stack.Screen name="onboarding/resume" options={{ headerShown: false }} />
                   <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
         <Stack.Screen name="progress" options={{ headerShown: false }} />
-        <Stack.Screen name="achievements" options={{ headerShown: true, title: "Achievements", headerStyle: { backgroundColor: colors.background }, headerTintColor: colors.text }} />
+        <Stack.Screen name="achievements" options={{ headerShown: true, title: "Achievements", headerStyle: { backgroundColor: colors.bg }, headerTintColor: colors.text }} />
                 </Stack>
               </RoutingGate>
             </NotificationTapHandler>

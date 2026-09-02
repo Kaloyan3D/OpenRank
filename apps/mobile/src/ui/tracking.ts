@@ -18,24 +18,28 @@ export interface SetFieldSpec {
   label: string;
 }
 
-/** The ordered field list for one tracking type. */
-export function fieldsForTracking(trackingType: TrackingType): SetFieldSpec[] {
+/** The ordered field list for one tracking type (display-unit aware). */
+export function fieldsForTracking(
+  trackingType: TrackingType,
+  weightLabel = "kg",
+  distanceLabel = "km",
+): SetFieldSpec[] {
   switch (trackingType) {
     case "weight_reps":
       return [
-        { kind: "weight", label: "kg" },
+        { kind: "weight", label: weightLabel },
         { kind: "reps", label: "reps" },
       ];
     case "bodyweight_reps":
       return [{ kind: "reps", label: "reps" }];
     case "bodyweight_weighted":
       return [
-        { kind: "weight", label: "+kg" },
+        { kind: "weight", label: "+" + weightLabel },
         { kind: "reps", label: "reps" },
       ];
     case "bodyweight_assisted":
       return [
-        { kind: "weight", label: "assist kg" },
+        { kind: "weight", label: weightLabel + " assist" },
         { kind: "reps", label: "reps" },
       ];
     case "reps_only":
@@ -47,7 +51,7 @@ export function fieldsForTracking(trackingType: TrackingType): SetFieldSpec[] {
       ];
     case "distance_duration":
       return [
-        { kind: "distance", label: "km" },
+        { kind: "distance", label: distanceLabel },
         { kind: "duration", label: "min" },
         { kind: "duration", label: "sec" },
       ];

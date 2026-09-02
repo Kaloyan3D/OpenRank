@@ -226,6 +226,16 @@ export class SqlitePersonalRecordRepository implements PersonalRecordRepository 
       )
       .map(mapPersonalRecordEvent);
   }
+
+  listEventsForProfile(profileId: string, limit = 10): PersonalRecordEvent[] {
+    return this.driver
+      .all(
+        "SELECT * FROM personal_record_events WHERE profile_id = ? " +
+          "ORDER BY achieved_at DESC, rowid DESC LIMIT " + String(Math.max(0, Math.floor(limit))),
+        [profileId],
+      )
+      .map(mapPersonalRecordEvent);
+  }
 }
 
 export class SqliteRankSnapshotRepository implements RankSnapshotRepository {

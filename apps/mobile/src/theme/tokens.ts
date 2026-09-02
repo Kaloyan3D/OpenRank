@@ -1,25 +1,32 @@
 /**
- * Design tokens (display only - no business logic may live in the UI layer).
+ * LEGACY token shim (Phase 8.1): the approved design system now lives in
+ * src/design. This shim maps the old token names onto the new semantic
+ * palette so un-migrated screens render the approved colors immediately.
+ * New code imports from src/design directly.
  */
+import { colors as designColors } from "../design/colors";
+import { space as designSpace } from "../design/spacing";
+import { type as designType } from "../design/typography";
+
 export const colors = {
-  background: "#0e1116",
-  surface: "#171b23",
-  text: "#e8ecf1",
-  textMuted: "#9aa1ab",
-  accent: "#5ec8ff",
-  success: "#2fe0c8",
+  background: designColors.bg,
+  surface: designColors.surface,
+  text: designColors.text,
+  textMuted: designColors.textMuted,
+  accent: designColors.accent,
+  success: designColors.success,
 } as const;
 
 export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
+  xs: designSpace.xs,
+  sm: designSpace.sm,
+  md: designSpace.lg,
+  lg: designSpace.xxl,
   xl: 32,
 } as const;
 
 export const typography = {
-  title: { fontSize: 24, fontWeight: "700" as const },
-  body: { fontSize: 16 },
-  caption: { fontSize: 12, color: colors.textMuted },
+  title: { ...designType.sectionTitle },
+  body: { ...designType.body },
+  caption: { ...designType.caption, color: designColors.textMuted },
 } as const;

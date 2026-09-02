@@ -1,13 +1,16 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { usePathname, useRouter } from "expo-router";
 import { resolveRootRoute } from "@openrank/database";
 import { useServices } from "../../services/ServicesProvider";
-import { colors } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 
 /**
- * ROOT APPLICATION ROUTING GATE (Phase 7.1, spec 7/8).
+ * ROOT APPLICATION ROUTING GATE (Phase 7.1, spec 7/8; Phase 8.1 restyle
+ * only - tokens swapped, zero logic change).
  *
  * After SQLite open -> migrate -> seed -> service init, the profile state
  * decides where the app can go. The gate OWNS this invariant - main screens
@@ -63,8 +66,15 @@ export function RoutingGate(props: { children: ReactNode }) {
   return <>{props.children}</>;
 }
 
-const styles = {
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background, padding: 24, gap: 8 },
-  error: { color: "#ff6b6b", fontSize: 16, fontWeight: "700", textAlign: "center" },
-  muted: { color: colors.textMuted, fontSize: 13, textAlign: "center" },
-} as const;
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.bg,
+    padding: space[6],
+    gap: space[2],
+  },
+  error: { ...type.cardTitle, color: colors.danger, textAlign: "center" },
+  muted: { ...type.caption, color: colors.textMuted, textAlign: "center" },
+});

@@ -4,7 +4,8 @@ import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, Vi
 import type { Exercise, MajorGroup, TrackingType } from "@openrank/domain";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
-import { colors, spacing, typography } from "../theme/tokens";
+import { colors } from "../design/colors";
+import { spacing, typography } from "../theme/tokens";
 
 /**
  * Exercise picker (Phase 4, task E): offline search + filters over the
@@ -179,7 +180,7 @@ function Chip(props: { label: string; active: boolean; onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
+  container: { flex: 1, backgroundColor: colors.bg, padding: spacing.md },
   search: {
     backgroundColor: colors.surface,
     color: colors.text,
@@ -209,6 +210,6 @@ const styles = StyleSheet.create({
   name: { ...typography.body, color: colors.text },
   meta: { ...typography.caption, color: colors.textMuted, marginTop: 2, textTransform: "capitalize" },
   rankBadge: { borderRadius: 999, borderWidth: 1, borderColor: colors.accent, paddingHorizontal: 8, paddingVertical: 3 },
-  rankProvisional: { borderColor: "#e0b45a" },
+  rankProvisional: { borderColor: colors.accent },
   rankText: { color: colors.accent, fontSize: 11 },
 });

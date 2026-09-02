@@ -10,6 +10,7 @@ export function PressableScale(props: {
   onPress: () => void;
   children: ReactNode;
   accessibilityLabel?: string;
+  accessibilityRole?: string;
   disabled?: boolean;
   style?: object | object[];
 }) {

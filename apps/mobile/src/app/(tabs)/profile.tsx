@@ -5,14 +5,23 @@ import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
 import { useUnits } from "../../ui/units";
 import { formatDateTime } from "../../ui/format";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { Screen } from "../../components/ui/Screen";
+import { Card } from "../../components/ui/Card";
+import { Chip } from "../../components/ui/Chip";
 import { BarChart } from "../../features/charts/BarChart";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 
 /**
- * Profile (Phase 5 scope): bodyweight management (ranks REQUIRE a bodyweight
- * entry - the CTA wording mirrors the Ranks tab), strength standard
- * (male/female ranking reference - changing it rebuilds ranks, never workouts
- * or PRs) and display units. Changing display units does NOT touch rankings.
+ * Profile (Phase 8.1 approved structure, spec 31): avatar initial, display
+ * name, bodyweight hero with trend, then a quiet settings list (Progress,
+ * Achievements, Training Schedule, Reminders, Units, Strength Standard)
+ * and a DATA footer: "Stored locally on this device." No account, no
+ * cloud, no sync UI - Phase 8.1 ships local-only. All existing semantics
+ * preserved (standard change rebuilds ranks, never workouts/PRs; unit
+ * change is display-only).
  */
 export default function ProfileScreen() {
   const router = useRouter();
@@ -28,6 +37,11 @@ export default function ProfileScreen() {
   const profile = repos.profile.getDefault();
   const history = profile ? repos.bodyweight.history(profile.id) : [];
   const latest = history[0] ?? null;
+  const previous = history[1] ?? null;
+  const trend =
+    latest && previous
+      ? latest.weightKg - previous.weightKg
+      : 0;
 
   const addBodyweight = () => {
     if (!profile) return;
@@ -75,10 +89,10 @@ export default function ProfileScreen() {
   if (!profile) {
     // The root routing gate owns this; corruption recovery only (spec 23).
     return (
-      <View style={styles.center}>
+      <Screen>
         <Text style={styles.errorTitle}>Internal state error</Text>
         <Text style={styles.muted}>The local profile is missing. Restart the app to recover.</Text>
-      </View>
+      </Screen>
     );
   }
 
@@ -87,6 +101,7 @@ export default function ProfileScreen() {
     unlocked: achievementViews.filter((a) => a.unlocked).length,
     total: achievementViews.length,
   };
+  const initial = (profile.displayName.trim()[0] ?? "?").toUpperCase();
 
   const saveName = () => {
     try {
@@ -99,64 +114,98 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.kicker}>PROFILE</Text>
-      {editingName ? (
-        <View style={styles.row}>
-          <TextInput
-            style={styles.input}
-            value={nameDraft}
-            onChangeText={setNameDraft}
-            autoFocus
-            maxLength={60}
-            accessibilityLabel="Display name"
-          />
-          <Pressable style={styles.button} onPress={saveName}>
-            <Text style={styles.buttonText}>Save</Text>
-          </Pressable>
+    <Screen>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text style={styles.kicker}>PROFILE</Text>
+        <View style={styles.identityRow}>
+          <View style={styles.avatar} accessible accessibilityLabel={"Profile avatar for " + profile.displayName}>
+            <Text style={styles.avatarText}>{initial}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            {editingName ? (
+              <View style={styles.nameRow}>
+                <TextInput
+                  style={styles.input}
+                  value={nameDraft}
+                  onChangeText={setNameDraft}
+                  autoFocus
+                  maxLength={60}
+                  accessibilityLabel="Display name"
+                />
+                <Pressable accessibilityRole="button" accessibilityLabel="Save name" onPress={saveName}>
+                  <Text style={styles.linkText}>Save</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.nameRow}>
+                <Text style={styles.name} numberOfLines={1}>{profile.displayName}</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Edit display name"
+                  onPress={() => {
+                    setNameDraft(profile.displayName);
+                    setEditingName(true);
+                  }}
+                >
+                  <Text style={styles.linkText}>Edit</Text>
+                </Pressable>
+              </View>
+            )}
+            <Text style={styles.muted}>Local profile on this device - no account required.</Text>
+          </View>
         </View>
-      ) : (
-        <View style={styles.row}>
-          <Text style={styles.title}>{profile.displayName}</Text>
-          <Pressable
-            onPress={() => {
-              setNameDraft(profile.displayName);
-              setEditingName(true);
-            }}
-            accessibilityLabel="Edit display name"
-          >
-            <Text style={styles.linkText}>Edit</Text>
-          </Pressable>
-        </View>
-      )}
-      <Text style={styles.meta}>Local profile on this device - no account required.</Text>
 
-      <Text style={styles.section}>Bodyweight</Text>
-      {!latest ? (
-        <Text style={styles.callout}>Add bodyweight to calculate strength ranks.</Text>
-      ) : (
-        <Text style={styles.body}>
-          {units.toDisplay(latest.weightKg) + " " + units.weightLabel + " - measured " + formatDateTime(latest.measuredAt)}
-        </Text>
-      )}
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          value={weightInput}
-          onChangeText={setWeightInput}
-          placeholder={"current weight (" + units.weightLabel + ")"}
-          placeholderTextColor={colors.textMuted}
-          keyboardType="decimal-pad"
-        />
-        <Pressable style={styles.button} onPress={addBodyweight}>
-          <Text style={styles.buttonText}>Add</Text>
-        </Pressable>
-      </View>
-      {history.length > 0 ? (
-        <>
-          <Text style={styles.meta}>
-            {String(history.length) + " entries recorded - the newest at or before each workout is used for its ranks."}
-          </Text>
+        <Text style={styles.section}>BODYWEIGHT</Text>
+        <Card variant="elevated">
+          <View style={styles.bwRow}>
+            <View>
+              <Text style={styles.bwValue}>
+                {latest ? units.toDisplay(latest.weightKg) + " " + units.weightLabel : "\u2014"}
+              </Text>
+              <Text style={styles.muted}>
+                {latest
+                  ? "measured " + formatDateTime(latest.measuredAt)
+                  : "Add bodyweight to calculate strength ranks."}
+              </Text>
+            </View>
+            {Math.abs(trend) >= 0.05 ? (
+              <Text
+                style={[styles.trend, { color: trend < 0 ? colors.info : colors.accent }]}
+                accessibilityLabel={
+                  "Compared to previous measurement: " + (trend < 0 ? "down " : "up ") +
+                  units.toDisplay(Math.abs(trend)) + " " + units.weightLabel
+                }
+              >
+                {(trend < 0 ? "\u2212" : "+") + units.toDisplay(Math.abs(trend)) + " " + units.weightLabel}
+              </Text>
+            ) : null}
+          </View>
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              value={weightInput}
+              onChangeText={setWeightInput}
+              placeholder={"current weight (" + units.weightLabel + ")"}
+              placeholderTextColor={colors.textDisabled}
+              keyboardType="decimal-pad"
+              accessibilityLabel="New bodyweight"
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add bodyweight entry"
+              onPress={addBodyweight}
+              style={styles.addBtn}
+            >
+              <Text style={styles.addBtnText}>ADD</Text>
+            </Pressable>
+          </View>
+          {history.length > 0 ? (
+            <Text style={styles.muted}>
+              {String(history.length) + " entries recorded - the newest at or before each workout is used for its ranks."}
+            </Text>
+          ) : null}
+        </Card>
+        {history.length > 1 ? (
           <BarChart
             points={services.analytics
               .bodyweightSeries(profile.id)
@@ -169,111 +218,123 @@ export default function ProfileScreen() {
               }))}
             unitLabel={"Recent measurements (" + units.weightLabel + ")"}
           />
-        </>
-      ) : null}
+        ) : null}
 
-      <Text style={styles.section}>Ranking reference</Text>
-      <Text style={styles.meta}>
-        {profile.strengthStandard === "male" ? "Male reference" : "Female reference"} - used to calculate your strength ranks.
-      </Text>
+        <Text style={styles.section}>SETTINGS</Text>
+        <Card>
+          <SettingsRow label="Progress" hint="Charts, PRs, rank history" onPress={() => router.push("/progress")} />
+          <SettingsRow
+            label="Achievements"
+            hint={String(achievements.unlocked) + " of " + String(achievements.total) + " unlocked"}
+            onPress={() => router.push("/achievements")}
+          />
+          <SettingsRow label="Training Schedule" hint="Training days and routines" onPress={() => router.push("/schedule")} />
+          <SettingsRow label="Reminders" hint="Local notifications" onPress={() => router.push("/notifications")} />
+          <SettingsRow label="Streak" hint="Current streak, best streak, history" onPress={() => router.push("/streak")} />
+        </Card>
 
-      <Text style={styles.section}>Ranking standard</Text>
-      <Text style={styles.meta}>
-        Ranks compare your strength to the selected reference standard.
-        Changing it recalculates ranks (never workouts or records).
-      </Text>
-      <View style={styles.row}>
-        <Pressable
-          style={[styles.button, profile.strengthStandard === "male" && styles.buttonActive]}
-          onPress={() => setStandard("male")}
-        >
-          <Text style={styles.buttonText}>Male reference</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.button, profile.strengthStandard === "female" && styles.buttonActive]}
-          onPress={() => setStandard("female")}
-        >
-          <Text style={styles.buttonText}>Female reference</Text>
-        </Pressable>
-      </View>
+        <Text style={styles.section}>UNITS</Text>
+        <Card>
+          <View style={styles.chipRow}>
+            <Chip label="Metric (kg, km)" selected={profile.unitSystem === "metric"} onPress={() => setUnits("metric")} accessibilityLabel="Use metric units" />
+            <Chip label="Imperial (lb, mi)" selected={profile.unitSystem === "imperial"} onPress={() => setUnits("imperial")} accessibilityLabel="Use imperial units" />
+          </View>
+          <Text style={styles.muted}>Display only - your data is stored in canonical units.</Text>
+        </Card>
 
-      <Text style={styles.section}>Progress & achievements</Text>
-      <Text style={styles.meta}>
-        {String(achievements.unlocked) + " of " + String(achievements.total) + " milestones unlocked."}
-      </Text>
-      <View style={styles.row}>
-        <Pressable style={styles.button} onPress={() => router.push("/achievements")}>
-          <Text style={styles.buttonText}>Achievements</Text>
-        </Pressable>
-        <Pressable style={styles.button} onPress={() => router.push("/progress")}>
-          <Text style={styles.buttonText}>Progress charts</Text>
-        </Pressable>
-      </View>
+        <Text style={styles.section}>STRENGTH STANDARD</Text>
+        <Card>
+          <Text style={styles.muted}>
+            Ranks compare your strength to the selected reference standard. Changing it recalculates ranks (never
+            workouts or records).
+          </Text>
+          <View style={styles.chipRow}>
+            <Chip label="Male reference" selected={profile.strengthStandard === "male"} onPress={() => setStandard("male")} accessibilityLabel="Use male reference standard" />
+            <Chip label="Female reference" selected={profile.strengthStandard === "female"} onPress={() => setStandard("female")} accessibilityLabel="Use female reference standard" />
+          </View>
+        </Card>
 
-      <Text style={styles.section}>Notifications</Text>
-      <Text style={styles.meta}>Local reminders for planned sessions and rest timers.</Text>
-      <Pressable style={styles.button} onPress={() => router.push("/notifications")}>
-        <Text style={styles.buttonText}>Notification settings</Text>
-      </Pressable>
-
-      <Text style={styles.section}>Training schedule</Text>
-      <Text style={styles.meta}>Set your weekly training days, pauses and planned sessions.</Text>
-      <Pressable style={styles.button} onPress={() => router.push("/schedule")}>
-        <Text style={styles.buttonText}>Edit training schedule</Text>
-      </Pressable>
-
-      <Text style={styles.section}>Display units</Text>
-      <Text style={styles.meta}>
-        Display only - all data is stored in canonical units and ranks are unaffected.
-      </Text>
-      <View style={styles.row}>
-        <Pressable
-          style={[styles.button, profile.unitSystem === "metric" && styles.buttonActive]}
-          onPress={() => setUnits("metric")}
-        >
-          <Text style={styles.buttonText}>kg</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.button, profile.unitSystem === "imperial" && styles.buttonActive]}
-          onPress={() => setUnits("imperial")}
-        >
-          <Text style={styles.buttonText}>lb</Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+        <Text style={styles.section}>DATA</Text>
+        <Card>
+          <Text style={styles.dataText}>Stored locally on this device.</Text>
+          <Text style={styles.muted}>
+            No account. No cloud. No analytics leaves this device. Uninstalling the app deletes your data.
+          </Text>
+        </Card>
+      </ScrollView>
+    </Screen>
   );
 }
 
+function SettingsRow(props: { label: string; hint?: string; onPress: () => void }) {
+  return (
+    <Pressable
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={props.label + (props.hint ? ", " + props.hint : "")}
+      onPress={props.onPress}
+      style={rowStyles.row}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={rowStyles.label}>{props.label}</Text>
+        {props.hint ? <Text style={rowStyles.hint}>{props.hint}</Text> : null}
+      </View>
+      <Text style={rowStyles.chevron}>{"\u203A"}</Text>
+    </Pressable>
+  );
+}
+
+const rowStyles = StyleSheet.create({
+  row: { flexDirection: "row", alignItems: "center", paddingVertical: space[3], minHeight: 48 },
+  label: { ...type.body, color: colors.text },
+  hint: { ...type.caption, color: colors.textMuted },
+  chevron: { ...type.bodyStrong, color: colors.textMuted },
+});
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background, padding: spacing.lg },
-  kicker: { color: colors.accent, fontSize: 11, fontWeight: "700", letterSpacing: 1.2 },
-  title: { ...typography.title, color: colors.text },
-  section: { ...typography.title, color: colors.text, fontSize: 18, marginTop: spacing.md },
-  body: { ...typography.body, color: colors.text },
-  meta: { ...typography.caption },
-  muted: { ...typography.caption, color: colors.textMuted },
-  callout: { ...typography.body, color: colors.accent },
-  row: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm, flexWrap: "wrap" },
-  input: {
-    flex: 1,
-    minWidth: 140,
-    backgroundColor: colors.surface,
-    borderRadius: 8,
-    color: colors.text,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  button: {
-    backgroundColor: colors.surface,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+  kicker: { ...type.label, color: colors.accent, letterSpacing: 1.2, marginBottom: space[2] },
+  identityRow: { flexDirection: "row", alignItems: "center", gap: space[3], marginBottom: space[2] },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accentSubtle,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    alignItems: "center",
     justifyContent: "center",
   },
-  buttonActive: { borderColor: colors.accent, borderWidth: 1 },
-  buttonText: { color: colors.accent, fontWeight: "700" },
-  linkText: { color: colors.accent, fontWeight: "700", marginLeft: spacing.sm },
-  errorTitle: { color: "#ff6b6b", fontSize: 16, fontWeight: "700" },
+  avatarText: { ...type.sectionTitle, color: colors.accent },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: space[3] },
+  name: { ...type.sectionTitle, color: colors.text, flexShrink: 1 },
+  muted: { ...type.caption, color: colors.textMuted },
+  section: { ...type.label, color: colors.textSecondary, letterSpacing: 1.2, marginTop: space[4], marginBottom: space[1] },
+  bwRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space[3] },
+  bwValue: { ...type.metricMedium, color: colors.text, fontVariant: ["tabular-nums"] },
+  trend: { ...type.label, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  inputRow: { flexDirection: "row", gap: space[2], marginTop: space[3] },
+  input: {
+    flex: 1,
+    backgroundColor: colors.surfacePressed,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: radius.sm,
+    paddingHorizontal: space[3],
+    minHeight: 44,
+    fontSize: 15,
+  },
+  addBtn: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.sm,
+    paddingHorizontal: space[4],
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addBtnText: { ...type.label, color: colors.textOnAccent, letterSpacing: 1 },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: space[2], marginTop: space[2] },
+  dataText: { ...type.bodyStrong, color: colors.text },
+  linkText: { ...type.caption, color: colors.accent, fontWeight: "600" },
+  errorTitle: { ...type.cardTitle, color: colors.danger },
 });

@@ -1,29 +1,56 @@
 import { Tabs } from "expo-router";
-import { colors } from "../../theme/tokens";
+import { StyleSheet } from "react-native";
+import { TabBarIcon, TabBarLabel, TAB_ITEMS } from "../../components/ui/TabBar";
+import { colors } from "../../design/colors";
 
 /**
- * Bottom navigation (spec section 48): HOME, WORKOUT, RANKS, HISTORY, PROFILE.
- * WORKOUT is visually emphasized as the center action.
- * Phase 2 adds the EXERCISES tab as the entry point for the offline catalog
- * (documented deviation: extends the section 48 tab list by one entry).
+ * Bottom navigation (Phase 8.1, spec 17): EXACTLY five primary tabs -
+ * Home, History, Workout, Ranks, Profile. Workout is visually central
+ * (amber plate; never a giant floating button, never glow). Exercises is
+ * NOT a permanent tab: href null keeps the route reachable from Home and
+ * the workout flows. Active = amber; inactive = TEXT_MUTED. Every item
+ * carries icon + label + accessibility label.
  */
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.surface },
-        headerTintColor: colors.text,
-        sceneStyle: { backgroundColor: colors.background },
+        headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: styles.tabBar,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Home" }} />
-      <Tabs.Screen name="exercises" options={{ title: "Exercises" }} />
-      <Tabs.Screen name="workout" options={{ title: "Workout" }} />
-      <Tabs.Screen name="ranks" options={{ title: "Ranks" }} />
-      <Tabs.Screen name="history" options={{ title: "History" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      {TAB_ITEMS.map((item) => (
+        <Tabs.Screen
+          key={item.name}
+          name={item.name}
+          options={{
+            tabBarAccessibilityLabel:
+              item.label + (item.name === "workout" ? " - central workout action" : " tab"),
+            tabBarIcon: ({ focused, color }) => (
+              <TabBarIcon route={item.name} focused={focused} color={String(color)} />
+            ),
+            tabBarLabel: ({ focused, color }) => (
+              <TabBarLabel focused={focused} color={String(color)} label={item.label} />
+            ),
+          }}
+        />
+      ))}
+      {/* Exercise catalog: reachable route, not a permanent tab (spec 17). */}
+      <Tabs.Screen name="exercises" options={{ href: null }} />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    elevation: 0,
+    shadowOpacity: 0,
+    height: 58,
+    paddingTop: 6,
+  },
+});

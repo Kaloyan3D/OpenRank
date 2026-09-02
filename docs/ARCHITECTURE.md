@@ -312,3 +312,31 @@ triggers: docs/NOTIFICATIONS_SPEC.md is the contract.
   dependency); the native graph is unchanged.
 - New screens: /progress (analytics hub) and /achievements; exercise,
   muscle-group, workout-summary and profile screens gained chart sections.
+
+## Phase 8.1: design system v1 + product UI implementation
+
+- `apps/mobile/src/design/` owns the approved OpenRank Design System v1
+  (dark athletic / premium / utilitarian): semantic color tokens
+  (`colors.ts`), spacing scale (`spacing.ts`), radii (`radii.ts`),
+  typography tokens (`typography.ts`), rank colors (`rank-colors.ts`),
+  shadow steps (`elevation.ts`) and a PURE reduced-motion policy
+  (`motion.ts`, reactive hook `src/ui/useReducedMotion.ts`). UI code
+  consumes semantic tokens - no scattered hex.
+- `src/components/ui/` provides the shared primitives (Screen, Card,
+  Button, Chip, SectionHeader, ProgressBar, RankBadge, EmptyState,
+  InlineError, ModalShell, TabBar). Rank colors appear only on rank
+  badges/bars/labels; green is success-only; red is destructive-only.
+- Bottom navigation is exactly five tabs (Home, History, Workout, Ranks,
+  Profile) with Workout visually central; the exercise catalog remains a
+  reachable non-tab route. Home links to it directly.
+- All product screens (Home, History, Workout hub, active workout, Ranks,
+  Progress, Exercise detail, Profile, Onboarding) implement the approved
+  structures without changing any Phase 5-8 semantics: future-workout and
+  rest-day bonus behavior, reschedule generation, canonical PR/rank/streak
+  events, achievement derivation and AnalyticsService reads are untouched.
+- The only new dependency is @expo/vector-icons (Expo-compatible install).
+  Charts remain pure views (bars instead of an SVG line chart - documented
+  in docs/DESIGN_SYSTEM.md). No schema change; the one read-API addition is
+  PersonalRecordRepository.listEventsForProfile (Home Recent Wins).
+- Spec-52 policy tests live in apps/mobile/tests/design-policy.test.ts
+  (source-level invariants + pure token/motion/range/column mapping).

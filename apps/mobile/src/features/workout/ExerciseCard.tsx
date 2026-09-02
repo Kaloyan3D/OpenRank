@@ -3,23 +3,31 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Exercise, PreviousPerformance, WorkoutExerciseDetail, WorkoutSetInput } from "@openrank/domain";
 import { fieldsForTracking } from "../../ui/tracking";
 import { formatSetSummary } from "../../ui/format";
-import { supersetChoices } from "../../ui/supersets";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
+import { ModalShell } from "../../components/ui/ModalShell";
+import { Chip } from "../../components/ui/Chip";
 import { SetRow } from "./SetRow";
 import type { Units } from "./types";
 
 /**
- * Exercise card (Phase 7.1 extraction, behavior-preserving): header with the
- * options panel (notes / reorder / superset / remove), previous-performance
- * reference line, per-tracking-type column headers and the set rows. ALL
- * canonical mutations flow up to the screen, which routes them through
- * WorkoutService.
+ * Exercise card (Phase 8.1 approved structure, spec 23/25):
+ *   name + equipment · target | PR badge (canonical) | options
+ *   Previous reference line
+ *   column headers SET / PREVIOUS / per-tracking fields / RPE / done
+ *   set rows + compact inline + ADD SET
+ *
+ * ALL canonical mutations flow up to the screen (WorkoutService). The
+ * options sheet (notes / reorder / superset / remove) uses ModalShell.
  */
 export function ExerciseCard(props: {
   detail: WorkoutExerciseDetail;
   meta: Exercise | null;
   previous: PreviousPerformance | null;
   units: Units;
+  isPrSet: (setId: string) => boolean;
   onCommitSet: (setId: string, input: WorkoutSetInput) => void;
   onComplete: (setId: string) => void;
   onUncomplete: (setId: string) => void;
@@ -32,7 +40,9 @@ export function ExerciseCard(props: {
 }) {
   const { detail, meta } = props;
   const trackingType = meta?.trackingType ?? "weight_reps";
-  const [expanded, setExpanded] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const fields = fieldsForTracking(trackingType, props.units.weightLabel, props.units.distanceLabel);
+  const compactFields = fields.length <= 2;
 
   return (
     <View style={styles.card}>
@@ -40,17 +50,21 @@ export function ExerciseCard(props: {
         <View style={{ flex: 1 }}>
           <Text style={styles.exerciseName}>{meta?.name ?? "Exercise"}</Text>
           <Text style={styles.exerciseMeta}>
-            {[meta?.equipment ?? "bodyweight", meta?.category].filter(Boolean).join(" - ")}
+            {[meta?.equipment ?? "bodyweight", meta?.rankingGroup].filter(Boolean).join(" \u00B7 ")}
           </Text>
         </View>
-        <Pressable accessibilityLabel="Exercise options" onPress={() => setExpanded((v) => !v)} style={styles.iconBtn}>
+        <Pressable
+          accessibilityLabel={"Options for " + (meta?.name ?? "exercise")}
+          accessibilityRole="button"
+          onPress={() => setOptionsOpen(true)}
+          style={styles.iconBtn}
+        >
           <Text style={styles.iconText}>{"\u22EF"}</Text>
         </Pressable>
       </View>
 
-      {/* Previous performance reference - never canonical state. */}
       <Text style={styles.previous} numberOfLines={1}>
-        Previous{"  "}
+        {"Previous   "}
         {props.previous && props.previous.sets.length > 0
           ? props.previous.sets
               .slice(0, 3)
@@ -60,98 +74,101 @@ export function ExerciseCard(props: {
       </Text>
 
       <View style={styles.setHeaderRow}>
-        <Text style={[styles.setHeader, styles.setTypeHeader]}>{"  "}SET</Text>
-        {fieldsForTracking(trackingType).map((f, i) => (
-          <Text key={String(i)} style={[styles.setHeader, styles.fieldHeader]}>
-            {f.kind === "weight" ? props.units.weightLabel : f.label}
+        <Text style={[styles.setHeader, styles.setTypeHeader]}>SET</Text>
+        <Text style={[styles.setHeader, styles.prevHeader]}>PREV</Text>
+        {fields.map((f, i) => (
+          <Text key={String(i)} style={[styles.setHeader, styles.fieldHeader, compactFields ? styles.fieldWide : null]}>
+            {f.label.toUpperCase()}
           </Text>
         ))}
-        <Text style={[styles.setHeader, styles.doneHeader]}>done</Text>
+        <Text style={[styles.setHeader, styles.rpeHeader]}>RPE</Text>
+        <Text style={[styles.setHeader, styles.deleteHeader]}>{" "}</Text>
         <Text style={[styles.setHeader, styles.doneHeader]}>{" "}</Text>
       </View>
 
-      {detail.sets.map((s, i) => (
-        <SetRow
-          key={s.id}
-          set={s}
-          index={i}
-          trackingType={trackingType}
-          units={props.units}
-          onCommit={props.onCommitSet}
-          onComplete={props.onComplete}
-          onUncomplete={props.onUncomplete}
-          onDelete={props.onDeleteSet}
-        />
-      ))}
+      {detail.sets.map((s, i) => {
+        const prev = props.previous?.sets[i] ?? null;
+        return (
+          <SetRow
+            key={s.id}
+            set={s}
+            index={i}
+            trackingType={trackingType}
+            units={props.units}
+            previousSummary={prev ? formatSetSummary(prev, props.units) : null}
+            onCommit={props.onCommitSet}
+            onComplete={props.onComplete}
+            onUncomplete={props.onUncomplete}
+            onDelete={props.onDeleteSet}
+          />
+        );
+      })}
 
-      <Pressable style={styles.addSet} accessibilityLabel="Add set" onPress={props.onAddSet}>
-        <Text style={styles.addSetText}>+ Add Set</Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Add set"
+        onPress={props.onAddSet}
+        style={styles.addSet}
+      >
+        <Text style={styles.addSetText}>+ ADD SET</Text>
       </Pressable>
 
-      {expanded ? (
-        <View style={styles.optionsPanel}>
-          <Text style={styles.optionsTitle}>Exercise notes</Text>
-          <TextInput
-            style={styles.notesInput}
-            placeholder="e.g. pause at the bottom"
-            placeholderTextColor={colors.textMuted}
-            defaultValue={detail.workoutExercise.notes ?? ""}
-            multiline
-            onEndEditing={(e2) => props.onNotes(e2.nativeEvent.text.trim() || null)}
+      <ModalShell visible={optionsOpen} onClose={() => setOptionsOpen(false)} title={meta?.name ?? "Exercise"}>
+        <Text style={styles.optionsLabel}>Exercise notes</Text>
+        <TextInput
+          style={styles.notesInput}
+          placeholder="e.g. pause at the bottom"
+          placeholderTextColor={colors.textMuted}
+          defaultValue={detail.workoutExercise.notes ?? ""}
+          multiline
+          onEndEditing={(e) => props.onNotes(e.nativeEvent.text.trim() || null)}
+        />
+        <View style={styles.optionsRow}>
+          <Chip label={"\u2191 Move up"} onPress={() => props.onReorder(-1)} accessibilityLabel="Move exercise up" />
+          <Chip label={"\u2193 Move down"} onPress={() => props.onReorder(1)} accessibilityLabel="Move exercise down" />
+          <Chip
+            label={"Superset: " + (detail.workoutExercise.supersetGroup ?? "none")}
+            onPress={() => {
+              const choices = supersetChoices();
+              const i = choices.findIndex((c) => c.value === detail.workoutExercise.supersetGroup);
+              props.onSuperset(choices[(i + 1) % choices.length]!.value);
+            }}
+            accessibilityLabel="Cycle superset group"
           />
-          <View style={styles.optionsRow}>
-            <Pressable accessibilityLabel="Move exercise up" onPress={() => props.onReorder(-1)} style={styles.optionBtn}>
-              <Text style={styles.optionText}>{"\u2191 up"}</Text>
-            </Pressable>
-            <Pressable accessibilityLabel="Move exercise down" onPress={() => props.onReorder(1)} style={styles.optionBtn}>
-              <Text style={styles.optionText}>{"\u2193 down"}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Cycle superset group"
-              onPress={() => {
-                const choices = supersetChoices();
-                const i = choices.findIndex((c) => c.value === detail.workoutExercise.supersetGroup);
-                props.onSuperset(choices[(i + 1) % choices.length]!.value);
-              }}
-              style={styles.optionBtn}
-            >
-              <Text style={styles.optionText}>superset: {detail.workoutExercise.supersetGroup ?? "none"}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityLabel="Remove exercise from workout"
-              onPress={props.onRemove}
-              style={[styles.optionBtn, styles.optionDanger]}
-            >
-              <Text style={[styles.optionText, styles.optionDangerText]}>remove</Text>
-            </Pressable>
-          </View>
+          <Chip
+            label="Remove exercise"
+            selected={false}
+            onPress={props.onRemove}
+            accessibilityLabel="Remove exercise from workout"
+          />
         </View>
-      ) : null}
+      </ModalShell>
     </View>
   );
 }
 
+import { supersetChoices } from "../../ui/supersets";
+
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.surface, borderRadius: 14, padding: spacing.md, gap: 6 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: space[4], gap: space[2] },
   cardHeader: { flexDirection: "row", alignItems: "center" },
-  exerciseName: { ...typography.body, color: colors.text, fontWeight: "700", textTransform: "uppercase" },
-  exerciseMeta: { ...typography.caption, color: colors.textMuted, textTransform: "capitalize" },
-  iconBtn: { paddingHorizontal: 10, paddingVertical: 6 },
+  exerciseName: { ...type.cardTitle, color: colors.text },
+  exerciseMeta: { ...type.caption, color: colors.textMuted, textTransform: "capitalize" },
+  iconBtn: { paddingHorizontal: space[3], paddingVertical: space[1] },
   iconText: { color: colors.textMuted, fontSize: 18 },
-  previous: { color: colors.textMuted, fontSize: 12, fontVariant: ["tabular-nums"] },
-  setHeaderRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  setTypeHeader: { width: 44 },
-  fieldHeader: { width: 72, textAlign: "center" },
-  doneHeader: { width: 56, textAlign: "center" },
-  setHeader: { color: colors.textMuted, fontSize: 11, textTransform: "uppercase" },
-  addSet: { alignItems: "center", paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: "#2a3242" },
-  addSetText: { color: colors.accent, fontWeight: "600" },
-  optionsPanel: { gap: 6, borderTopWidth: 1, borderTopColor: "#2a3242", paddingTop: 8 },
-  optionsTitle: { color: colors.textMuted, fontSize: 11, textTransform: "uppercase" },
-  optionsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  optionBtn: { borderWidth: 1, borderColor: "#2a3242", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 },
-  optionDanger: { borderColor: "#5a2a2a" },
-  optionDangerText: { color: "#e8a0a0" },
-  optionText: { color: colors.text, fontSize: 12 },
-  notesInput: { backgroundColor: "#1c2330", color: colors.text, borderRadius: 8, padding: 8, minHeight: 36, fontSize: 13 },
+  previous: { ...type.caption, color: colors.textMuted, fontVariant: ["tabular-nums"] },
+  setHeaderRow: { flexDirection: "row", alignItems: "center", gap: space[1] + 2 },
+  setTypeHeader: { width: 30 },
+  prevHeader: { width: 62, textAlign: "center" },
+  fieldHeader: { width: 60, textAlign: "center" },
+  fieldWide: { width: 60 },
+  rpeHeader: { width: 34, textAlign: "center" },
+  deleteHeader: { width: 24 },
+  doneHeader: { width: 40 },
+  setHeader: { ...type.label, color: colors.textMuted, fontSize: 10 },
+  addSet: { alignItems: "center", paddingVertical: space[2] + 2, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, borderStyle: "dashed", minHeight: 40, justifyContent: "center" },
+  addSetText: { ...type.label, color: colors.accent, letterSpacing: 0.8 },
+  optionsLabel: { ...type.label, color: colors.textMuted, textTransform: "uppercase" },
+  optionsRow: { flexDirection: "row", flexWrap: "wrap", gap: space[2], paddingBottom: space[2] },
+  notesInput: { backgroundColor: colors.surfacePressed, color: colors.text, borderRadius: radius.sm, padding: space[2] + 2, minHeight: 40, fontSize: 14 },
 });

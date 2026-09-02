@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { formatDuration } from "../../ui/format";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 
 /**
- * Workout header (Phase 7.1 extraction, behavior-preserving): title, the
- * derived duration timer (never stored, ticks from started_at) and workout
- * notes (autosave on end-editing).
+ * Active workout header (Phase 8.1, spec 22): back arrow, workout name,
+ * amber tabular timer (derived, never stored) and workout notes with
+ * autosave on end-editing. Finish lives with the finish flow (amber text
+ * action) - never styled as destructive.
  */
 export function WorkoutHeader(props: {
   title: string;
@@ -14,11 +18,24 @@ export function WorkoutHeader(props: {
   finishedAt: string | null;
   notes: string | null;
   onNotes: (notes: string | null) => void;
+  onBack?: () => void;
 }) {
   return (
     <View style={styles.wrap}>
       <View style={styles.row}>
-        <Text style={styles.title}>{props.title}</Text>
+        {props.onBack ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back to workout hub"
+            onPress={props.onBack}
+            style={styles.backBtn}
+          >
+            <Text style={styles.backText}>{"\u2190"}</Text>
+          </Pressable>
+        ) : null}
+        <Text style={[styles.title, !props.onBack ? styles.titleNoBack : null]} numberOfLines={1}>
+          {props.title}
+        </Text>
         <WorkoutTimer startedAt={props.startedAt} finishedAt={props.finishedAt} />
       </View>
       <TextInput
@@ -27,6 +44,7 @@ export function WorkoutHeader(props: {
         placeholderTextColor={colors.textMuted}
         defaultValue={props.notes ?? ""}
         multiline
+        accessibilityLabel="Workout notes"
         onEndEditing={(e) => props.onNotes(e.nativeEvent.text.trim() || null)}
       />
     </View>
@@ -43,23 +61,40 @@ function WorkoutTimer(props: { startedAt: string; finishedAt: string | null }) {
   }, [props.finishedAt]);
   const end = props.finishedAt ? Date.parse(props.finishedAt) : now;
   return (
-    <Text style={styles.timer} accessibilityLabel="Workout duration">
+    <Text
+      style={styles.timer}
+      accessibilityLabel={"Workout duration " + formatDuration(Math.max(0, Math.round((end - Date.parse(props.startedAt)) / 1000)))}
+    >
       {formatDuration(Math.max(0, Math.round((end - Date.parse(props.startedAt)) / 1000)))}
     </Text>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: spacing.sm },
-  row: { flexDirection: "row", alignItems: "center" },
-  title: { ...typography.title, color: colors.text, flex: 1 },
-  timer: { color: colors.accent, fontSize: 24, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  wrap: { gap: space[2] },
+  row: { flexDirection: "row", alignItems: "center", gap: space[2] },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backText: { ...type.bodyStrong, color: colors.text },
+  title: { ...type.sectionTitle, color: colors.text, flex: 1 },
+  titleNoBack: { marginLeft: 0 },
+  timer: { ...type.metricSmall, color: colors.accent, fontVariant: ["tabular-nums"] },
   notes: {
     backgroundColor: colors.surface,
     color: colors.text,
-    borderRadius: 10,
-    padding: spacing.sm,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    padding: space[2] + 2,
     minHeight: 40,
-    fontSize: 13,
+    fontSize: 14,
   },
 });

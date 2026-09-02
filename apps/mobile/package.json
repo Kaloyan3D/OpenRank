@@ -12,6 +12,7 @@
     "smoke:export": "expo export --platform android"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
     "@openrank/database": "workspace:*",
     "@openrank/domain": "workspace:*",
     "@openrank/exercise-catalog": "workspace:*",

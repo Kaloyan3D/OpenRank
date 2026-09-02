@@ -1,65 +1,152 @@
+import { useCallback, useMemo, useState } from "react";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
-import { useUnits } from "../../ui/units";
-import { formatDateTime, formatDurationRough, formatVolume } from "../../ui/format";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { formatDateTime, formatDurationRough } from "../../ui/format";
+import { Screen } from "../../components/ui/Screen";
+import { Card } from "../../components/ui/Card";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { InlineError } from "../../components/ui/InlineError";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { radius } from "../../design/radii";
+import { type } from "../../design/typography";
 
 /**
- * Workout history (Phase 4, task Y): chronological completed workouts with
- * canonical statistics only (duration, counts, basic volume) - no ranks,
- * PRs, streaks or achievements.
+ * History (Phase 8.1 approved structure, spec 20): compact dark cards -
+ * date, workout name, duration, completed sets, PR badge when a genuine
+ * canonical PR event exists. Virtualized via FlatList (long history).
+ * No charts in the list. Empty state is intentional and honest.
  */
+interface HistoryEntry {
+  workoutId: string;
+  startedAt: string;
+  title: string;
+  durationSeconds: number;
+  completedSetCount: number;
+  volumeKg: number;
+  hasPr: boolean;
+}
+
 export default function HistoryScreen() {
   const router = useRouter();
   const repos = useRepos();
   const services = useServices();
-  const units = useUnits();
+  const [reloadKey, setReloadKey] = useState(0);
+
   const profile = repos.profile.getDefault();
 
-  // Canonical read on every render; the screen re-renders on navigation.
-  const entries = profile
-    ? services.workout.listHistory(profile.id).map((detail) => {
+  const entries = useMemo<HistoryEntry[] | null>(() => {
+    try {
+      if (!profile) return [];
+      void reloadKey;
+      return services.workout.listHistory(profile.id).map((detail) => {
         const summary = services.workout.getSummary(detail.workout.id);
-        return { detail, summary };
-      })
-    : [];
+        return {
+          workoutId: detail.workout.id,
+          startedAt: detail.workout.startedAt,
+          title: detail.workout.title ?? "Workout",
+          durationSeconds: summary.durationSeconds,
+          completedSetCount: summary.completedSetCount,
+          volumeKg: summary.volumeKg,
+          hasPr: services.derived.getWorkoutHighlights(detail.workout.id).prs.length > 0,
+        };
+      });
+    } catch {
+      return null; // render the user-safe error state
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id, reloadKey]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: HistoryEntry }) => (
+      <Card>
+        <Pressable
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={
+            "Open workout " + item.title + " from " + formatDateTime(item.startedAt) +
+            ", " + formatDurationRough(item.durationSeconds) + ", " + String(item.completedSetCount) + " sets"
+          }
+          onPress={() => router.push("/history/" + item.workoutId)}
+          style={styles.row}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.date}>{formatDateTime(item.startedAt)}</Text>
+            <Text style={styles.title}>{item.title}</Text>
+          </View>
+          <View style={styles.statsCol}>
+            <Text style={styles.duration}>{formatDurationRough(item.durationSeconds)}</Text>
+            <Text style={styles.sets}>{String(item.completedSetCount) + " sets"}</Text>
+          </View>
+          {item.hasPr ? (
+            <View style={styles.prBadge}>
+              <Text style={styles.prBadgeText}>PR</Text>
+            </View>
+          ) : null}
+        </Pressable>
+      </Card>
+    ),
+    [router],
+  );
+
+  if (entries === null) {
+    return (
+      <Screen>
+        <Text style={styles.kicker}>HISTORY</Text>
+        <InlineError
+          message={"We couldn't load your workout history. Your data is safe - try again."}
+          retryLabel="TRY AGAIN"
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
+      </Screen>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {entries.length === 0 ? (
-        <Text style={styles.muted}>No completed workouts yet. Finish a workout to see it here.</Text>
-      ) : (
-        entries.map(({ detail, summary }) => (
-          <Pressable
-            key={detail.workout.id}
-            style={styles.card}
-            accessibilityLabel={"Open workout from " + detail.workout.startedAt}
-            onPress={() => router.push("/history/" + detail.workout.id)}
-          >
-            <Text style={styles.title}>{detail.workout.title ?? "Workout"}</Text>
-            <Text style={styles.date}>{formatDateTime(detail.workout.startedAt)}</Text>
-            <View style={styles.statsRow}>
-              <Text style={styles.stat}>{formatDurationRough(summary.durationSeconds)}</Text>
-              <Text style={styles.stat}>{String(summary.exerciseCount)} ex</Text>
-              <Text style={styles.stat}>{String(summary.completedSetCount)} sets</Text>
-              <Text style={styles.stat}>{formatVolume(summary.volumeKg, units.weightLabel)}</Text>
-            </View>
-          </Pressable>
-        ))
-      )}
-    </ScrollView>
+    <Screen>
+      <Text style={styles.kicker}>HISTORY</Text>
+      <Text style={styles.pageTitle}>Workouts</Text>
+      <FlatList
+        data={entries}
+        keyExtractor={(item) => item.workoutId}
+        renderItem={renderItem}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        contentContainerStyle={entries.length === 0 ? styles.emptyList : styles.list}
+        ListEmptyComponent={
+          <EmptyState
+            icon="barbell-outline"
+            title="No workouts yet"
+            description="Your completed workouts will appear here."
+            ctaLabel="START A WORKOUT"
+            onCta={() => router.push("/(tabs)/workout")}
+          />
+        }
+      />
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: spacing.sm, paddingBottom: 40 },
-  muted: { ...typography.caption, color: colors.textMuted },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, gap: 4, minHeight: 60 },
-  title: { ...typography.body, color: colors.text, fontWeight: "700" },
-  date: { ...typography.caption, color: colors.textMuted },
-  statsRow: { flexDirection: "row", gap: 12, marginTop: 2, flexWrap: "wrap" },
-  stat: { ...typography.caption, color: colors.accent, fontVariant: ["tabular-nums"] },
+  kicker: { ...type.label, color: colors.accent, letterSpacing: 1.2 },
+  pageTitle: { ...type.pageTitle, color: colors.text, marginBottom: space[2] },
+  list: { gap: space[2], paddingBottom: space[8] },
+  emptyList: { flexGrow: 1, justifyContent: "center" },
+  separator: { height: space[2] },
+  row: { flexDirection: "row", alignItems: "center", gap: space[3] },
+  date: { ...type.caption, color: colors.textMuted },
+  title: { ...type.cardTitle, color: colors.text },
+  statsCol: { alignItems: "flex-end" },
+  duration: { ...type.metricSmall, color: colors.text, fontVariant: ["tabular-nums"], fontSize: 16 },
+  sets: { ...type.caption, color: colors.textMuted },
+  prBadge: {
+    backgroundColor: colors.accentSubtle,
+    borderColor: colors.accent,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  prBadgeText: { ...type.label, color: colors.accent },
 });

@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, spacing } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 import { useServices } from "../../services/ServicesProvider";
+import { Chip } from "../../components/ui/Chip";
 import { OnboardingShell } from "../../features/onboarding/OnboardingShell";
 
 /**
- * Onboarding - Reminders (spec 17/18/19). Reuses the Phase 7 stack ONLY:
- * pre-permission explainer -> explicit choice -> NotificationService
- * requestPermission. Denial NEVER blocks onboarding.
+ * Onboarding - Reminders (spec 17/18/19; Phase 8.1 restyle only). Reuses the
+ * Phase 7 stack ONLY: pre-permission explainer -> explicit choice ->
+ * NotificationService requestPermission. Denial NEVER blocks onboarding.
  *
  * Zero training days: reminders are simply not requested here - the screen
  * explains they become available after a schedule is configured.
@@ -91,20 +94,21 @@ export default function OnboardingReminders() {
           <Text style={styles.section}>Reminder time</Text>
           <View style={styles.row}>
             {TIME_CHOICES.map((t) => (
-              <Pressable
+              <Chip
                 key={t}
+                label={label(t)}
+                selected={chosen === t}
                 onPress={() => setChosen(t)}
-                style={[styles.chip, chosen === t && styles.chipOn]}
                 accessibilityLabel={"Reminder at " + label(t)}
-              >
-                <Text style={[styles.chipText, chosen === t && styles.chipTextOn]}>{label(t)}</Text>
-              </Pressable>
+              />
             ))}
           </View>
           <Text style={styles.note}>
-            {days.length} training day(s): {days.map((d) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d.weekday - 1]!).join(" \u00B7 ")}
+            {days.length} training day(s): {days.map((d) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d.weekday - 1]!).join(" · ")}
           </Text>
-          {status ? <Text style={styles.status}>{status}</Text> : null}
+          {status ? (
+            <Text style={status.startsWith("Enabled") ? styles.statusOk : styles.statusOff}>{status}</Text>
+          ) : null}
         </>
       )}
     </OnboardingShell>
@@ -112,12 +116,9 @@ export default function OnboardingReminders() {
 }
 
 const styles = StyleSheet.create({
-  note: { color: colors.textMuted, fontSize: 13, marginTop: spacing.sm, lineHeight: 19 },
-  section: { color: colors.text, fontWeight: "700", marginTop: spacing.md, fontSize: 13, textTransform: "uppercase" },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, marginTop: spacing.sm },
-  chip: { borderWidth: 1, borderColor: "#2a3242", borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
-  chipOn: { borderColor: colors.accent, backgroundColor: "rgba(94,200,255,0.12)" },
-  chipText: { color: colors.textMuted, fontWeight: "700" },
-  chipTextOn: { color: colors.accent },
-  status: { color: colors.accent, fontSize: 13, marginTop: spacing.sm },
+  note: { ...type.caption, color: colors.textMuted },
+  section: { ...type.label, color: colors.textSecondary, letterSpacing: 1.2, textTransform: "uppercase" },
+  row: { flexDirection: "row", flexWrap: "wrap", gap: space[2] },
+  statusOk: { ...type.caption, color: colors.success, fontWeight: "600" },
+  statusOff: { ...type.caption, color: colors.textSecondary },
 });

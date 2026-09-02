@@ -3,7 +3,10 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-nat
 import type { NotificationPermissionStatus, ScheduleWeekday } from "@openrank/domain";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
-import { colors, spacing, typography } from "../theme/tokens";
+import { colors } from "../design/colors";
+import { radius } from "../design/radii";
+import { space } from "../design/spacing";
+import { type } from "../design/typography";
 
 /**
  * Notification settings (Phase 7, specs V/X/AZ). Everything is opt-in and
@@ -238,26 +241,26 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
-  title: { ...typography.title, color: colors.text },
-  section: { ...typography.title, color: colors.text, fontSize: 15, marginTop: spacing.md },
-  body: { ...typography.body, color: colors.text },
-  muted: { ...typography.caption, color: colors.textMuted },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, marginTop: spacing.sm, gap: spacing.xs },
-  cardTitle: { ...typography.body, color: colors.text, fontWeight: "700" },
-  statusOk: { color: colors.accent, marginTop: spacing.sm, fontWeight: "700" },
-  statusOff: { color: colors.text, marginTop: spacing.sm, fontWeight: "700" },
-  switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: spacing.sm },
-  row: { flexDirection: "row", gap: spacing.xs, flexWrap: "wrap", marginTop: spacing.xs },
-  dayRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: spacing.xs, flexWrap: "wrap", gap: spacing.xs },
-  chip: { borderWidth: 1, borderColor: colors.textMuted, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: space.lg, gap: space.xs, paddingBottom: 60 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg },
+  title: { ...type.sectionTitle, color: colors.text },
+  section: { ...type.sectionTitle, color: colors.text, fontSize: 15, marginTop: space.md },
+  body: { ...type.body, color: colors.text },
+  muted: { ...type.caption, color: colors.textMuted },
+  card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md, marginTop: space.sm, gap: space.xs },
+  cardTitle: { ...type.body, color: colors.text, fontWeight: "700" },
+  statusOk: { color: colors.success, marginTop: space.sm, fontWeight: "700" },
+  statusOff: { color: colors.text, marginTop: space.sm, fontWeight: "700" },
+  switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space.sm },
+  row: { flexDirection: "row", gap: space.xs, flexWrap: "wrap", marginTop: space.xs },
+  dayRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space.xs, flexWrap: "wrap", gap: space.xs },
+  chip: { borderWidth: 1, borderColor: colors.textMuted, borderRadius: radius.pill, paddingHorizontal: space[2], paddingVertical: 4 },
   chipActive: { borderColor: colors.accent },
-  chipText: { color: colors.text, fontSize: 12 },
-  primaryButton: { backgroundColor: colors.accent, borderRadius: 10, paddingVertical: spacing.sm, alignItems: "center", marginTop: spacing.xs },
-  primaryButtonText: { color: colors.background, fontWeight: "800", letterSpacing: 1 },
-  button: { backgroundColor: colors.surface, borderRadius: 10, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, marginTop: spacing.xs, alignSelf: "flex-start" },
-  buttonText: { color: colors.accent, fontWeight: "700" },
-  linkText: { color: colors.accent, marginTop: spacing.xs },
+  chipText: { ...type.caption, color: colors.text },
+  primaryButton: { backgroundColor: colors.accent, borderRadius: radius.md, paddingVertical: space.sm, alignItems: "center", marginTop: space.xs },
+  primaryButtonText: { color: colors.textOnAccent, fontWeight: "800", letterSpacing: 1 },
+  button: { backgroundColor: colors.surface, borderRadius: radius.md, paddingVertical: space.sm, paddingHorizontal: space.md, marginTop: space.xs, alignSelf: "flex-start" },
+  buttonText: { ...type.body, color: colors.accent, fontWeight: "700" },
+  linkText: { ...type.body, color: colors.accent, marginTop: space.xs },
 });

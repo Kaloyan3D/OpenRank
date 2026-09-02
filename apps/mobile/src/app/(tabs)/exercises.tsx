@@ -4,7 +4,10 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-na
 import type { Exercise, MajorGroup, TrackingType } from "@openrank/domain";
 import { MAJOR_GROUPS } from "@openrank/exercise-catalog";
 import { useRepos } from "../../db/DatabaseProvider";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 
 /**
  * Exercise catalog browser (Phase 3): offline search + filters served from
@@ -89,7 +92,7 @@ export default function ExercisesScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Pressable
-            style={styles.row}
+            style={({ pressed }) => [styles.row, pressed ? styles.rowPressed : null]}
             onPress={() => router.push("/exercise/" + encodeURIComponent(item.slug))}
           >
             <Text style={styles.name}>{item.name}</Text>
@@ -125,33 +128,34 @@ function FilterChip(props: { label: string; active: boolean; onPress: () => void
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
+  container: { flex: 1, backgroundColor: colors.bg, padding: space.md },
   search: {
     backgroundColor: colors.surface,
     color: colors.text,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.sm,
+    borderRadius: radius.sm,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    marginBottom: space.sm,
   },
-  chipsRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.xs, marginBottom: spacing.sm },
+  chipsRow: { flexDirection: "row", flexWrap: "wrap", gap: space.xs, marginBottom: space.sm },
   chip: {
-    borderRadius: 999,
+    borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.textMuted,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    paddingHorizontal: space.sm,
+    paddingVertical: space[1],
   },
   chipActive: { borderColor: colors.accent, backgroundColor: colors.surface },
-  chipText: { color: colors.textMuted, fontSize: 12 },
+  chipText: { ...type.caption, color: colors.textMuted },
   chipTextActive: { color: colors.accent },
-  count: { ...typography.caption, marginBottom: spacing.xs },
+  count: { ...type.caption, color: colors.textMuted, marginBottom: space.xs },
   row: {
     backgroundColor: colors.surface,
-    borderRadius: 8,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    borderRadius: radius.sm,
+    padding: space.md,
+    marginBottom: space.sm,
   },
-  name: { ...typography.body, color: colors.text },
-  meta: { ...typography.caption, marginTop: 2 },
+  rowPressed: { backgroundColor: colors.surfacePressed },
+  name: { ...type.body, color: colors.text },
+  meta: { ...type.caption, color: colors.textMuted, marginTop: 2 },
 });

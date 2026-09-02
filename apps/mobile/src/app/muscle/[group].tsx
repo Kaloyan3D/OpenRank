@@ -6,7 +6,11 @@ import { useRepos } from "../../db/DatabaseProvider";
 import { TierTimeline } from "../../features/charts/TierTimeline";
 import { useServices } from "../../services/ServicesProvider";
 import { formatDateTime, formatProgressPercent, formatRankLabel } from "../../ui/format";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { rankColor } from "../../design/rank-colors";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 
 /**
  * Muscle group detail (Phase 5, spec Z): answers "why am I Diamond III?" -
@@ -37,7 +41,9 @@ export default function MuscleDetailScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.kicker}>{cfg.label.toUpperCase()}</Text>
-      <Text style={styles.title}>{s ? formatRankLabel(s.tierName, s.division) : "No rank yet"}</Text>
+      <Text style={[styles.title, { color: s ? rankColor(s.tierName) : colors.textMuted }]}>
+        {s ? formatRankLabel(s.tierName, s.division) : "No rank yet"}
+      </Text>
       {s ? (
         <>
           <Text style={styles.meta}>
@@ -123,17 +129,17 @@ export default function MuscleDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background, padding: spacing.lg },
-  kicker: { color: colors.accent, fontSize: 11, fontWeight: "700", letterSpacing: 1.2 },
-  title: { ...typography.title, color: colors.text },
-  meta: { ...typography.caption },
-  muted: { ...typography.caption, color: colors.textMuted },
-  section: { ...typography.title, color: colors.text, fontSize: 18, marginTop: spacing.sm },
-  body: { ...typography.caption, color: colors.text, lineHeight: 20 },
-  card: { backgroundColor: colors.surface, borderRadius: 10, padding: spacing.md, gap: 2 },
-  liftTitle: { color: colors.text, fontWeight: "700" },
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: space.lg, gap: space.xs, paddingBottom: 60 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg, padding: space.lg },
+  kicker: { ...type.label, color: colors.accent, letterSpacing: 1.2 },
+  title: { ...type.sectionTitle, color: colors.text },
+  meta: { ...type.caption, color: colors.textMuted },
+  muted: { ...type.caption, color: colors.textMuted },
+  section: { ...type.sectionTitle, color: colors.text, marginTop: space.sm },
+  body: { ...type.caption, color: colors.text, lineHeight: 20 },
+  card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md, gap: 2 },
+  liftTitle: { ...type.bodyStrong, color: colors.text },
   eventRow: { paddingVertical: 2 },
-  eventText: { ...typography.caption, color: colors.text },
+  eventText: { ...type.caption, color: colors.text },
 });

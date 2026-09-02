@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
-import { colors, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { type } from "../../design/typography";
 
 /**
  * Pure-RN animated bar chart (Phase 8). No chart library, no SVG, no native
@@ -92,11 +93,11 @@ export function formatShort(value: number): string {
 const styles = StyleSheet.create({
   rowWrap: { flexDirection: "row", alignItems: "flex-end", gap: 5 },
   barCol: { flex: 1, alignItems: "center", gap: 2 },
-  barTrack: { height: 96, width: "100%", justifyContent: "flex-end", backgroundColor: "rgba(255,255,255,0.04)", borderRadius: 6 },
+  barTrack: { height: 96, width: "100%", justifyContent: "flex-end", backgroundColor: colors.surfacePressed, borderRadius: 6 },
   barFill: { backgroundColor: colors.accent, borderRadius: 6, minHeight: 2 },
   barFillHot: { backgroundColor: colors.success },
-  barValue: { ...typography.caption, color: colors.textMuted, fontSize: 9, fontVariant: ["tabular-nums"] },
-  barLabel: { ...typography.caption, color: colors.textMuted, fontSize: 9, flex: 1, textAlign: "center" },
-  unit: { ...typography.caption, color: colors.textMuted, fontSize: 10 },
-  empty: { ...typography.caption, color: colors.textMuted },
+  barValue: { ...type.caption, color: colors.textMuted, fontSize: 9, fontVariant: ["tabular-nums"] },
+  barLabel: { ...type.caption, color: colors.textMuted, fontSize: 9, flex: 1, textAlign: "center" },
+  unit: { ...type.caption, color: colors.textMuted, fontSize: 10 },
+  empty: { ...type.caption, color: colors.textMuted },
 });

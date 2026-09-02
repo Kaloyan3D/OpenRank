@@ -3,7 +3,8 @@ import { useRouter } from "expo-router";
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
-import { colors, spacing, typography } from "../theme/tokens";
+import { colors } from "../design/colors";
+import { spacing, typography } from "../theme/tokens";
 
 /**
  * Routine list (Phase 4, task R): active and archived sections; create via
@@ -94,11 +95,11 @@ export default function RoutinesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, gap: spacing.sm, paddingBottom: 60 },
   button: { borderRadius: 10, paddingVertical: 14, paddingHorizontal: 16, alignItems: "center", minHeight: 48, justifyContent: "center" },
   primary: { backgroundColor: colors.accent },
-  primaryText: { color: "#0b1220", fontWeight: "700", fontSize: 15 },
+  primaryText: { color: colors.textOnAccent, fontWeight: "700", fontSize: 15 },
   secondary: { borderWidth: 1, borderColor: colors.textMuted },
   secondaryText: { color: colors.text },
   section: { ...typography.body, color: colors.accent, fontWeight: "700", marginTop: spacing.sm },
@@ -111,6 +112,6 @@ const styles = StyleSheet.create({
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" },
   modalCard: { backgroundColor: colors.surface, borderRadius: 14, padding: spacing.lg, width: "86%", gap: 12 },
   modalTitle: { ...typography.body, color: colors.text, fontWeight: "700" },
-  input: { backgroundColor: "#1c2330", color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, minHeight: 44 },
+  input: { backgroundColor: colors.surfacePressed, color: colors.text, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, minHeight: 44 },
   modalRow: { flexDirection: "row", gap: 8 },
 });

@@ -8,8 +8,11 @@ import { useUnits } from "../../ui/units";
 import { usesWeightField } from "../../ui/tracking";
 import { groupSupersets } from "../../ui/supersets";
 import { RestTimerBar } from "../../ui/RestTimerBar";
-import { colors, spacing } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 import { WorkoutHeader } from "./WorkoutHeader";
+import { Button } from "../../components/ui/Button";
 import { ExerciseCard } from "./ExerciseCard";
 
 /**
@@ -110,6 +113,12 @@ export function ActiveWorkoutScreen() {
   }
 
   const workout = session.workout;
+  // Canonical PR events of THIS workout (Phase 8.1, spec 47): the PR badge
+  // in the set rows is driven by real personal_record_events - never by UI
+  // heuristics.
+  const workoutPrSetIds = new Set(
+    services.derived.getWorkoutHighlights(workout.id).prs.map((e) => e.sourceSetId),
+  );
   const rest = services.restTimer.getActive(profile.id);
   const blocks = groupSupersets(session.exercises);
   const incompleteCount = session.exercises.flatMap((e) => e.sets).filter((s) => s.completedAt == null).length;
@@ -217,11 +226,22 @@ export function ActiveWorkoutScreen() {
           startedAt={workout.startedAt}
           finishedAt={workout.finishedAt}
           notes={workout.notes}
+          onBack={() => router.push("/(tabs)/workout")}
           onNotes={(notes) => {
             services.workout.updateWorkoutNotes(workout.id, notes);
             refresh();
           }}
         />
+        <View style={styles.headerActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Finish workout"
+            onPress={finishWorkout}
+            style={styles.finishTextBtn}
+          >
+            <Text style={styles.finishTextBtnLabel}>FINISH</Text>
+          </Pressable>
+        </View>
 
         {blocks.map((block) => (
           <View
@@ -238,6 +258,7 @@ export function ActiveWorkoutScreen() {
                   meta={meta}
                   previous={previous.get(e.workoutExercise.exerciseId) ?? null}
                   units={units}
+                  isPrSet={(setId) => workoutPrSetIds.has(setId)}
                   onCommitSet={commitSet}
                   onComplete={completeSet}
                   onUncomplete={(setId) => {
@@ -311,12 +332,8 @@ export function ActiveWorkoutScreen() {
         </Pressable>
 
         <View style={styles.finishRow}>
-          <Pressable style={[styles.button, styles.finish]} onPress={finishWorkout}>
-            <Text style={styles.finishText}>Finish Workout</Text>
-          </Pressable>
-          <Pressable style={[styles.button, styles.discard]} onPress={discardWorkout}>
-            <Text style={styles.discardText}>Discard</Text>
-          </Pressable>
+          <Button label="FINISH WORKOUT" onPress={finishWorkout} style={styles.finishBtn} accessibilityLabel="Finish workout" />
+          <Button label="Discard" variant="dangerSubtle" onPress={discardWorkout} accessibilityLabel="Discard workout" />
         </View>
       </ScrollView>
 
@@ -352,12 +369,16 @@ type WorkoutSetLike =
   | null;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.md, gap: spacing.md, paddingBottom: 140 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
+  headerActions: { flexDirection: "row", justifyContent: "flex-end" },
+  finishTextBtn: { paddingHorizontal: space[3], paddingVertical: space[2] },
+  finishTextBtnLabel: { ...type.label, color: colors.accent, letterSpacing: 1.2 },
+  finishBtn: { flex: 2 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: space.md, gap: space.md, paddingBottom: 140 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg },
   muted: { color: colors.textMuted },
-  block: { gap: spacing.sm },
-  blockSuperset: { borderLeftWidth: 3, borderLeftColor: colors.accent, paddingLeft: spacing.sm },
+  block: { gap: space.sm },
+  blockSuperset: { borderLeftWidth: 3, borderLeftColor: colors.accent, paddingLeft: space.sm },
   supersetLabel: { color: colors.accent, fontSize: 11, fontWeight: "700", letterSpacing: 1 },
   button: {
     borderRadius: 10,
@@ -367,12 +388,8 @@ const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: "center",
   },
-  addExercise: { borderWidth: 1, borderColor: "#2a3242", borderRadius: 12, paddingVertical: 14 },
+  addExercise: { borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 12, paddingVertical: 14 },
   addExerciseText: { color: colors.accent, fontWeight: "700", textAlign: "center" },
-  finishRow: { flexDirection: "row", gap: spacing.sm },
-  finish: { backgroundColor: colors.accent, flex: 2, paddingVertical: 16 },
-  finishText: { color: "#0b1220", fontWeight: "700", fontSize: 16, textAlign: "center" },
-  discard: { borderWidth: 1, borderColor: "#a05a5a", flex: 1 },
-  discardText: { color: "#e8a0a0", textAlign: "center", fontWeight: "600" },
-  restDock: { position: "absolute", left: spacing.md, right: spacing.md, bottom: spacing.md },
+  finishRow: { flexDirection: "row", gap: space.sm },
+  restDock: { position: "absolute", left: space.md, right: space.md, bottom: space.md },
 });

@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { StyleSheet, Text, TextInput } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, spacing } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { radius } from "../../design/radii";
+import { type } from "../../design/typography";
 import { useServices } from "../../services/ServicesProvider";
 import { OnboardingShell } from "../../features/onboarding/OnboardingShell";
 
 /**
- * Onboarding - Local profile (spec 10). The display name creates the LOCAL
- * profile row the moment it is submitted: from here on a profile exists with
- * onboarding_completed = false, and process death resumes from the DB.
- * Trimmed, non-empty, Unicode-safe, capped at 40 code points. No legal or
- * full-name requirement, no account.
+ * Onboarding - Local profile (spec 10; Phase 8.1 restyle only). The display
+ * name creates the LOCAL profile row the moment it is submitted: from here
+ * on a profile exists with onboarding_completed = false, and process death
+ * resumes from the DB. Trimmed, non-empty, Unicode-safe, capped at 40 code
+ * points. No legal or full-name requirement, no account.
  */
 export default function OnboardingName() {
   const router = useRouter();
@@ -47,7 +50,7 @@ export default function OnboardingName() {
         value={initial && name === "" ? initial : name}
         onChangeText={setName}
         placeholder="Kaloyan"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.textDisabled}
         maxLength={60}
         autoFocus
         accessibilityLabel="Display name"
@@ -59,13 +62,15 @@ export default function OnboardingName() {
 
 const styles = StyleSheet.create({
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfacePressed,
     color: colors.text,
-    borderRadius: 12,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    fontSize: 18,
-    marginTop: spacing.sm,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    minHeight: 44,
+    paddingHorizontal: space[3],
+    paddingVertical: space[3],
+    fontSize: type.body.fontSize,
   },
-  error: { color: "#e8a0a0", fontSize: 13 },
+  error: { ...type.caption, color: colors.danger },
 });

@@ -2,21 +2,34 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { WorkoutSet, WorkoutSetInput } from "@openrank/domain";
 import { fieldsForTracking } from "../../ui/tracking";
-import { colors } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 import { SetTypeModal } from "./SetTypePicker";
 import type { Units } from "./types";
 
 /**
- * Set row (Phase 7.1 extraction, behavior-preserving): tracking-type aware
- * fields, autosave on commit, big done control, RPE/RIR detail, set-type
- * picker. Local buffers are transient input state; commits go through the
- * screen's onCommit (service layer).
+ * Set row (Phase 8.1 approved layout, spec 24/25):
+ *   SET | PREVIOUS | <tracking fields> | RPE | (x) | done-check
+ *
+ * - Completed = success check; incomplete = neutral circle (never a fully
+ *   bright green row).
+ * - PREVIOUS shows the prior performance of this set position (canonical
+ *   previous-performance read) - reference only, never editable state.
+ * - RPE is optional (detail disclosure); tracking fields adapt honestly to
+ *   the exercise's tracking mode (weight_reps / bodyweight_weighted /
+ *   bodyweight_assisted / bodyweight_reps / reps_only / duration /
+ *   distance_duration).
+ * - Local buffers are transient input; commits go through onCommit (which
+ *   routes to WorkoutService).
  */
 export function SetRow(props: {
   set: WorkoutSet;
   index: number;
   trackingType: string;
   units: Units;
+  previousSummary: string | null;
   onCommit: (setId: string, input: WorkoutSetInput) => void;
   onComplete: (setId: string) => void;
   onUncomplete: (setId: string) => void;
@@ -32,7 +45,6 @@ export function SetRow(props: {
   const [durSec, setDurSec] = useState(set.durationSeconds == null ? "" : String(Math.round(set.durationSeconds % 60)));
   const [dist, setDist] = useState(units.distanceToDisplay(set.distanceMeters));
   const [rpe, setRpe] = useState(set.rpe == null ? "" : String(set.rpe));
-  const [rir, setRir] = useState(set.rir == null ? "" : String(set.rir));
 
   const done = set.completedAt != null;
 
@@ -55,9 +67,7 @@ export function SetRow(props: {
       if (f.kind === "distance") input.distanceMeters = units.distanceFromDisplay(dist);
     }
     const rpeN = parseFloat(rpe);
-    const rirN = parseInt(rir, 10);
     input.rpe = Number.isFinite(rpeN) ? rpeN : null;
-    input.rir = Number.isFinite(rirN) ? rirN : null;
     props.onCommit(set.id, input);
   };
 
@@ -73,18 +83,22 @@ export function SetRow(props: {
         </Text>
       </Pressable>
 
-      {fieldsForTracking(props.trackingType as never).map((f) => {
+      <Text style={styles.previousCell} numberOfLines={1}>
+        {props.previousSummary ?? "\u2014"}
+      </Text>
+
+      {fieldsForTracking(props.trackingType as never, units.weightLabel, units.distanceLabel).map((f) => {
         if (f.kind === "weight") {
           return (
             <TextInput
               key="w"
-              style={[styles.cellInput, styles.weightCell, done ? styles.cellDone : null]}
+              style={[styles.cellInput, done ? styles.cellDone : null]}
               keyboardType="decimal-pad"
               value={weight}
               onChangeText={setWeight}
               onEndEditing={() => props.onCommit(set.id, { weightKg: units.fromDisplay(weight) })}
               placeholder="0"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.textDisabled}
               accessibilityLabel={"Set " + String(props.index + 1) + " weight in " + units.weightLabel}
             />
           );
@@ -93,7 +107,7 @@ export function SetRow(props: {
           return (
             <TextInput
               key="r"
-              style={[styles.cellInput, styles.repsCell, done ? styles.cellDone : null]}
+              style={[styles.cellInput, done ? styles.cellDone : null]}
               keyboardType="number-pad"
               value={reps}
               onChangeText={setReps}
@@ -102,7 +116,7 @@ export function SetRow(props: {
                 props.onCommit(set.id, { reps: Number.isFinite(r) && r >= 0 ? r : null });
               }}
               placeholder="0"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.textDisabled}
               accessibilityLabel={"Set " + String(props.index + 1) + " reps"}
             />
           );
@@ -111,13 +125,13 @@ export function SetRow(props: {
           return (
             <TextInput
               key="d"
-              style={[styles.cellInput, styles.weightCell, done ? styles.cellDone : null]}
+              style={[styles.cellInput, done ? styles.cellDone : null]}
               keyboardType="decimal-pad"
               value={dist}
               onChangeText={setDist}
               onEndEditing={() => props.onCommit(set.id, { distanceMeters: units.distanceFromDisplay(dist) })}
               placeholder="0"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.textDisabled}
               accessibilityLabel={"Set " + String(props.index + 1) + " distance in " + units.distanceLabel}
             />
           );
@@ -126,13 +140,13 @@ export function SetRow(props: {
           return (
             <TextInput
               key="dm"
-              style={[styles.cellInput, styles.repsCell, done ? styles.cellDone : null]}
+              style={[styles.cellInput, done ? styles.cellDone : null]}
               keyboardType="number-pad"
               value={durMin}
               onChangeText={setDurMin}
               onEndEditing={commitFull}
               placeholder="0"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.textDisabled}
               accessibilityLabel={"Set " + String(props.index + 1) + " minutes"}
             />
           );
@@ -140,17 +154,41 @@ export function SetRow(props: {
         return (
           <TextInput
             key="ds"
-            style={[styles.cellInput, styles.repsCell, done ? styles.cellDone : null]}
+            style={[styles.cellInput, done ? styles.cellDone : null]}
             keyboardType="number-pad"
             value={durSec}
             onChangeText={setDurSec}
             onEndEditing={commitFull}
             placeholder="0"
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor={colors.textDisabled}
             accessibilityLabel={"Set " + String(props.index + 1) + " seconds"}
           />
         );
       })}
+
+      <Pressable
+        accessible
+        accessibilityLabel={
+          set.rpe != null
+            ? "Set " + String(props.index + 1) + " RPE " + String(set.rpe) + ". Press to edit."
+            : "Set " + String(props.index + 1) + " RPE. Press to add."
+        }
+        onPress={() => setDetailOpen((v) => !v)}
+        style={styles.rpeCell}
+      >
+        <Text style={[styles.rpeText, set.rpe != null ? styles.rpeTextSet : null]}>
+          {set.rpe != null ? String(set.rpe) : "rpe"}
+        </Text>
+      </Pressable>
+
+      <Pressable
+        accessibilityLabel={"Delete set " + String(props.index + 1)}
+        accessibilityRole="button"
+        onPress={() => props.onDelete(set.id)}
+        style={styles.deleteCell}
+      >
+        <Text style={styles.deleteText}>{"\u00D7"}</Text>
+      </Pressable>
 
       <Pressable
         accessibilityLabel={
@@ -158,26 +196,13 @@ export function SetRow(props: {
             ? "Set " + String(props.index + 1) + " done. Press to undo."
             : "Mark set " + String(props.index + 1) + " as done"
         }
+        accessibilityRole="button"
+        accessibilityState={{ selected: done }}
         onPress={() => (done ? props.onUncomplete(set.id) : props.onComplete(set.id))}
         style={[styles.doneBtn, done ? styles.doneBtnOn : null]}
       >
-        <Text style={[styles.doneText, done ? styles.doneTextOn : null]}>{done ? "done" : "log"}</Text>
-      </Pressable>
-
-      <Pressable
-        accessibilityLabel={"Delete set " + String(props.index + 1)}
-        onPress={() => props.onDelete(set.id)}
-        style={styles.rowDelete}
-      >
-        <Text style={styles.deleteText}>{"\u00D7"}</Text>
-      </Pressable>
-      <Pressable
-        accessibilityLabel="Set details: RPE and RIR"
-        onPress={() => setDetailOpen((v) => !v)}
-        style={styles.rowDetail}
-      >
-        <Text style={[styles.detailText, set.rpe != null || set.rir != null ? styles.detailTextSet : null]}>
-          {set.rpe != null ? "RPE " + String(set.rpe) : set.rir != null ? "RIR " + String(set.rir) : "rpe"}
+        <Text style={[styles.doneGlyph, done ? styles.doneGlyphOn : null]}>
+          {done ? "\u2713" : "\u25CB"}
         </Text>
       </Pressable>
 
@@ -190,18 +215,8 @@ export function SetRow(props: {
             onChangeText={setRpe}
             onEndEditing={commitFull}
             placeholder="RPE 1-10"
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor={colors.textDisabled}
             accessibilityLabel="Rate of perceived exertion, 1 to 10"
-          />
-          <TextInput
-            style={styles.detailInput}
-            keyboardType="number-pad"
-            value={rir}
-            onChangeText={setRir}
-            onEndEditing={commitFull}
-            placeholder="RIR 0-10"
-            placeholderTextColor={colors.textMuted}
-            accessibilityLabel="Reps in reserve, 0 to 10"
           />
         </View>
       ) : null}
@@ -221,45 +236,47 @@ export function SetRow(props: {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
-  rowDone: { opacity: 0.75 },
-  setTypeCell: { width: 44, height: 40, borderRadius: 8, backgroundColor: "#1c2330", alignItems: "center", justifyContent: "center" },
-  setTypeText: { color: colors.text, fontWeight: "700", fontSize: 15 },
-  setTypeTextAlt: { color: "#e0b45a", fontSize: 12, textTransform: "uppercase" },
+  row: { flexDirection: "row", alignItems: "center", gap: space[1] + 2, flexWrap: "wrap" },
+  rowDone: { opacity: 0.72 },
+  setTypeCell: { width: 30, height: 40, borderRadius: radius.sm, backgroundColor: colors.surfacePressed, alignItems: "center", justifyContent: "center" },
+  setTypeText: { ...type.bodyStrong, color: colors.text },
+  setTypeTextAlt: { color: colors.accent, fontSize: 12, textTransform: "uppercase" },
+  previousCell: { ...type.caption, color: colors.textMuted, width: 62, textAlign: "center", fontVariant: ["tabular-nums"] },
   cellInput: {
-    backgroundColor: "#1c2330",
+    backgroundColor: colors.surfacePressed,
     color: colors.text,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     height: 40,
+    width: 60,
     textAlign: "center",
     fontSize: 15,
     paddingVertical: 0,
+    fontVariant: ["tabular-nums"],
   },
-  weightCell: { width: 72 },
-  repsCell: { width: 72 },
   cellDone: { color: colors.textMuted },
+  rpeCell: { width: 34, height: 40, alignItems: "center", justifyContent: "center" },
+  rpeText: { ...type.caption, color: colors.textMuted },
+  rpeTextSet: { color: colors.accent, fontWeight: "700" },
+  deleteCell: { width: 24, height: 40, alignItems: "center", justifyContent: "center" },
+  deleteText: { color: colors.textMuted, fontSize: 18 },
   doneBtn: {
-    width: 56,
+    width: 40,
     height: 40,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.accent,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surfacePressed,
     alignItems: "center",
     justifyContent: "center",
   },
-  doneBtnOn: { backgroundColor: colors.accent },
-  doneText: { color: colors.accent, fontWeight: "700", fontSize: 13 },
-  doneTextOn: { color: "#0b1220" },
-  rowDelete: { width: 26, height: 40, alignItems: "center", justifyContent: "center" },
-  deleteText: { color: "#e8a0a0", fontSize: 20 },
-  rowDetail: { width: 44, height: 40, alignItems: "center", justifyContent: "center" },
-  detailText: { color: colors.textMuted, fontSize: 11 },
-  detailTextSet: { color: "#e0b45a" },
-  detailRow: { flexDirection: "row", gap: 8, paddingLeft: 50 },
+  doneBtnOn: { backgroundColor: colors.successSubtle, borderColor: colors.success },
+  doneGlyph: { color: colors.textMuted, fontSize: 16 },
+  doneGlyphOn: { color: colors.success, fontWeight: "700" },
+  detailRow: { flexDirection: "row", gap: space[2], paddingLeft: 84 },
   detailInput: {
-    backgroundColor: "#1c2330",
+    backgroundColor: colors.surfacePressed,
     color: colors.text,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     height: 36,
     width: 100,
     textAlign: "center",

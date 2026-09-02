@@ -18,6 +18,7 @@ import type { CatalogV1 } from "@openrank/exercise-catalog";
 import type { OpenDatabaseResult } from "@openrank/database";
 import { openDatabase } from "@openrank/database";
 import { ExpoSqliteDriver, newExpoId } from "@openrank/database/expo";
+import { colors } from "../design/colors";
 
 const catalog = catalogJson as unknown as CatalogV1;
 
@@ -88,7 +89,7 @@ export function DatabaseGate(props: { ready: ReactNode }) {
   if (status.state === "loading") {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color="#4a9eff" />
+        <ActivityIndicator color={colors.accent} />
         <Text style={styles.muted}>Opening database...</Text>
       </View>
     );
@@ -109,15 +110,15 @@ export function DatabaseGate(props: { ready: ReactNode }) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 8, padding: 24 },
-  muted: { color: "#8a8f98", fontSize: 13, textAlign: "center" },
-  errorTitle: { color: "#ff6b6b", fontSize: 16, fontWeight: "700" },
+  muted: { color: colors.textMuted, fontSize: 13, textAlign: "center" },
+  errorTitle: { color: colors.danger, fontSize: 16, fontWeight: "700" },
   retryButton: {
     marginTop: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#4a9eff",
+    borderColor: colors.accent,
   },
-  retryText: { color: "#4a9eff", fontSize: 14 },
+  retryText: { color: colors.accent, fontSize: 14 },
 });

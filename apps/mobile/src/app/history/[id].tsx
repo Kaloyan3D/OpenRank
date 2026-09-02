@@ -7,7 +7,10 @@ import { useUnits } from "../../ui/units";
 import { formatDateTime, formatDurationRough, formatVolume } from "../../ui/format";
 import { formatSetSummary } from "../../ui/format";
 import { formatRankLabel } from "../../ui/format";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
 import { BarChart } from "../../features/charts/BarChart";
 
 /**
@@ -94,8 +97,8 @@ export default function HistoryDetailScreen() {
       ) : null}
 
       {prsByExercise.size > 0 ? (
-        <View style={styles.highlightCard}>
-          <Text style={styles.highlightTitle}>NEW PR</Text>
+        <View style={styles.prCard}>
+          <Text style={styles.prTitle}>NEW PR</Text>
           {[...prsByExercise.entries()].map(([name, labels]) => (
             <Text key={name} style={styles.highlightLine}>
               {name + " - " + labels}
@@ -105,8 +108,8 @@ export default function HistoryDetailScreen() {
       ) : null}
 
       {highlights.rankUps.length > 0 ? (
-        <View style={styles.highlightCard}>
-          <Text style={styles.highlightTitle}>RANK UP</Text>
+        <View style={styles.rankUpCard}>
+          <Text style={styles.rankUpTitle}>RANK UP</Text>
           {highlights.rankUps.map((e) => (
             <Text key={e.id} style={styles.highlightLine}>
               {formatRankLabel(e.toTier, e.toDivision) +
@@ -221,27 +224,31 @@ export default function HistoryDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  deferredNote: { ...typography.caption, color: colors.textMuted, fontStyle: "italic" },
-  highlightCard: { backgroundColor: colors.surface, borderRadius: 10, padding: spacing.md, gap: 2, marginTop: spacing.xs },
-  highlightTitle: { color: colors.success, fontWeight: "800", letterSpacing: 1.2, fontSize: 12 },
-  highlightTitleMuted: { color: colors.textMuted, fontWeight: "800", letterSpacing: 1.2, fontSize: 12 },
-  highlightLine: { color: colors.text, ...typography.body },
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
-  muted: { ...typography.caption, color: colors.textMuted },
-  kicker: { color: colors.accent, fontSize: 11, fontWeight: "700", letterSpacing: 1.2 },
-  title: { ...typography.title, color: colors.text },
-  date: { ...typography.caption, color: colors.textMuted },
-  summaryRow: { flexDirection: "row", gap: spacing.md, marginTop: spacing.sm, flexWrap: "wrap" },
+  deferredNote: { ...type.caption, color: colors.textMuted, fontStyle: "italic" },
+  highlightCard: { backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md, gap: 2, marginTop: space.xs },
+  prCard: { backgroundColor: colors.accentSubtle, borderRadius: radius.md, padding: space.md, gap: 2, marginTop: space.xs },
+  prTitle: { ...type.label, color: colors.accent, letterSpacing: 1.2 },
+  rankUpCard: { backgroundColor: "rgba(96,165,250,0.12)", borderRadius: radius.md, padding: space.md, gap: 2, marginTop: space.xs },
+  rankUpTitle: { ...type.label, color: colors.info, letterSpacing: 1.2 },
+  highlightTitle: { ...type.label, color: colors.success, letterSpacing: 1.2 },
+  highlightTitleMuted: { ...type.label, color: colors.textMuted, letterSpacing: 1.2 },
+  highlightLine: { ...type.body, color: colors.text },
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: space.lg, gap: space.xs, paddingBottom: 60 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg },
+  muted: { ...type.caption, color: colors.textMuted },
+  kicker: { ...type.label, color: colors.accent, letterSpacing: 1.2 },
+  title: { ...type.sectionTitle, color: colors.text },
+  date: { ...type.caption, color: colors.textMuted },
+  summaryRow: { flexDirection: "row", gap: space.md, marginTop: space.sm, flexWrap: "wrap" },
   summaryItem: { alignItems: "flex-start" },
-  summaryValue: { color: colors.text, fontSize: 16, fontWeight: "700", fontVariant: ["tabular-nums"] },
-  summaryLabel: { color: colors.textMuted, fontSize: 11, textTransform: "uppercase" },
-  sectionLabel: { ...typography.title, color: colors.text, fontSize: 18, marginTop: spacing.sm },
-  volumeNote: { ...typography.caption, color: colors.textMuted, fontStyle: "italic" },
-  origin: { ...typography.caption, color: colors.textMuted },
-  notes: { ...typography.body, color: colors.text, marginTop: spacing.xs },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, marginTop: spacing.sm, gap: 3 },
-  exerciseName: { ...typography.body, color: colors.text, fontWeight: "700", textTransform: "uppercase" },
-  setLine: { ...typography.caption, color: colors.text, fontVariant: ["tabular-nums"], paddingLeft: 8 },
+  summaryValue: { ...type.metricSmall, color: colors.text, fontVariant: ["tabular-nums"] },
+  summaryLabel: { ...type.label, color: colors.textMuted, textTransform: "uppercase" },
+  sectionLabel: { ...type.label, color: colors.textSecondary, letterSpacing: 1.2, marginTop: space.sm },
+  volumeNote: { ...type.caption, color: colors.textMuted, fontStyle: "italic" },
+  origin: { ...type.caption, color: colors.textMuted },
+  notes: { ...type.body, color: colors.text, marginTop: space.xs },
+  card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md, marginTop: space.sm, gap: 3 },
+  exerciseName: { ...type.bodyStrong, color: colors.text, textTransform: "uppercase" },
+  setLine: { ...type.caption, color: colors.text, fontVariant: ["tabular-nums"], paddingLeft: space[2] },
 });

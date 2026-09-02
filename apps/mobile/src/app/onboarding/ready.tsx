@@ -1,12 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { radius } from "../../design/radii";
+import { type } from "../../design/typography";
 import { useServices } from "../../services/ServicesProvider";
-import { colors, spacing } from "../../theme/tokens";
+import { Card } from "../../components/ui/Card";
 import { OnboardingShell } from "../../features/onboarding/OnboardingShell";
 
 /**
- * Onboarding - Ready (spec 20). The ONLY screen whose explicit action sets
- * onboarding_completed = true, then routes to the main tabs.
+ * Onboarding - Ready (spec 20; Phase 8.1 restyle only). The ONLY screen
+ * whose explicit action sets onboarding_completed = true, then routes to the
+ * main tabs.
  */
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -38,31 +43,44 @@ export default function OnboardingReady() {
       continueLabel="START OPENRANK"
       onBack={() => router.push("/onboarding/reminders")}
     >
-      <View style={styles.card}>
-        <Text style={styles.kicker}>Profile</Text>
-        <Text style={styles.value}>{profile.displayName}</Text>
+      <Card variant="elevated" style={styles.card}>
+        <View style={styles.row}>
+          <Text style={styles.kicker}>Profile</Text>
+          <Text style={styles.value}>{profile.displayName}</Text>
+        </View>
 
-        <Text style={styles.kicker}>Training</Text>
-        <Text style={styles.value}>
-          {enabledDays.length > 0 ? enabledDays.join(" \u00B7 ") : "No scheduled days yet"}
-        </Text>
+        <View style={styles.row}>
+          <Text style={styles.kicker}>Training</Text>
+          <Text style={styles.value}>
+            {enabledDays.length > 0 ? enabledDays.join(" · ") : "No scheduled days yet"}
+          </Text>
+        </View>
 
-        <Text style={styles.kicker}>Strength ranks</Text>
-        <Text style={styles.value}>
-          {bodyweight
-            ? "Ready (" + String(bodyweight.weightKg) + " kg reference)"
-            : "Add bodyweight later"}
-        </Text>
+        <View style={styles.row}>
+          <Text style={styles.kicker}>Strength ranks</Text>
+          <Text style={styles.value}>
+            {bodyweight
+              ? "Ready (" + String(bodyweight.weightKg) + " kg reference)"
+              : "Add bodyweight later"}
+          </Text>
+        </View>
 
-        <Text style={styles.kicker}>Reminders</Text>
-        <Text style={styles.value}>{remindersOn ? "Enabled" : "Off"}</Text>
-      </View>
+        <View style={styles.row}>
+          <Text style={styles.kicker}>Reminders</Text>
+          <Text style={styles.value}>{remindersOn ? "Enabled" : "Off"}</Text>
+        </View>
+      </Card>
     </OnboardingShell>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.surface, borderRadius: 14, padding: spacing.lg, gap: 6, marginTop: spacing.sm },
-  kicker: { color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1.2, textTransform: "uppercase", marginTop: spacing.sm },
-  value: { color: colors.text, fontSize: 17, fontWeight: "600" },
+  card: {
+    borderRadius: radius.lg,
+    padding: space[4],
+    gap: space[3],
+  },
+  row: { gap: space[1] },
+  kicker: { ...type.label, color: colors.textMuted, letterSpacing: 1.2, textTransform: "uppercase" },
+  value: { ...type.body, color: colors.text },
 });

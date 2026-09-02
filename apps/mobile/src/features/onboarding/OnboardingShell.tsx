@@ -1,13 +1,17 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, spacing, typography } from "../../theme/tokens";
+import { colors } from "../../design/colors";
+import { space } from "../../design/spacing";
+import { type } from "../../design/typography";
+import { Button } from "../../components/ui/Button";
 
 /**
- * Shared onboarding chrome (Phase 7.1): step kicker, title, body copy and a
- * consistent primary/secondary action area. Every step persists BEFORE the
+ * Shared onboarding chrome (Phase 8.1 restyle): step kicker, page title,
+ * caption body copy and a consistent primary/secondary action area on the
+ * approved dark athletic design system. Every step persists BEFORE the
  * continue callback routes onward - resumability is a service-layer fact,
- * never React state.
+ * never React state. No semantics changed by the restyle.
  */
 export function OnboardingShell(props: {
   step: string;
@@ -27,9 +31,13 @@ export function OnboardingShell(props: {
     <View style={styles.container}>
       <View style={styles.topBar}>
         {props.onBack !== null ? (
-          <Pressable onPress={back} accessibilityLabel="Go back" hitSlop={12}>
-            <Text style={styles.backText}>{"\u2190 Back"}</Text>
-          </Pressable>
+          <Button
+            label={"← Back"}
+            variant="ghost"
+            size="compact"
+            onPress={back}
+            accessibilityLabel="Go back"
+          />
         ) : (
           <View />
         )}
@@ -44,19 +52,24 @@ export function OnboardingShell(props: {
 
       <View style={styles.actions}>
         {props.secondaryLabel && props.onSecondary ? (
-          <Pressable style={styles.secondaryButton} onPress={props.onSecondary}>
-            <Text style={styles.secondaryText}>{props.secondaryLabel}</Text>
-          </Pressable>
+          <Button
+            label={props.secondaryLabel}
+            variant="secondary"
+            onPress={props.onSecondary}
+            fullWidth
+            accessibilityLabel={props.secondaryLabel}
+          />
         ) : null}
         {props.onContinue ? (
-          <Pressable
-            style={[styles.primaryButton, props.continueDisabled && styles.disabled]}
+          <Button
+            label={props.continueLabel ?? "CONTINUE"}
+            variant="primary"
             onPress={props.onContinue}
-            disabled={props.continueDisabled}
+            fullWidth
+            disabled={props.continueDisabled === true}
+            style={props.continueDisabled ? styles.disabled : undefined}
             accessibilityLabel={props.continueLabel ?? "Continue"}
-          >
-            <Text style={styles.primaryText}>{props.continueLabel ?? "CONTINUE"}</Text>
-          </Pressable>
+          />
         ) : null}
       </View>
     </View>
@@ -64,30 +77,18 @@ export function OnboardingShell(props: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.lg, gap: spacing.lg },
-  topBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: spacing.md },
-  backText: { color: colors.accent, fontWeight: "700" },
-  step: { color: colors.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 1.5, textTransform: "uppercase" },
-  body: { flex: 1, gap: spacing.sm },
-  title: { ...typography.title, color: colors.text, fontSize: 26 },
-  subtitle: { ...typography.body, color: colors.textMuted },
-  actions: { gap: spacing.sm, paddingBottom: spacing.lg },
-  primaryButton: {
-    backgroundColor: colors.accent,
-    borderRadius: 12,
-    paddingVertical: 16,
+  container: { flex: 1, backgroundColor: colors.bg, paddingHorizontal: space[4], paddingTop: space[2] },
+  topBar: {
+    flexDirection: "row",
     alignItems: "center",
-    minHeight: 52,
-    justifyContent: "center",
+    justifyContent: "space-between",
+    minHeight: 40,
+    marginTop: space[1],
   },
-  primaryText: { color: "#0b1220", fontWeight: "800", letterSpacing: 1.2 },
-  secondaryButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#2a3242",
-  },
-  secondaryText: { color: colors.textMuted, fontWeight: "700", letterSpacing: 0.5 },
+  step: { ...type.label, color: colors.accent, letterSpacing: 1.2, textTransform: "uppercase" },
+  body: { flex: 1, gap: space[3], paddingTop: space[2] },
+  title: { ...type.pageTitle, color: colors.text },
+  subtitle: { ...type.caption, color: colors.textMuted },
+  actions: { gap: space[2], paddingBottom: space[6] },
   disabled: { opacity: 0.4 },
 });

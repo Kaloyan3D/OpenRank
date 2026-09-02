@@ -5,15 +5,20 @@ import { SchedulePauseOverlapError, RescheduleError, computeLogicalTrainingDate 
 import type { ScheduleWeekday } from "@openrank/domain";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
-import { colors, spacing, typography } from "../theme/tokens";
+import { colors } from "../design/colors";
+import { radius } from "../design/radii";
+import { space } from "../design/spacing";
+import { type } from "../design/typography";
 
 /**
  * Training schedule editor (Phase 6, spec AG/AH): weekly training days with
  * optional routine association, enable/disable, planned pauses and the
- * upcoming obligation list (reschedule entry point).
+ * upcoming obligation list (reschedule entry point). Phase 8.1: day toggles
+ * use the approved weekday-circle treatment (selected = filled amber).
  */
 
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+const SHORT_DAY_NAMES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 
 export default function ScheduleScreen() {
   const router = useRouter();
@@ -152,20 +157,39 @@ export default function ScheduleScreen() {
       ) : null}
 
       <Text style={styles.section}>Which days do you usually train?</Text>
-      {days.map((day, i) => (
-        <View key={day.weekday} style={styles.dayRow}>
-          <Switch value={day.enabled} onValueChange={() => toggleDay(day.weekday)} />
-          <Text style={[styles.body, day.enabled ? styles.bold : styles.muted]}>{DAY_NAMES[i]}</Text>
-          {day.enabled ? (
-            <Pressable
-              onPress={() => setPickerDay(day.weekday)}
-              accessibilityLabel={"Choose routine for " + DAY_NAMES[i]}
-              style={styles.pickerButton}
+      <View style={styles.dayCircles}>
+        {days.map((day) => (
+          <Pressable
+            key={day.weekday}
+            accessible
+            accessibilityRole="switch"
+            accessibilityLabel={DAY_NAMES[day.weekday - 1]}
+            accessibilityState={{ checked: day.enabled }}
+            onPress={() => toggleDay(day.weekday)}
+            style={[styles.dayCircle, day.enabled ? styles.dayCircleSelected : null]}
+          >
+            <Text
+              style={[
+                styles.dayCircleText,
+                day.enabled ? styles.dayCircleTextSelected : null,
+              ]}
             >
-              <Text style={styles.pickerText}>{routineName(day.routineId)}</Text>
-              <Text style={styles.pickerCaret}>{"\u25BE"}</Text>
-            </Pressable>
-          ) : null}
+              {SHORT_DAY_NAMES[day.weekday - 1]}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      {days.filter((d) => d.enabled).map((day) => (
+        <View key={day.weekday} style={styles.dayRow}>
+          <Text style={styles.body}>{DAY_NAMES[day.weekday - 1]}</Text>
+          <Pressable
+            onPress={() => setPickerDay(day.weekday)}
+            accessibilityLabel={"Choose routine for " + DAY_NAMES[day.weekday - 1]}
+            style={styles.pickerButton}
+          >
+            <Text style={styles.pickerText}>{routineName(day.routineId)}</Text>
+            <Text style={styles.pickerCaret}>{"\u25BE"}</Text>
+          </Pressable>
         </View>
       ))}
 
@@ -301,6 +325,20 @@ export default function ScheduleScreen() {
 }
 
 const styles = StyleSheet.create({
+  dayCircles: { flexDirection: "row", justifyContent: "space-between", marginTop: space.sm },
+  dayCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dayCircleSelected: { borderColor: colors.accent, backgroundColor: colors.accent },
+  dayCircleText: { ...type.label, color: colors.textMuted, letterSpacing: 0.5 },
+  dayCircleTextSelected: { color: colors.textOnAccent },
   pickerButton: {
     flex: 1,
     minWidth: 140,
@@ -308,47 +346,42 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: colors.surface,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    borderRadius: radius.sm,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
   },
-  pickerText: { color: colors.text, fontSize: 13 },
-  pickerCaret: { color: colors.textMuted },
-  modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" },
-  modalCard: { backgroundColor: colors.surface, borderRadius: 14, padding: spacing.lg, width: "86%", gap: 6 },
-  modalTitle: { color: colors.text, fontWeight: "700", marginBottom: 4 },
-  modalRow: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#232a36" },
-  modalRowText: { color: colors.text },
+  pickerText: { ...type.body, color: colors.text, fontSize: 13 },
+  pickerCaret: { ...type.body, color: colors.textMuted, fontSize: 13 },
+  modalBackdrop: { flex: 1, backgroundColor: colors.overlay, alignItems: "center", justifyContent: "center" },
+  modalCard: { backgroundColor: colors.surface, borderRadius: radius.md, padding: space.lg, width: "86%", gap: 6 },
+  modalTitle: { ...type.bodyStrong, color: colors.text, marginBottom: 4 },
+  modalRow: { paddingVertical: space[2], borderBottomWidth: 1, borderBottomColor: colors.border },
+  modalRowText: { ...type.body, color: colors.text },
   pauseField: { flex: 1 },
-  pauseLabel: { color: colors.textMuted, fontSize: 11, textTransform: "uppercase", marginBottom: 2, letterSpacing: 1 },
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xs, paddingBottom: 60 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background },
-  title: { ...typography.title, color: colors.text },
-  section: { ...typography.title, color: colors.text, fontSize: 16, marginTop: spacing.md },
-  body: { ...typography.body, color: colors.text },
-  bold: { fontWeight: "700" },
-  muted: { ...typography.caption, color: colors.textMuted },
-  switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: spacing.sm },
-  dayRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginTop: spacing.xs, flexWrap: "wrap" },
-  routinePicker: { flexDirection: "row", gap: spacing.xs, flexWrap: "wrap", flex: 1 },
-  chip: { borderWidth: 1, borderColor: colors.textMuted, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
-  chipActive: { borderColor: colors.accent },
-  chipText: { color: colors.text, fontSize: 12 },
-  row: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm, alignItems: "center" },
+  pauseLabel: { ...type.label, color: colors.textMuted, textTransform: "uppercase", marginBottom: 2, letterSpacing: 1 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: space.lg, gap: space.xs, paddingBottom: 60 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg },
+  title: { ...type.sectionTitle, color: colors.text },
+  section: { ...type.sectionTitle, color: colors.text, fontSize: 16, marginTop: space.md },
+  body: { ...type.body, color: colors.text },
+  muted: { ...type.caption, color: colors.textMuted },
+  switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space.sm },
+  dayRow: { flexDirection: "row", alignItems: "center", gap: space.sm, marginTop: space.xs, flexWrap: "wrap" },
+  row: { flexDirection: "row", gap: space.sm, marginTop: space.sm, alignItems: "center" },
   input: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     color: colors.text,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
   },
-  button: { backgroundColor: colors.surface, borderRadius: 8, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, marginTop: spacing.sm, gap: spacing.xs },
-  cardTitle: { ...typography.body, color: colors.text, fontWeight: "700" },
-  linkText: { color: colors.accent, fontWeight: "700" },
-  buttonText: { color: colors.accent, fontWeight: "700" },
-  pauseRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.xs },
-  sessionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.xs },
+  button: { backgroundColor: colors.surface, borderRadius: radius.sm, paddingHorizontal: space.md, paddingVertical: space.sm },
+  card: { backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md, marginTop: space.sm, gap: space.xs },
+  cardTitle: { ...type.body, color: colors.text, fontWeight: "700" },
+  linkText: { ...type.body, color: colors.accent, fontWeight: "700" },
+  buttonText: { ...type.body, color: colors.accent, fontWeight: "700" },
+  pauseRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: space.xs },
+  sessionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: space.xs },
 });
