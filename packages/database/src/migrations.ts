@@ -13,7 +13,7 @@
 
 import type { DatabaseDriver } from "./driver";
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export interface Migration {
   version: number;
@@ -378,10 +378,136 @@ const V3_STATEMENTS: readonly string[] = [
 ];
 
 /** Ordered, immutable migration list. */
+export 
+const V4_STATEMENTS: readonly string[] = [
+  // One active weekly schedule per profile (spec D). revision bumps on every
+  // meaningful configuration change; day_boundary_minutes is stored with the
+  // v1 default of 240 (04:00) - the shared logical-day helper remains the
+  // single boundary implementation.
+  `CREATE TABLE training_schedules (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL UNIQUE REFERENCES profiles(id) ON DELETE CASCADE,
+    enabled INTEGER NOT NULL DEFAULT 0 CHECK (enabled IN (0, 1)),
+    day_boundary_minutes INTEGER NOT NULL DEFAULT 240
+      CHECK (day_boundary_minutes BETWEEN 0 AND 1440),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1 CHECK (revision >= 1)
+  )`,
+
+  // Exactly one row per weekday per schedule (spec E). ISO weekdays:
+  // 1 = Monday ... 7 = Sunday. routine association is optional context only.
+  `CREATE TABLE training_schedule_days (
+    id TEXT PRIMARY KEY NOT NULL,
+    schedule_id TEXT NOT NULL REFERENCES training_schedules(id) ON DELETE CASCADE,
+    weekday INTEGER NOT NULL CHECK (weekday BETWEEN 1 AND 7),
+    enabled INTEGER NOT NULL DEFAULT 0 CHECK (enabled IN (0, 1)),
+    routine_id TEXT REFERENCES routines(id) ON DELETE SET NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE (schedule_id, weekday)
+  )`,
+
+  // Materialized obligation ledger (spec G) - the historical truth for
+  // streaks. workout_id is plain TEXT on purpose: deleting a canonical
+  // workout must not rewrite attendance history (rebuild/reconciliation own
+  // this table instead). streak_after is a projection read model.
+  `CREATE TABLE scheduled_sessions (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    original_date TEXT NOT NULL,
+    scheduled_date TEXT NOT NULL,
+    routine_id TEXT,
+    status TEXT NOT NULL CHECK (status IN
+      ('pending', 'completed', 'missed', 'paused', 'rescheduled', 'cancelled')),
+    schedule_revision INTEGER NOT NULL CHECK (schedule_revision >= 1),
+    workout_id TEXT,
+    completed_at TEXT,
+    rescheduled_from_date TEXT,
+    streak_after INTEGER CHECK (streak_after IS NULL OR streak_after >= 0),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )`,
+
+  // A date holds at most one ACTIVE obligation. cancelled/rescheduled rows
+  // are inert history and may coexist with a new active row (re-enable,
+  // reschedule source). Enforces: one obligation per training day; idempotent
+  // generation (INSERT OR IGNORE); reschedule conflict rejection (spec V).
+  `CREATE UNIQUE INDEX idx_scheduled_sessions_active_date
+    ON scheduled_sessions(profile_id, scheduled_date)
+    WHERE status IN ('pending', 'completed', 'missed', 'paused')`,
+
+  `CREATE INDEX idx_scheduled_sessions_profile_date
+    ON scheduled_sessions(profile_id, scheduled_date)`,
+  `CREATE INDEX idx_scheduled_sessions_workout
+    ON scheduled_sessions(workout_id) WHERE workout_id IS NOT NULL`,
+
+  // Planned pauses / vacation (spec W). reason is informational. The
+  // (profile, start, end, type) key makes duplicate adds idempotent;
+  // overlaps are rejected at the service layer (deterministic policy).
+  `CREATE TABLE schedule_exceptions (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('pause')),
+    reason TEXT,
+    created_at TEXT NOT NULL,
+    CHECK (end_date >= start_date),
+    UNIQUE (profile_id, start_date, end_date, type)
+  )`,
+
+  `CREATE INDEX idx_schedule_exceptions_profile
+    ON schedule_exceptions(profile_id, start_date)`,
+
+  // Streak cache (spec Q): a rebuildable projection over the ledger + pauses.
+  `CREATE TABLE streak_cache (
+    profile_id TEXT PRIMARY KEY NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    current_streak INTEGER NOT NULL DEFAULT 0 CHECK (current_streak >= 0),
+    best_streak INTEGER NOT NULL DEFAULT 0 CHECK (best_streak >= 0),
+    perfect_weeks INTEGER NOT NULL DEFAULT 0 CHECK (perfect_weeks >= 0),
+    last_completed_session_id TEXT,
+    recalculated_at TEXT
+  )`,
+
+  // Streak events (spec AC): milestones/broken/new_best with STABLE identity
+  // - UNIQUE(profile, type, key) makes re-derivation and rebuilds idempotent
+  // (a milestone is celebrated exactly once).
+  `CREATE TABLE streak_events (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    type TEXT NOT NULL CHECK (type IN ('milestone', 'broken', 'new_best')),
+    key TEXT NOT NULL,
+    value INTEGER NOT NULL DEFAULT 0 CHECK (value >= 0),
+    occurred_at TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE (profile_id, type, key)
+  )`,
+
+  `CREATE INDEX idx_streak_events_profile
+    ON streak_events(profile_id, occurred_at)`,
+
+  // Dedicated streak/schedule repair queue (spec S, option B): explicitly
+  // typed and separate from the strength dirty queue so neither consumer can
+  // misinterpret the other's markers. UNIQUE key gives per-entity coalescing.
+  `CREATE TABLE streak_dirty (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT REFERENCES profiles(id) ON DELETE CASCADE,
+    entity_type TEXT NOT NULL CHECK (entity_type IN ('workout', 'schedule', 'exception')),
+    entity_id TEXT NOT NULL,
+    reason TEXT NOT NULL CHECK (reason IN
+      ('workout_completed', 'schedule_changed', 'schedule_enabled_changed',
+       'exception_changed', 'session_rescheduled')),
+    created_at TEXT NOT NULL,
+    UNIQUE (profile_id, entity_type, entity_id, reason)
+  )`,
+];
+
 export const MIGRATIONS: readonly Migration[] = [
   { version: 1, name: "schema_v1_core", statements: V1_STATEMENTS },
   { version: 2, name: "schema_v2_workout_session", statements: V2_STATEMENTS },
   { version: 3, name: "schema_v3_derived_state", statements: V3_STATEMENTS },
+  { version: 4, name: "schema_v4_scheduled_streaks", statements: V4_STATEMENTS },
 ];
 
 /** Current PRAGMA user_version (0 on a fresh database). */

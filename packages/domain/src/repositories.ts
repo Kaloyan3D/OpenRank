@@ -23,6 +23,21 @@ import type {
 import type { Exercise, ExerciseMuscle, MajorGroup, TrackingType } from "./exercise";
 import type { Routine, RoutineDetail, RoutineExercise, RoutineSetTarget } from "./routine";
 import type {
+  ScheduleException,
+  ScheduleExceptionType,
+  ScheduleWeekday,
+  ScheduledSession,
+  ScheduledSessionStatus,
+  StreakCache,
+  StreakDirtyEntityType,
+  StreakDirtyReason,
+  StreakDirtyRecord,
+  StreakEvent,
+  StreakEventType,
+  TrainingSchedule,
+  TrainingScheduleDay,
+} from "./streak";
+import type {
   PersonalRecord,
   PersonalRecordEvent,
   PersonalRecordType,
@@ -413,3 +428,91 @@ export interface RankEventRepository {
 }
 
 export type { RankDirection };
+
+// ---------------------------------------------------------------------------
+// Training schedule + streak (Phase 6)
+// ---------------------------------------------------------------------------
+
+export interface TrainingScheduleRepository {
+  getForProfile(profileId: string): TrainingSchedule | null;
+  /** Idempotently creates the profile schedule (disabled, all days off, revision 1). */
+  ensureDefault(profileId: string): TrainingSchedule;
+  setEnabled(scheduleId: string, enabled: boolean): void;
+  /** Bumps revision and returns the new value (spec F). */
+  bumpRevision(scheduleId: string): number;
+  getDays(scheduleId: string): TrainingScheduleDay[];
+  /** Keyed (schedule_id, weekday) upsert; exactly one row per weekday. */
+  upsertDay(scheduleId: string, day: { weekday: ScheduleWeekday; enabled: boolean; routineId: string | null }): void;
+  replaceAllForProfile(profileId: string, schedule: TrainingSchedule | null, days: readonly TrainingScheduleDay[]): void;
+}
+
+export interface ScheduledSessionRepository {
+  getById(id: string): ScheduledSession | null;
+  /** Linked session for a completed workout, if any (summary + idempotency). */
+  forWorkout(workoutId: string): ScheduledSession | null;
+  /** All sessions for a date, any status. */
+  forDate(profileId: string, scheduledDate: string): ScheduledSession[];
+  /** First ACTIVE (pending/completed/missed/paused) session on a date. */
+  activeForDate(profileId: string, scheduledDate: string): ScheduledSession | null;
+  firstPendingOnDate(profileId: string, scheduledDate: string): ScheduledSession | null;
+  /** Chronological full ledger (streak walks + history UI). */
+  forProfile(profileId: string): ScheduledSession[];
+  pendingFrom(profileId: string, fromDate: string): ScheduledSession[];
+  /**
+   * Idempotent generation: INSERT OR IGNORE under the partial unique index on
+   * (profile_id, scheduled_date) for active statuses. Returns true when a new
+   * row was created.
+   */
+  generateIfMissing(session: {
+    id: string;
+    profileId: string;
+    scheduledDate: string;
+    routineId: string | null;
+    scheduleRevision: number;
+    now: string;
+    /** Defaults to scheduledDate; reschedule targets keep the very original. */
+    originalDate?: string | undefined;
+    /** Set on reschedule targets (provenance). */
+    rescheduledFromDate?: string | null | undefined;
+  }): boolean;
+  setStatus(sessionId: string, status: ScheduledSessionStatus, now: string): void;
+  linkCompletion(sessionId: string, workoutId: string, completedAt: string, now: string): void;
+  setStreakAfter(sessionId: string, streakAfter: number): void;
+  replaceAllForProfile(profileId: string, sessions: readonly ScheduledSession[]): void;
+  countForProfile(profileId: string): number;
+}
+
+export interface ScheduleExceptionRepository {
+  getById(id: string): ScheduleException | null;
+  add(exception: { profileId: string; startDate: string; endDate: string; type: ScheduleExceptionType; reason: string | null; now: string }): ScheduleException;
+  remove(id: string): void;
+  listForProfile(profileId: string): ScheduleException[];
+  /** Pauses overlapping the given date (pause overlay). */
+  listOverlapping(profileId: string, date: string): ScheduleException[];
+  replaceAllForProfile(profileId: string, exceptions: readonly ScheduleException[]): void;
+}
+
+export interface StreakCacheRepository {
+  get(profileId: string): StreakCache | null;
+  upsert(cache: StreakCache): void;
+  replaceAllForProfile(profileId: string, caches: readonly StreakCache[]): void;
+}
+
+export interface StreakEventRepository {
+  /** Stable-identity append: duplicates are ignored, never re-celebrated. */
+  append(event: StreakEvent): void;
+  byKey(profileId: string, type: StreakEventType, key: string): StreakEvent | null;
+  listForProfile(profileId: string): StreakEvent[];
+  listByType(profileId: string, type: StreakEventType): StreakEvent[];
+  replaceAllForProfile(profileId: string, events: readonly StreakEvent[]): void;
+  countForProfile(profileId: string): number;
+}
+
+export interface StreakDirtyRepository {
+  /** INSERT OR IGNORE under UNIQUE(profile, entity_type, entity_id, reason). */
+  mark(profileId: string | null, entityType: StreakDirtyEntityType, entityId: string, reason: StreakDirtyReason): void;
+  list(profileId?: string | null): StreakDirtyRecord[];
+  clear(ids: readonly string[]): void;
+  clearAll(): void;
+  count(): number;
+}

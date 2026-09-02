@@ -1,4 +1,4 @@
-# Database design (Phases 3-5)
+# Database design (Phases 3-6)
 
 This document records the persistence decisions: the ORM/library
 evaluation, the schema layout (v1 baseline, v2 workout-session additions, v3
@@ -346,3 +346,29 @@ canonical tables only.
 
 Seed policy is unchanged (idempotent, transactional, preserves user data);
 alias rows now also carry `source_id`, refreshed on every seed run.
+
+## Phase 6 additions (schema v4): scheduled training streaks
+
+Migration `schema_v4_scheduled_streaks` adds the attendance ledger and its
+projections (full contract: docs/STREAK_SPEC.md):
+
+- `training_schedules` - one per profile (UNIQUE profile_id), `revision`
+  bumps on meaningful weekly changes, `day_boundary_minutes` stores the v1
+  default 240 (04:00 logical boundary, single shared implementation).
+- `training_schedule_days` - ISO weekday (1=Mon..7=Sun) with
+  UNIQUE(schedule_id, weekday); routine_id is FK ON DELETE SET NULL
+  (association is context, never an attendance requirement).
+- `scheduled_sessions` - the obligation ledger. Statuses pending /
+  completed / missed / paused / rescheduled / cancelled. Partial UNIQUE
+  index over active statuses enforces one obligation per (profile, date),
+  makes generation idempotent (INSERT OR IGNORE) and reschedule conflicts
+  explicit; cancelled/rescheduled rows may coexist with a new active row.
+  `workout_id` is plain TEXT on purpose (canonical deletion must not
+  rewrite attendance history); `streak_after` is a projection read model.
+- `schedule_exceptions` - planned pauses; UNIQUE(profile, start, end, type)
+  makes duplicate adds idempotent, overlaps are rejected at service level.
+- `streak_cache` / `streak_events` - rebuildable projections; events carry
+  stable identity UNIQUE(profile, type, key) so milestones never
+  re-celebrate.
+- `streak_dirty` - dedicated repair queue (spec S option B), UNIQUE per
+  (profile, entity, reason) for coalescing.

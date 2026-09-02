@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
@@ -13,6 +14,7 @@ import { colors, spacing, typography } from "../../theme/tokens";
  * or PRs) and display units. Changing display units does NOT touch rankings.
  */
 export default function ProfileScreen() {
+  const router = useRouter();
   const repos = useRepos();
   const services = useServices();
   const units = useUnits();
@@ -126,6 +128,12 @@ export default function ProfileScreen() {
           <Text style={styles.buttonText}>Female reference</Text>
         </Pressable>
       </View>
+
+      <Text style={styles.section}>Training schedule</Text>
+      <Text style={styles.meta}>Set your weekly training days, pauses and planned sessions.</Text>
+      <Pressable style={styles.button} onPress={() => router.push("/schedule")}>
+        <Text style={styles.buttonText}>Edit training schedule</Text>
+      </Pressable>
 
       <Text style={styles.section}>Display units</Text>
       <Text style={styles.meta}>

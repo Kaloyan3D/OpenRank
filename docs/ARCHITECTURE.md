@@ -212,6 +212,31 @@ only hold temporary UI state.
   drawers. The exercise picker searches SQLite with rank eligibility shown
   as an indicator only (unsupported/provisional exercises stay fully
   loggable).
+## Decisions log (Phase 6 - Scheduled Training Streaks)
+
+- **Separation from strength (spec B):** attendance is a second projection
+  family beside ranking. `ScheduleService` (weekly configuration, ledger
+  reconciliation, rescheduling, pauses) and `StreakService` (matching,
+  projection, rebuild) compose over their own repositories; nothing in
+  packages/ranking-core or the derived rank/PR path reads or writes streak
+  state. A regression test keeps the isolation contractual (spec BD).
+- **Ledger over configuration:** `scheduled_sessions` materializes each
+  obligation with its generating schedule revision and reschedule
+  provenance; the weekly configuration only generates future rows. Partial
+  UNIQUE(profile, date) over active statuses = one obligation per training
+  day, idempotent generation, conflict rejection.
+- **Dedicated repair queue:** `streak_dirty` (spec S option B) with typed
+  reasons; finishWorkout marks it in the finish transaction, so repair
+  intent survives a crash (spec BB) while completion stays canonical-first.
+- **Deterministic resolution order:** generate -> pause overlay -> match ->
+  expire -> project, all inside one transaction per profile; the ordering is
+  what enforces "no retroactive rescue" and lets on-time-but-late-processed
+  workouts still satisfy their day (spec BB/Y).
+- **UI:** Home = streak card + this-week strip (glyph + text states, never
+  color alone) + next workout / training-day banner; schedule editor with
+  optional per-day routines, pauses and reschedule; streak history answers
+  "why is my streak X?" from the ledger. No notification UI (Phase 7).
+
 ## Decisions log (Phase 5 - Personal Records + Ranked Core)
 
 - **Derived-data layer:** new `packages/database/src/derived` -

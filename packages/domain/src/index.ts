@@ -1,4 +1,5 @@
 export type * from "./derived";
+export type * from "./streak";
 export type {
   MajorGroup,
   RankingEligibility,
@@ -59,5 +60,11 @@ export type {
   BodyweightAddInput,
   PersonalRecordRepository,
   RankSnapshotRepository,
+  TrainingScheduleRepository,
+  ScheduledSessionRepository,
+  ScheduleExceptionRepository,
+  StreakCacheRepository,
+  StreakEventRepository,
+  StreakDirtyRepository,
   RankEventRepository,
 } from "./repositories";

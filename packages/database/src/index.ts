@@ -26,6 +26,12 @@ import type {
   RankEventRepository,
   RankSnapshotRepository,
   RoutineRepository,
+  ScheduleExceptionRepository,
+  ScheduledSessionRepository,
+  StreakCacheRepository,
+  StreakDirtyRepository,
+  StreakEventRepository,
+  TrainingScheduleRepository,
   WorkoutRepository,
 } from "@openrank/domain";
 import type { CatalogV1 } from "@openrank/exercise-catalog";
@@ -38,6 +44,14 @@ import { SqliteRoutineRepository } from "./repositories/routine";
 import { SqliteWorkoutRepository } from "./repositories/workout";
 import { SqliteDerivedStateRepository } from "./repositories/dirty";
 import { SqlitePersonalRecordRepository, SqliteRankEventRepository, SqliteRankSnapshotRepository } from "./repositories/derived";
+import {
+  SqliteScheduleExceptionRepository,
+  SqliteScheduledSessionRepository,
+  SqliteStreakCacheRepository,
+  SqliteStreakDirtyRepository,
+  SqliteStreakEventRepository,
+  SqliteTrainingScheduleRepository,
+} from "./repositories/schedule";
 
 export interface OpenDatabaseResult {
   profile: ProfileRepository;
@@ -49,6 +63,12 @@ export interface OpenDatabaseResult {
   personalRecords: PersonalRecordRepository;
   rankSnapshots: RankSnapshotRepository;
   rankEvents: RankEventRepository;
+  trainingSchedule: TrainingScheduleRepository;
+  scheduledSessions: ScheduledSessionRepository;
+  scheduleExceptions: ScheduleExceptionRepository;
+  streakCache: StreakCacheRepository;
+  streakEvents: StreakEventRepository;
+  streakDirty: StreakDirtyRepository;
   /** Schema version after migration (equals SCHEMA_VERSION). */
   schemaVersion: number;
   /** Fingerprint of the seeded catalog, or null when no catalog supplied. */
@@ -87,6 +107,12 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
   const personalRecords = new SqlitePersonalRecordRepository(driver);
   const rankSnapshots = new SqliteRankSnapshotRepository(driver);
   const rankEvents = new SqliteRankEventRepository(driver);
+  const trainingSchedule = new SqliteTrainingScheduleRepository(driver, newId);
+  const scheduledSessions = new SqliteScheduledSessionRepository(driver);
+  const scheduleExceptions = new SqliteScheduleExceptionRepository(driver, newId);
+  const streakCache = new SqliteStreakCacheRepository(driver);
+  const streakEvents = new SqliteStreakEventRepository(driver, newId);
+  const streakDirty = new SqliteStreakDirtyRepository(driver, newId);
 
   let fingerprint: string | null = null;
   let seedUnchanged: boolean | null = null;
@@ -102,6 +128,8 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
   return {
     profile, bodyweight, exercise, routine, workout, dirty,
     personalRecords, rankSnapshots, rankEvents,
+    trainingSchedule, scheduledSessions, scheduleExceptions,
+    streakCache, streakEvents, streakDirty,
     newId,
     schemaVersion: version,
     catalogFingerprint: fingerprint ?? installedFingerprint(driver),
@@ -113,7 +141,12 @@ export { SCHEMA_VERSION, MIGRATIONS, migrate, schemaVersion } from "./migrations
 export { createServices } from "./services";
 export type { OpenRankServices, WorkoutSummary } from "./services";
 export { DerivedDataService } from "./services/derived-service";
-export { WorkoutService, RoutineService, RestTimerService, ActiveWorkoutConflictError, IncompleteSetsError, SetValidationError, computeLogicalTrainingDate, computeStartLocalDate } from "./services";
+export {
+  WorkoutService, RoutineService, RestTimerService, ActiveWorkoutConflictError, IncompleteSetsError, SetValidationError,
+  computeLogicalTrainingDate, computeStartLocalDate, ScheduleService, StreakService,
+  SchedulePauseOverlapError, RescheduleError, computeStreakState, isPerfectWeek, STREAK_MILESTONES,
+  isoWeekKey, isoWeekdayOf, addDays, startOfIsoWeek, datesBetween,
+} from "./services";
 export { SqliteRestTimerRepository } from "./repositories/rest-timer";
 export { catalogFingerprint, installedFingerprint, seedCatalog, stableHash } from "./seed";
 export type { SeedOptions, SeedStats } from "./seed";

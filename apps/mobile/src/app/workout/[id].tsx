@@ -172,7 +172,18 @@ export default function ActiveWorkoutScreen() {
     } catch {
       derivedStatus = "deferred";
     }
-    router.replace("/history/" + summary.workout.id + "?derived=" + derivedStatus);
+    // Scheduled-session matching + streak projection (Phase 6): independent
+    // of ranking; failure never endangers the saved workout (spec R/AU).
+    let streakStatus: "done" | "deferred" = "deferred";
+    try {
+      const streakReport = services.streak.processPending({
+        timezoneOffsetMinutes: -new Date().getTimezoneOffset(),
+      });
+      streakStatus = streakReport.errors.length === 0 ? "done" : "deferred";
+    } catch {
+      streakStatus = "deferred";
+    }
+    router.replace("/history/" + summary.workout.id + "?derived=" + derivedStatus + "&streak=" + streakStatus);
   };
 
   const finishWorkout = () => {

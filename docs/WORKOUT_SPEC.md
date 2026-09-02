@@ -168,3 +168,24 @@ processing pass and the summary communicates honestly in all three cases:
   or a deferred pass.
 
 Derived state never blocks or rejects a finish (spec V).
+
+## Phase 6: attendance integration
+
+Finishing a workout also writes a `streak_dirty` marker inside the finish
+transaction (canonical-first; the marker is repair intent, not state). The
+UI then runs one streak processing pass (match -> project) next to the
+Phase 5 derived pass:
+
+- the workout satisfied a planned session: the summary shows the streak
+  delta ("18 -> 19") and, when the week's obligations are all resolved and
+  completed, "Perfect week completed";
+- the workout was a bonus (no obligation on its logical date): a friendly
+  "Bonus workout" section states that the planned-session streak remains
+  unchanged;
+- streak processing failed: "Workout saved successfully. Your training
+  streak is being updated." - the workout stays saved and the app-start
+  repair completes the projection (never a failed finish).
+
+Starting from Home's planned session uses the day's associated routine when
+one exists (context only) and an empty workout otherwise; any other valid
+workout started elsewhere still satisfies the day's obligation (spec K/AT).

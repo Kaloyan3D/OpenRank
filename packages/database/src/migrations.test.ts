@@ -20,6 +20,8 @@ describe("migrations", () => {
       "personal_records", "personal_record_events",
       "rank_snapshots", "rank_events",
       "imports", "derived_dirty", "catalog_meta",
+      "training_schedules", "training_schedule_days", "scheduled_sessions",
+      "schedule_exceptions", "streak_cache", "streak_events", "streak_dirty",
     ]) {
       expect(tables, expected).toContain(expected);
     }

@@ -88,6 +88,15 @@ export class WorkoutService {
       clearForWorkout(profileId: string, workoutId: string): void;
     },
     private readonly now: () => string = nowUtc,
+    /**
+     * Phase 6: optional streak/schedule repair hook. Marked INSIDE the finish
+     * transaction so the repair intent survives a crash before processing
+     * (spec R/S/BB). The streak projection itself never runs here - workout
+     * completion stays canonical-first and cannot fail because of it.
+     */
+    private readonly streakDirty?: {
+      mark(profileId: string | null, entityType: "workout" | "schedule" | "exception", entityId: string, reason: "workout_completed" | "schedule_changed" | "schedule_enabled_changed" | "exception_changed" | "session_rescheduled"): void;
+    } | null,
   ) {}
 
   // ------------------------------------------------------------ lifecycle --
@@ -182,6 +191,7 @@ export class WorkoutService {
       for (const s of incomplete) this.repos.workout.deleteSet(s.id);
       this.repos.workout.complete(workoutId, finishedAt);
       this.restTimer.clearForWorkout(detail.workout.profileId, workoutId);
+      this.streakDirty?.mark(detail.workout.profileId, "workout", workoutId, "workout_completed");
     });
     return this.getSummary(workoutId);
   }

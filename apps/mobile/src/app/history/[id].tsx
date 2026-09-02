@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
+import { isPerfectWeek } from "@openrank/database";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
@@ -15,7 +16,7 @@ import { colors, spacing, typography } from "../../theme/tokens";
  * routine origin. No PRs, ranks, streaks or achievements. Read-only.
  */
 export default function HistoryDetailScreen() {
-  const params = useLocalSearchParams<{ id: string; derived?: string }>();
+  const params = useLocalSearchParams<{ id: string; derived?: string; streak?: string }>();
   const workoutId = typeof params.id === "string" ? params.id : "";
   const derivedStatus = typeof params.derived === "string" ? params.derived : null;
   const repos = useRepos();
@@ -41,6 +42,21 @@ export default function HistoryDetailScreen() {
     ? (repos.routine.getById(workout.routineId)?.routine.name ?? "deleted routine")
     : null;
   const highlights = services.derived.getWorkoutHighlights(workoutId);
+
+  // Streak integration (Phase 6, spec AJ): shown only when this workout
+  // actually resolved a scheduled obligation; bonus workouts get the honest,
+  // friendly variant. streak_after is the projection's read model.
+  const scheduled = workoutId ? repos.scheduledSessions.forWorkout(workoutId) : null;
+  const streakDeferred = params.streak === "deferred";
+  const streakDelta =
+    scheduled && scheduled.status === "completed" && scheduled.streakAfter != null
+      ? scheduled.streakAfter
+      : null;
+  const perfectWeek =
+    scheduled && scheduled.status === "completed"
+      ? isPerfectWeek(repos.scheduledSessions.forProfile(workout.profileId), scheduled.scheduledDate)
+      : false;
+  const currentStreak = services.streak.getCurrentState(workout.profileId).cache.currentStreak;
   const prsByExercise = new Map<string, string>();
   for (const pr of highlights.prs) {
     const name = repos.exercise.findById(pr.exerciseId)?.name ?? "exercise";
@@ -107,6 +123,32 @@ export default function HistoryDetailScreen() {
             </Text>
           ))}
         </View>
+      ) : null}
+
+      {workout.status === "completed" ? (
+        streakDeferred ? (
+          <Text style={styles.deferredNote}>
+            Workout saved successfully. Your training streak is being updated.
+          </Text>
+        ) : streakDelta != null ? (
+          <View style={styles.highlightCard}>
+            <Text style={styles.highlightTitle}>{"\u{1F525} STREAK"}</Text>
+            <Text style={styles.highlightLine}>
+              {String(streakDelta - 1) + " \u2192 " + String(streakDelta)}
+            </Text>
+            {perfectWeek ? (
+              <Text style={styles.highlightLine}>Perfect week completed</Text>
+            ) : null}
+          </View>
+        ) : (
+          <View style={styles.highlightCard}>
+            <Text style={styles.highlightTitleMuted}>BONUS WORKOUT</Text>
+            <Text style={styles.highlightLine}>
+              {"No session was planned for this day - it does not change your " +
+                String(currentStreak) + "-session planned streak. Nice extra training."}
+            </Text>
+          </View>
+        )
       ) : null}
 
       <View style={styles.summaryRow}>

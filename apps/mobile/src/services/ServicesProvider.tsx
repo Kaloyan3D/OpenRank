@@ -29,6 +29,15 @@ export function ServicesProvider(props: { children: ReactNode }) {
     } catch {
       /* repaired on the next start */
     }
+    // Phase 6 repair (spec H/BB): materialize the rolling schedule horizon,
+    // match leftover workout markers and project the streak. Non-blocking.
+    try {
+      created.streak.processPending({
+        timezoneOffsetMinutes: -new Date().getTimezoneOffset(),
+      });
+    } catch {
+      /* repaired on the next start */
+    }
     return created;
   }, [repos]);
   return <ServicesContext.Provider value={services}>{props.children}</ServicesContext.Provider>;
