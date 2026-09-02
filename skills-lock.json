@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "expo-design-system": {
+      "source": "expo/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/expo/skills/expo-design-system/SKILL.md",
+      "computedHash": "cf425c344c671f3f75e300009791c88a821359282872c397ba97aa1f55c96abd"
+    },
+    "expo-dev-client": {
+      "source": "expo/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/expo/skills/expo-dev-client/SKILL.md",
+      "computedHash": "7b8b0ec9a98e96674b13b72b798bc1b0b0d122244dc22c54d375613eb525bcae"
+    },
+    "expo-native-ui": {
+      "source": "expo/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/expo/skills/expo-native-ui/SKILL.md",
+      "computedHash": "8493aa734ed5522d89e02eddb974ec1dc03c6d714a0619eaf15d047ef0019d8e"
+    },
+    "expo-router": {
+      "source": "expo/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/expo/skills/expo-router/SKILL.md",
+      "computedHash": "1cc6bb6852cf44bb51e6f4cb50efb3bed48b486c7f8ba3ac8e06b6b82be2cd78"
+    },
+    "mobile-design": {
+      "source": "RubenGlez/mobile-design",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "6fd8eb2016eb087a236c6417f5876fd5de5785f30c53408fb8562cc86fe93e41"
+    },
+    "react-native-best-practices": {
+      "source": "callstackincubator/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-native-best-practices/SKILL.md",
+      "computedHash": "5b9722518860a462a9308759b7046725e4a1ab59642ad6a6e520afc45bc8373b"
+    }
+  }
+}
