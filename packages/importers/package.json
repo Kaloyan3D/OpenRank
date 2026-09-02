@@ -1,0 +1,16 @@
+{
+  "name": "@openrank/importers",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@openrank/domain": "workspace:*",
+    "typescript": "~6.0.3"
+  }
+}

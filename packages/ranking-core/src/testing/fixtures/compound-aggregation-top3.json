@@ -1,0 +1,577 @@
+{
+  "name": "compound-aggregation-top3",
+  "description": "Four qualifying chest compounds: composite uses the top 3 with weights 1.0/0.5/0.25.",
+  "opts": {
+    "bodyweightKg": 84.7,
+    "sex": "male"
+  },
+  "sessions": [
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 120,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 120,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 120,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Incline Dumbbell Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 70,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Incline Dumbbell Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 70,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Incline Dumbbell Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 70,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Weighted Dip",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 15,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Weighted Dip",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 15,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Weighted Dip",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 15,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Machine Chest Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 90,
+              "reps": 8,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Machine Chest Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 90,
+              "reps": 8,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Machine Chest Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 90,
+              "reps": 8,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected": {
+    "bodyweightKg": 84.7,
+    "sex": "male",
+    "minSessions": 3,
+    "groups": {
+      "legs": {
+        "group": {
+          "key": "legs",
+          "label": "Legs",
+          "ref": "Squat",
+          "primaries": [
+            "quadriceps",
+            "hamstrings",
+            "glutes",
+            "calves",
+            "abductors",
+            "adductors"
+          ],
+          "thresholds": [
+            0,
+            0.5,
+            0.75,
+            1,
+            1.25,
+            1.5,
+            1.85,
+            2.3,
+            3
+          ],
+          "def": 1.3
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "chest": {
+        "group": {
+          "key": "chest",
+          "label": "Chest",
+          "ref": "Bench press",
+          "primaries": [
+            "chest"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.4
+          ],
+          "def": 1.1
+        },
+        "lifts": [
+          {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 140,
+            "load": 120,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.6528925619834711
+          },
+          {
+            "title": "Weighted Dip",
+            "best1RM": 116.31666666666668,
+            "load": 99.7,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1.1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.248434760831455
+          },
+          {
+            "title": "Chest Press (Machine)",
+            "best1RM": 114,
+            "load": 90,
+            "reps": 8,
+            "date": "2026-01-05",
+            "coeff": 1.2,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.1216056670602126
+          }
+        ],
+        "used": [
+          {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 140,
+            "load": 120,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.6528925619834711
+          },
+          {
+            "title": "Weighted Dip",
+            "best1RM": 116.31666666666668,
+            "load": 99.7,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1.1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.248434760831455
+          },
+          {
+            "title": "Chest Press (Machine)",
+            "best1RM": 114,
+            "load": 90,
+            "reps": 8,
+            "date": "2026-01-05",
+            "coeff": 1.2,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.1216056670602126
+          }
+        ],
+        "excluded": [],
+        "best": {
+          "title": "Bench Press (Barbell)",
+          "best1RM": 140,
+          "load": 120,
+          "reps": 5,
+          "date": "2026-01-05",
+          "coeff": 1,
+          "isolation": false,
+          "sessionsCount": 3,
+          "eqRatio": 1.6528925619834711
+        },
+        "eqRatio": 1.4614350623795722,
+        "source": "compound",
+        "capped": false,
+        "hasData": true,
+        "tierIndex": 5,
+        "tier": {
+          "name": "Titan",
+          "img": "rank-06-titan.png",
+          "color": "#2fe0c8"
+        },
+        "next": {
+          "tier": {
+            "name": "Colossus",
+            "img": "rank-07-colossus.png",
+            "color": "#ff6a2b"
+          },
+          "ratio": 1.55,
+          "remaining": 0.08856493762042783
+        },
+        "progress": 0.7047835412652406,
+        "recommendation": {
+          "nextTier": {
+            "name": "Colossus",
+            "img": "rank-07-colossus.png",
+            "color": "#ff6a2b"
+          },
+          "topLift": {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 140,
+            "coeff": 1,
+            "currentReps": 5
+          },
+          "required1RM": 153.12753787878788,
+          "delta1RM": 13.127537878787876,
+          "targetForReps": {
+            "reps": 5,
+            "weight": 131.2521753246753
+          },
+          "currentForReps": {
+            "reps": 5,
+            "weight": 119.99999999999999
+          },
+          "tooFar": false
+        }
+      },
+      "back": {
+        "group": {
+          "key": "back",
+          "label": "Back",
+          "ref": "Barbell row",
+          "primaries": [
+            "lats",
+            "upper_back",
+            "lower_back",
+            "traps"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.3
+          ],
+          "def": 1.1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "shoulders": {
+        "group": {
+          "key": "shoulders",
+          "label": "Shoulders",
+          "ref": "Overhead press",
+          "primaries": [
+            "shoulders",
+            "neck"
+          ],
+          "thresholds": [
+            0,
+            0.3,
+            0.4,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3,
+            1.6
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "arms": {
+        "group": {
+          "key": "arms",
+          "label": "Arms",
+          "ref": "Barbell curl",
+          "primaries": [
+            "biceps",
+            "triceps",
+            "forearms"
+          ],
+          "thresholds": [
+            0,
+            0.25,
+            0.35,
+            0.45,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "core": {
+        "group": {
+          "key": "core",
+          "label": "Core",
+          "ref": "Weighted crunch",
+          "primaries": [
+            "abdominals"
+          ],
+          "thresholds": [
+            0,
+            0.15,
+            0.25,
+            0.35,
+            0.45,
+            0.6,
+            0.8,
+            1.05,
+            1.4
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      }
+    },
+    "unmatched": [
+      "Incline Dumbbell Press"
+    ],
+    "unmatchedDetails": [
+      [
+        "Incline Dumbbell Press",
+        {
+          "title": "Incline Dumbbell Press",
+          "sessions": [
+            "2026-01-05",
+            "2026-01-07",
+            "2026-01-09"
+          ],
+          "reason": "unknown"
+        }
+      ]
+    ],
+    "matchStats": {
+      "catalog": 2,
+      "inferred": 1,
+      "total": 3
+    }
+  }
+}

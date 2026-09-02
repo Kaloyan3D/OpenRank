@@ -1,0 +1,365 @@
+{
+  "name": "tier-ladder-2",
+  "description": "Bench Press composite engineered for tier index 2 (ratio ~0.7 x BW).",
+  "opts": {
+    "bodyweightKg": 84.7,
+    "sex": "male"
+  },
+  "sessions": [
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 59.29,
+              "reps": 1,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 59.29,
+              "reps": 1,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 59.29,
+              "reps": 1,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected": {
+    "bodyweightKg": 84.7,
+    "sex": "male",
+    "minSessions": 3,
+    "groups": {
+      "legs": {
+        "group": {
+          "key": "legs",
+          "label": "Legs",
+          "ref": "Squat",
+          "primaries": [
+            "quadriceps",
+            "hamstrings",
+            "glutes",
+            "calves",
+            "abductors",
+            "adductors"
+          ],
+          "thresholds": [
+            0,
+            0.5,
+            0.75,
+            1,
+            1.25,
+            1.5,
+            1.85,
+            2.3,
+            3
+          ],
+          "def": 1.3
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "chest": {
+        "group": {
+          "key": "chest",
+          "label": "Chest",
+          "ref": "Bench press",
+          "primaries": [
+            "chest"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.4
+          ],
+          "def": 1.1
+        },
+        "lifts": [
+          {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 59.29,
+            "load": 59.29,
+            "reps": 1,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 0.7
+          }
+        ],
+        "used": [
+          {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 59.29,
+            "load": 59.29,
+            "reps": 1,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 0.7
+          }
+        ],
+        "excluded": [],
+        "best": {
+          "title": "Bench Press (Barbell)",
+          "best1RM": 59.29,
+          "load": 59.29,
+          "reps": 1,
+          "date": "2026-01-05",
+          "coeff": 1,
+          "isolation": false,
+          "sessionsCount": 3,
+          "eqRatio": 0.7
+        },
+        "eqRatio": 0.7,
+        "source": "compound",
+        "capped": false,
+        "hasData": true,
+        "tierIndex": 2,
+        "tier": {
+          "name": "Gold",
+          "img": "rank-03-gold.png",
+          "color": "#e8b923"
+        },
+        "next": {
+          "tier": {
+            "name": "Platinum",
+            "img": "rank-04-platinum.png",
+            "color": "#d3dae1"
+          },
+          "ratio": 0.8,
+          "remaining": 0.10000000000000009
+        },
+        "progress": 0.4999999999999997,
+        "recommendation": {
+          "nextTier": {
+            "name": "Platinum",
+            "img": "rank-04-platinum.png",
+            "color": "#d3dae1"
+          },
+          "topLift": {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 59.29,
+            "coeff": 1,
+            "currentReps": 1
+          },
+          "required1RM": 67.76,
+          "delta1RM": 8.470000000000006,
+          "targetForReps": {
+            "reps": 1,
+            "weight": 67.76
+          },
+          "currentForReps": {
+            "reps": 1,
+            "weight": 59.29
+          },
+          "tooFar": false
+        }
+      },
+      "back": {
+        "group": {
+          "key": "back",
+          "label": "Back",
+          "ref": "Barbell row",
+          "primaries": [
+            "lats",
+            "upper_back",
+            "lower_back",
+            "traps"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.3
+          ],
+          "def": 1.1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "shoulders": {
+        "group": {
+          "key": "shoulders",
+          "label": "Shoulders",
+          "ref": "Overhead press",
+          "primaries": [
+            "shoulders",
+            "neck"
+          ],
+          "thresholds": [
+            0,
+            0.3,
+            0.4,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3,
+            1.6
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "arms": {
+        "group": {
+          "key": "arms",
+          "label": "Arms",
+          "ref": "Barbell curl",
+          "primaries": [
+            "biceps",
+            "triceps",
+            "forearms"
+          ],
+          "thresholds": [
+            0,
+            0.25,
+            0.35,
+            0.45,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "core": {
+        "group": {
+          "key": "core",
+          "label": "Core",
+          "ref": "Weighted crunch",
+          "primaries": [
+            "abdominals"
+          ],
+          "thresholds": [
+            0,
+            0.15,
+            0.25,
+            0.35,
+            0.45,
+            0.6,
+            0.8,
+            1.05,
+            1.4
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      }
+    },
+    "unmatched": [],
+    "unmatchedDetails": [],
+    "matchStats": {
+      "catalog": 1,
+      "inferred": 0,
+      "total": 1
+    }
+  }
+}

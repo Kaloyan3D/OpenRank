@@ -1,0 +1,488 @@
+{
+  "name": "isolation-fallback-capped-titan",
+  "description": "Legs trained with isolation lifts only: rank comes from isolation, capped at Titan.",
+  "opts": {
+    "bodyweightKg": 84.7,
+    "sex": "male"
+  },
+  "sessions": [
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Leg Curl",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 60,
+              "reps": 10,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Leg Curl",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 60,
+              "reps": 10,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Leg Curl",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 60,
+              "reps": 10,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Leg Extension",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 65,
+              "reps": 10,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Leg Extension",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 65,
+              "reps": 10,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Leg Extension",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 65,
+              "reps": 10,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Standing Calf Raise",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 100,
+              "reps": 12,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Standing Calf Raise",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 100,
+              "reps": 12,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Standing Calf Raise",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 100,
+              "reps": 12,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected": {
+    "bodyweightKg": 84.7,
+    "sex": "male",
+    "minSessions": 3,
+    "groups": {
+      "legs": {
+        "group": {
+          "key": "legs",
+          "label": "Legs",
+          "ref": "Squat",
+          "primaries": [
+            "quadriceps",
+            "hamstrings",
+            "glutes",
+            "calves",
+            "abductors",
+            "adductors"
+          ],
+          "thresholds": [
+            0,
+            0.5,
+            0.75,
+            1,
+            1.25,
+            1.5,
+            1.85,
+            2.3,
+            3
+          ],
+          "def": 1.3
+        },
+        "lifts": [
+          {
+            "title": "Leg Curl",
+            "best1RM": 80,
+            "load": 60,
+            "reps": 10,
+            "date": "2026-01-05",
+            "coeff": 0.8,
+            "isolation": true,
+            "sessionsCount": 3,
+            "eqRatio": 1.1806375442739079
+          },
+          {
+            "title": "Leg Extension",
+            "best1RM": 86.66666666666666,
+            "load": 65,
+            "reps": 10,
+            "date": "2026-01-05",
+            "coeff": 0.9,
+            "isolation": true,
+            "sessionsCount": 3,
+            "eqRatio": 1.1369102278193184
+          },
+          {
+            "title": "Standing Calf Raise",
+            "best1RM": 47.432,
+            "load": 33.88,
+            "reps": 12,
+            "date": "2026-01-05",
+            "coeff": 2.8,
+            "isolation": true,
+            "sessionsCount": 3,
+            "eqRatio": 0.2
+          }
+        ],
+        "used": [
+          {
+            "title": "Leg Curl",
+            "best1RM": 80,
+            "load": 60,
+            "reps": 10,
+            "date": "2026-01-05",
+            "coeff": 0.8,
+            "isolation": true,
+            "sessionsCount": 3,
+            "eqRatio": 1.1806375442739079
+          },
+          {
+            "title": "Leg Extension",
+            "best1RM": 86.66666666666666,
+            "load": 65,
+            "reps": 10,
+            "date": "2026-01-05",
+            "coeff": 0.9,
+            "isolation": true,
+            "sessionsCount": 3,
+            "eqRatio": 1.1369102278193184
+          },
+          {
+            "title": "Standing Calf Raise",
+            "best1RM": 47.432,
+            "load": 33.88,
+            "reps": 12,
+            "date": "2026-01-05",
+            "coeff": 2.8,
+            "isolation": true,
+            "sessionsCount": 3,
+            "eqRatio": 0.2
+          }
+        ],
+        "excluded": [],
+        "best": {
+          "title": "Leg Curl",
+          "best1RM": 80,
+          "load": 60,
+          "reps": 10,
+          "date": "2026-01-05",
+          "coeff": 0.8,
+          "isolation": true,
+          "sessionsCount": 3,
+          "eqRatio": 1.1806375442739079
+        },
+        "eqRatio": 1.028052947533467,
+        "source": "isolation",
+        "capped": true,
+        "hasData": true,
+        "tierIndex": 3,
+        "tier": {
+          "name": "Platinum",
+          "img": "rank-04-platinum.png",
+          "color": "#d3dae1"
+        },
+        "next": {
+          "tier": {
+            "name": "Diamond",
+            "img": "rank-05-diamond.png",
+            "color": "#5ec8ff"
+          },
+          "ratio": 1.25,
+          "remaining": 0.221947052466533
+        },
+        "progress": 0.11221179013386795,
+        "recommendation": null
+      },
+      "chest": {
+        "group": {
+          "key": "chest",
+          "label": "Chest",
+          "ref": "Bench press",
+          "primaries": [
+            "chest"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.4
+          ],
+          "def": 1.1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "back": {
+        "group": {
+          "key": "back",
+          "label": "Back",
+          "ref": "Barbell row",
+          "primaries": [
+            "lats",
+            "upper_back",
+            "lower_back",
+            "traps"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.3
+          ],
+          "def": 1.1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "shoulders": {
+        "group": {
+          "key": "shoulders",
+          "label": "Shoulders",
+          "ref": "Overhead press",
+          "primaries": [
+            "shoulders",
+            "neck"
+          ],
+          "thresholds": [
+            0,
+            0.3,
+            0.4,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3,
+            1.6
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "arms": {
+        "group": {
+          "key": "arms",
+          "label": "Arms",
+          "ref": "Barbell curl",
+          "primaries": [
+            "biceps",
+            "triceps",
+            "forearms"
+          ],
+          "thresholds": [
+            0,
+            0.25,
+            0.35,
+            0.45,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "core": {
+        "group": {
+          "key": "core",
+          "label": "Core",
+          "ref": "Weighted crunch",
+          "primaries": [
+            "abdominals"
+          ],
+          "thresholds": [
+            0,
+            0.15,
+            0.25,
+            0.35,
+            0.45,
+            0.6,
+            0.8,
+            1.05,
+            1.4
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      }
+    },
+    "unmatched": [],
+    "unmatchedDetails": [],
+    "matchStats": {
+      "catalog": 1,
+      "inferred": 2,
+      "total": 3
+    }
+  }
+}

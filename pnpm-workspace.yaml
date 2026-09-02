@@ -1,0 +1,16 @@
+packages:
+  - apps/*
+  - packages/*
+# React Native's tooling (metro/expo) resolves some package files outside the
+# "exports" map (e.g. react-native/rn-get-polyfills), which requires a flat
+# node_modules layout under pnpm.
+nodeLinker: hoisted
+minimumReleaseAgeExclude:
+  - babel-preset-expo@57.0.10
+# Dependencies that are allowed to run install scripts.
+onlyBuiltDependencies:
+  - "@swc/core"
+  - core-js
+  - esbuild
+  - expo-modules-core
+  - simple-git-hooks

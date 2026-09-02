@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+coverage/
+*.tsbuildinfo
+
+# Expo / React Native
+.expo/
+apps/mobile/android/
+apps/mobile/ios/
+
+# Harness / local tooling (not part of the repository)
+.ai-harness/
+.tools/
+OpenRank_Nexus_Implementation_Spec.md
+npm-cache/
+
+# OS noise
+.DS_Store
+Thumbs.db

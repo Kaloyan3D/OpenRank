@@ -1,0 +1,536 @@
+{
+  "name": "catalog-matching",
+  "description": "Resolves by template id, exact title, and canonical word-order fuzzy match; matchStats splits catalog vs inferred.",
+  "opts": {
+    "bodyweightKg": 84.7,
+    "sex": "male"
+  },
+  "sessions": [
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": "79D0BB3A",
+          "sets": [
+            {
+              "weight": 100,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": "79D0BB3A",
+          "sets": [
+            {
+              "weight": 100,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Bench Press (Barbell)",
+          "templateId": "79D0BB3A",
+          "sets": [
+            {
+              "weight": 100,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Barbell Bench Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 102.5,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Barbell Bench Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 102.5,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Barbell Bench Press",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 102.5,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Squat Barbell",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 140,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Squat Barbell",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 140,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Squat Barbell",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 140,
+              "reps": 5,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected": {
+    "bodyweightKg": 84.7,
+    "sex": "male",
+    "minSessions": 3,
+    "groups": {
+      "legs": {
+        "group": {
+          "key": "legs",
+          "label": "Legs",
+          "ref": "Squat",
+          "primaries": [
+            "quadriceps",
+            "hamstrings",
+            "glutes",
+            "calves",
+            "abductors",
+            "adductors"
+          ],
+          "thresholds": [
+            0,
+            0.5,
+            0.75,
+            1,
+            1.25,
+            1.5,
+            1.85,
+            2.3,
+            3
+          ],
+          "def": 1.3
+        },
+        "lifts": [
+          {
+            "title": "Squat (Barbell)",
+            "best1RM": 163.33333333333334,
+            "load": 140,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.9283746556473829
+          }
+        ],
+        "used": [
+          {
+            "title": "Squat (Barbell)",
+            "best1RM": 163.33333333333334,
+            "load": 140,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.9283746556473829
+          }
+        ],
+        "excluded": [],
+        "best": {
+          "title": "Squat (Barbell)",
+          "best1RM": 163.33333333333334,
+          "load": 140,
+          "reps": 5,
+          "date": "2026-01-05",
+          "coeff": 1,
+          "isolation": false,
+          "sessionsCount": 3,
+          "eqRatio": 1.9283746556473829
+        },
+        "eqRatio": 1.9283746556473829,
+        "source": "compound",
+        "capped": false,
+        "hasData": true,
+        "tierIndex": 6,
+        "tier": {
+          "name": "Colossus",
+          "img": "rank-07-colossus.png",
+          "color": "#ff6a2b"
+        },
+        "next": {
+          "tier": {
+            "name": "Olympian",
+            "img": "rank-08-olympian.png",
+            "color": "#ffd76a"
+          },
+          "ratio": 2.3,
+          "remaining": 0.37162534435261696
+        },
+        "progress": 0.17416590143862848,
+        "recommendation": {
+          "nextTier": {
+            "name": "Olympian",
+            "img": "rank-08-olympian.png",
+            "color": "#ffd76a"
+          },
+          "topLift": {
+            "title": "Squat (Barbell)",
+            "best1RM": 163.33333333333334,
+            "coeff": 1,
+            "currentReps": 5
+          },
+          "required1RM": 194.81,
+          "delta1RM": 31.47666666666666,
+          "targetForReps": {
+            "reps": 5,
+            "weight": 166.98
+          },
+          "currentForReps": {
+            "reps": 5,
+            "weight": 140
+          },
+          "tooFar": false
+        }
+      },
+      "chest": {
+        "group": {
+          "key": "chest",
+          "label": "Chest",
+          "ref": "Bench press",
+          "primaries": [
+            "chest"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.4
+          ],
+          "def": 1.1
+        },
+        "lifts": [
+          {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 119.58333333333334,
+            "load": 102.5,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.4118457300275482
+          }
+        ],
+        "used": [
+          {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 119.58333333333334,
+            "load": 102.5,
+            "reps": 5,
+            "date": "2026-01-05",
+            "coeff": 1,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 1.4118457300275482
+          }
+        ],
+        "excluded": [],
+        "best": {
+          "title": "Bench Press (Barbell)",
+          "best1RM": 119.58333333333334,
+          "load": 102.5,
+          "reps": 5,
+          "date": "2026-01-05",
+          "coeff": 1,
+          "isolation": false,
+          "sessionsCount": 3,
+          "eqRatio": 1.4118457300275482
+        },
+        "eqRatio": 1.4118457300275482,
+        "source": "compound",
+        "capped": false,
+        "hasData": true,
+        "tierIndex": 5,
+        "tier": {
+          "name": "Titan",
+          "img": "rank-06-titan.png",
+          "color": "#2fe0c8"
+        },
+        "next": {
+          "tier": {
+            "name": "Colossus",
+            "img": "rank-07-colossus.png",
+            "color": "#ff6a2b"
+          },
+          "ratio": 1.55,
+          "remaining": 0.13815426997245184
+        },
+        "progress": 0.5394857667584939,
+        "recommendation": {
+          "nextTier": {
+            "name": "Colossus",
+            "img": "rank-07-colossus.png",
+            "color": "#ff6a2b"
+          },
+          "topLift": {
+            "title": "Bench Press (Barbell)",
+            "best1RM": 119.58333333333334,
+            "coeff": 1,
+            "currentReps": 5
+          },
+          "required1RM": 131.285,
+          "delta1RM": 11.701666666666654,
+          "targetForReps": {
+            "reps": 5,
+            "weight": 112.52999999999999
+          },
+          "currentForReps": {
+            "reps": 5,
+            "weight": 102.5
+          },
+          "tooFar": false
+        }
+      },
+      "back": {
+        "group": {
+          "key": "back",
+          "label": "Back",
+          "ref": "Barbell row",
+          "primaries": [
+            "lats",
+            "upper_back",
+            "lower_back",
+            "traps"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.3
+          ],
+          "def": 1.1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "shoulders": {
+        "group": {
+          "key": "shoulders",
+          "label": "Shoulders",
+          "ref": "Overhead press",
+          "primaries": [
+            "shoulders",
+            "neck"
+          ],
+          "thresholds": [
+            0,
+            0.3,
+            0.4,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3,
+            1.6
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "arms": {
+        "group": {
+          "key": "arms",
+          "label": "Arms",
+          "ref": "Barbell curl",
+          "primaries": [
+            "biceps",
+            "triceps",
+            "forearms"
+          ],
+          "thresholds": [
+            0,
+            0.25,
+            0.35,
+            0.45,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "core": {
+        "group": {
+          "key": "core",
+          "label": "Core",
+          "ref": "Weighted crunch",
+          "primaries": [
+            "abdominals"
+          ],
+          "thresholds": [
+            0,
+            0.15,
+            0.25,
+            0.35,
+            0.45,
+            0.6,
+            0.8,
+            1.05,
+            1.4
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      }
+    },
+    "unmatched": [],
+    "unmatchedDetails": [],
+    "matchStats": {
+      "catalog": 3,
+      "inferred": 0,
+      "total": 3
+    }
+  }
+}

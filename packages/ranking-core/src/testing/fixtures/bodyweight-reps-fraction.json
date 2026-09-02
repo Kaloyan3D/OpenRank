@@ -1,0 +1,485 @@
+{
+  "name": "bodyweight-reps-fraction",
+  "description": "Reps-only core/chest movements scored through bodyweight fractions (core 0.25, push up 0.35).",
+  "opts": {
+    "bodyweightKg": 84.7,
+    "sex": "male"
+  },
+  "sessions": [
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Hanging Leg Raise",
+          "templateId": "reps-only",
+          "sets": [
+            {
+              "weight": 0,
+              "reps": 12,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Hanging Leg Raise",
+          "templateId": "reps-only",
+          "sets": [
+            {
+              "weight": 0,
+              "reps": 12,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Hanging Leg Raise",
+          "templateId": "reps-only",
+          "sets": [
+            {
+              "weight": 0,
+              "reps": 12,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-05",
+      "title": "Session 2026-01-05",
+      "exercises": [
+        {
+          "title": "Push Up",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 0,
+              "reps": 20,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "title": "Session 2026-01-07",
+      "exercises": [
+        {
+          "title": "Push Up",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 0,
+              "reps": 20,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-01-09",
+      "title": "Session 2026-01-09",
+      "exercises": [
+        {
+          "title": "Push Up",
+          "templateId": null,
+          "sets": [
+            {
+              "weight": 0,
+              "reps": 20,
+              "type": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected": {
+    "bodyweightKg": 84.7,
+    "sex": "male",
+    "minSessions": 3,
+    "groups": {
+      "legs": {
+        "group": {
+          "key": "legs",
+          "label": "Legs",
+          "ref": "Squat",
+          "primaries": [
+            "quadriceps",
+            "hamstrings",
+            "glutes",
+            "calves",
+            "abductors",
+            "adductors"
+          ],
+          "thresholds": [
+            0,
+            0.5,
+            0.75,
+            1,
+            1.25,
+            1.5,
+            1.85,
+            2.3,
+            3
+          ],
+          "def": 1.3
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "chest": {
+        "group": {
+          "key": "chest",
+          "label": "Chest",
+          "ref": "Bench press",
+          "primaries": [
+            "chest"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.4
+          ],
+          "def": 1.1
+        },
+        "lifts": [
+          {
+            "title": "Push Up",
+            "best1RM": 41.503,
+            "load": 29.645,
+            "reps": 20,
+            "date": "2026-01-05",
+            "coeff": 0.6,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 0.8166666666666667
+          }
+        ],
+        "used": [
+          {
+            "title": "Push Up",
+            "best1RM": 41.503,
+            "load": 29.645,
+            "reps": 20,
+            "date": "2026-01-05",
+            "coeff": 0.6,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 0.8166666666666667
+          }
+        ],
+        "excluded": [],
+        "best": {
+          "title": "Push Up",
+          "best1RM": 41.503,
+          "load": 29.645,
+          "reps": 20,
+          "date": "2026-01-05",
+          "coeff": 0.6,
+          "isolation": false,
+          "sessionsCount": 3,
+          "eqRatio": 0.8166666666666667
+        },
+        "eqRatio": 0.8166666666666667,
+        "source": "compound",
+        "capped": false,
+        "hasData": true,
+        "tierIndex": 3,
+        "tier": {
+          "name": "Platinum",
+          "img": "rank-04-platinum.png",
+          "color": "#d3dae1"
+        },
+        "next": {
+          "tier": {
+            "name": "Diamond",
+            "img": "rank-05-diamond.png",
+            "color": "#5ec8ff"
+          },
+          "ratio": 1,
+          "remaining": 0.18333333333333335
+        },
+        "progress": 0.08333333333333305,
+        "recommendation": {
+          "nextTier": {
+            "name": "Diamond",
+            "img": "rank-05-diamond.png",
+            "color": "#5ec8ff"
+          },
+          "topLift": {
+            "title": "Push Up",
+            "best1RM": 41.503,
+            "coeff": 0.6,
+            "currentReps": 20
+          },
+          "required1RM": 50.82,
+          "delta1RM": 9.317,
+          "targetForReps": {
+            "reps": 10,
+            "weight": 38.115
+          },
+          "currentForReps": {
+            "reps": 10,
+            "weight": 31.12725
+          },
+          "tooFar": false
+        }
+      },
+      "back": {
+        "group": {
+          "key": "back",
+          "label": "Back",
+          "ref": "Barbell row",
+          "primaries": [
+            "lats",
+            "upper_back",
+            "lower_back",
+            "traps"
+          ],
+          "thresholds": [
+            0,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            1.25,
+            1.55,
+            1.9,
+            2.3
+          ],
+          "def": 1.1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "shoulders": {
+        "group": {
+          "key": "shoulders",
+          "label": "Shoulders",
+          "ref": "Overhead press",
+          "primaries": [
+            "shoulders",
+            "neck"
+          ],
+          "thresholds": [
+            0,
+            0.3,
+            0.4,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3,
+            1.6
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "arms": {
+        "group": {
+          "key": "arms",
+          "label": "Arms",
+          "ref": "Barbell curl",
+          "primaries": [
+            "biceps",
+            "triceps",
+            "forearms"
+          ],
+          "thresholds": [
+            0,
+            0.25,
+            0.35,
+            0.45,
+            0.55,
+            0.7,
+            0.85,
+            1.05,
+            1.3
+          ],
+          "def": 1
+        },
+        "lifts": [],
+        "used": [],
+        "excluded": [],
+        "best": null,
+        "eqRatio": null,
+        "source": null,
+        "capped": false,
+        "hasData": false,
+        "tierIndex": null,
+        "tier": null,
+        "next": null,
+        "progress": 0,
+        "recommendation": null
+      },
+      "core": {
+        "group": {
+          "key": "core",
+          "label": "Core",
+          "ref": "Weighted crunch",
+          "primaries": [
+            "abdominals"
+          ],
+          "thresholds": [
+            0,
+            0.15,
+            0.25,
+            0.35,
+            0.45,
+            0.6,
+            0.8,
+            1.05,
+            1.4
+          ],
+          "def": 1
+        },
+        "lifts": [
+          {
+            "title": "Hanging Leg Raise",
+            "best1RM": 29.645,
+            "load": 21.175,
+            "reps": 12,
+            "date": "2026-01-05",
+            "coeff": 0.8,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 0.43749999999999994
+          }
+        ],
+        "used": [
+          {
+            "title": "Hanging Leg Raise",
+            "best1RM": 29.645,
+            "load": 21.175,
+            "reps": 12,
+            "date": "2026-01-05",
+            "coeff": 0.8,
+            "isolation": false,
+            "sessionsCount": 3,
+            "eqRatio": 0.43749999999999994
+          }
+        ],
+        "excluded": [],
+        "best": {
+          "title": "Hanging Leg Raise",
+          "best1RM": 29.645,
+          "load": 21.175,
+          "reps": 12,
+          "date": "2026-01-05",
+          "coeff": 0.8,
+          "isolation": false,
+          "sessionsCount": 3,
+          "eqRatio": 0.43749999999999994
+        },
+        "eqRatio": 0.43749999999999994,
+        "source": "compound",
+        "capped": false,
+        "hasData": true,
+        "tierIndex": 3,
+        "tier": {
+          "name": "Platinum",
+          "img": "rank-04-platinum.png",
+          "color": "#d3dae1"
+        },
+        "next": {
+          "tier": {
+            "name": "Diamond",
+            "img": "rank-05-diamond.png",
+            "color": "#5ec8ff"
+          },
+          "ratio": 0.45,
+          "remaining": 0.012500000000000067
+        },
+        "progress": 0.8749999999999993,
+        "recommendation": {
+          "nextTier": {
+            "name": "Diamond",
+            "img": "rank-05-diamond.png",
+            "color": "#5ec8ff"
+          },
+          "topLift": {
+            "title": "Hanging Leg Raise",
+            "best1RM": 29.645,
+            "coeff": 0.8,
+            "currentReps": 12
+          },
+          "required1RM": 30.492000000000004,
+          "delta1RM": 0.8470000000000049,
+          "targetForReps": {
+            "reps": 10,
+            "weight": 22.869000000000003
+          },
+          "currentForReps": {
+            "reps": 10,
+            "weight": 22.23375
+          },
+          "tooFar": false
+        }
+      }
+    },
+    "unmatched": [],
+    "unmatchedDetails": [],
+    "matchStats": {
+      "catalog": 2,
+      "inferred": 0,
+      "total": 2
+    }
+  }
+}

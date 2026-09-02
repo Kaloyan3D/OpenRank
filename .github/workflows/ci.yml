@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: lint + typecheck + tests + licenses
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit + golden tests
+        run: pnpm test
+      - name: License check
+        run: pnpm licenses:check
+
+  android-smoke:
+    name: Android build smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Prebuild native project
+        run: pnpm --filter @openrank/mobile exec expo prebuild --platform android --no-install
+      - name: Assemble debug APK
+        run: pnpm --filter @openrank/mobile exec gradle assembleDebug
+        working-directory: apps/mobile
