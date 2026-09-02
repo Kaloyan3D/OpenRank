@@ -13,7 +13,7 @@
 
 import type { DatabaseDriver } from "./driver";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface Migration {
   version: number;
@@ -245,9 +245,29 @@ const V1_STATEMENTS: readonly string[] = [
   )`,
 ];
 
+/** Phase 4: rest timer persistence + routine target snapshot on workouts. */
+const V2_STATEMENTS: readonly string[] = [
+  // One rest timer per profile (upsert semantics). Timestamps are the
+  // authoritative state; the visible countdown is always derived from
+  // ends_at - now, so backgrounding and process restarts are free.
+  `CREATE TABLE rest_timer (
+    profile_id TEXT PRIMARY KEY NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    workout_id TEXT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
+    workout_exercise_id TEXT REFERENCES workout_exercises(id) ON DELETE SET NULL,
+    started_at TEXT NOT NULL,
+    ends_at TEXT NOT NULL,
+    duration_seconds INTEGER NOT NULL CHECK (duration_seconds > 0),
+    updated_at TEXT NOT NULL
+  )`,
+  // Routine target-set snapshot, written once when a workout starts from a
+  // routine; later routine edits never mutate started/finished workouts.
+  `ALTER TABLE workout_exercises ADD COLUMN targets_json TEXT`,
+];
+
 /** Ordered, immutable migration list. */
 export const MIGRATIONS: readonly Migration[] = [
   { version: 1, name: "schema_v1_core", statements: V1_STATEMENTS },
+  { version: 2, name: "schema_v2_workout_session", statements: V2_STATEMENTS },
 ];
 
 /** Current PRAGMA user_version (0 on a fresh database). */

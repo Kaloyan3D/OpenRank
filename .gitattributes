@@ -1,0 +1,5 @@
+# Vendored upstream artifacts are pinned by sha256 - line-ending translation
+# must never touch them (core.autocrlf=true otherwise rewrites them on
+# checkout and breaks licenses:check / build:catalog byte checks).
+datasets/upstream/** -text
+packages/ranking-core/src/legacy/** -text

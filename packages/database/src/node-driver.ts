@@ -50,7 +50,9 @@ export class NodeSqliteDriver implements DatabaseDriver {
   }
 
   transaction<T>(fn: () => T): T {
-    if (this.inTransaction) throw new Error("nested transactions are not supported");
+    // Reentrant: nested calls join the open transaction instead of failing
+    // (services compose several repository calls into one atomic unit).
+    if (this.inTransaction) return fn();
     this.inTransaction = true;
     try {
       this.db.exec("BEGIN IMMEDIATE");

@@ -172,3 +172,43 @@ only hold temporary UI state.
   synchronously on launch with explicit loading/error(retry) states; the
   Exercises list/detail screens read SQLite repositories. No workout,
   routine, rank, streak or notification UI yet (Phase 4+).
+
+## Decisions log (Phase 4 - Workout Tracker)
+
+- **Service layer:** `WorkoutService`, `RoutineService`, `RestTimerService`
+  (`packages/database/src/services`) sit above the repositories; screens go
+  UI -> service -> repository -> SQLite and never issue SQL or hold canonical
+  state. `createServices()` composes them over one opened database; the
+  injectable clock (`now?`) makes time-dependent behavior testable.
+- **Reentrant driver transactions:** `DatabaseDriver.transaction()` joins an
+  outer transaction when already inside one (both drivers), so services can
+  compose repository calls (complete-set = update + dirty markers + rest
+  timer) into a single atomic `BEGIN IMMEDIATE`.
+- **Schema v2:** `rest_timer` table (one row per profile; authoritative
+  `ends_at` timestamp - remaining time always derived, so backgrounding and
+  process death are free) and `workout_exercises.targets_json` (routine
+  target snapshot copied at start; later routine edits never mutate started
+  workouts).
+- **Snapshot semantics:** starting from a routine copies order, rest,
+  superset groups and per-set targets into the workout. The routine remains
+  the template; the workout owns its session structure from that instant.
+- **Autosave:** every meaningful mutation (set values on field commit, set
+  completion, notes on blur, structure changes) persists immediately. The
+  UI keeps only transient input buffers, flushed before completion and on
+  finish/unmount. Completed sets are durable without pressing Finish.
+- **Rest timer:** service-backed, persisted, +/-15 s and skip are
+  transactions; it survives process death (restarted live if `ends_at` is in
+  the future, reported as expired otherwise). Notifications are deferred to
+  the notifications phase.
+- **Recovery:** the hub shows a resume card whenever an active workout
+  exists (task T) - never auto-discarded; conflicts raise explicit Resume /
+  Discard & start / Cancel choices.
+- **Summary and history:** the workout summary is canonical only (duration
+  derived from timestamps, completed-set count, exercise count, logged
+  volume as a basic training statistic). No PR/rank/streak/achievement
+  display exists in Phase 4; history detail is read-only.
+- **UI rules:** screens read canonical data through services on every render;
+  component state holds only in-progress text inputs and open/closed
+  drawers. The exercise picker searches SQLite with rank eligibility shown
+  as an indicator only (unsupported/provisional exercises stay fully
+  loggable).

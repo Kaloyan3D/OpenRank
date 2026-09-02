@@ -9,7 +9,9 @@
 
 import type {
   DerivedStateRepository,
+  PreviousPerformance,
   RoutineExerciseAddInput,
+  SetTargetSnapshot,
   Workout,
   WorkoutCreateInput,
   WorkoutDetail,
@@ -23,7 +25,8 @@ import type { DatabaseDriver } from "../driver";
 import { mapWorkout, mapWorkoutExercise, mapWorkoutSet, nowUtc } from "../rows";
 
 interface SetRowRef {
-  workout_exercise_id: unknown;
+  workout_exercise_id?: unknown;
+  workout_id?: unknown;
 }
 
 export class SqliteWorkoutRepository implements WorkoutRepository {
@@ -43,7 +46,7 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
           "VALUES (?, ?, ?, ?, 'active', ?, NULL, ?, ?, ?, NULL, ?, ?)",
         [
           id, input.profileId, input.routineId ?? null, input.title ?? null,
-          input.startedAt, input.startLocalDate, input.startLocalDate,
+          input.startedAt, input.startLocalDate, input.logicalTrainingDate ?? input.startLocalDate,
           input.startTimezoneOffsetMinutes, now, now,
         ],
       );
@@ -88,6 +91,44 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
 
   updateNotes(id: string, notes: string | null): void {
     this.touch(id, { notes });
+  }
+
+  updateExerciseNotes(workoutExerciseId: string, notes: string | null): void {
+    const result = this.driver.run(
+      "UPDATE workout_exercises SET notes = ? WHERE id = ?",
+      [notes, workoutExerciseId],
+    );
+    if (result.changes === 0) throw new Error("workout exercise not found: " + workoutExerciseId);
+    const row = this.driver.get("SELECT workout_id FROM workout_exercises WHERE id = ?", [
+      workoutExerciseId,
+    ]);
+    if (row?.workout_id != null) this.markWorkoutDirty(String(row.workout_id), "sets_changed");
+  }
+
+  updateWorkoutExercise(
+    workoutExerciseId: string,
+    patch: { restSeconds?: number | null; supersetGroup?: string | null },
+  ): void {
+    const sets: string[] = [];
+    const params: (string | number | null)[] = [];
+    if (patch.restSeconds !== undefined) {
+      sets.push("rest_seconds = ?");
+      params.push(patch.restSeconds == null ? null : Math.round(patch.restSeconds));
+    }
+    if (patch.supersetGroup !== undefined) {
+      sets.push("superset_group = ?");
+      params.push(patch.supersetGroup);
+    }
+    if (sets.length === 0) return;
+    const result = this.driver.run(
+      "UPDATE workout_exercises SET " + sets.join(", ") + " WHERE id = ?",
+      [...params, workoutExerciseId],
+    );
+    if (result.changes === 0) throw new Error("workout exercise not found: " + workoutExerciseId);
+    const row = this.driver.get("SELECT workout_id FROM workout_exercises WHERE id = ?", [
+      workoutExerciseId,
+    ]);
+    if (row?.workout_id != null) this.markWorkoutDirty(String(row.workout_id), "sets_changed");
   }
 
   setTitle(id: string, title: string | null): void {
@@ -171,7 +212,7 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
       [workoutExerciseId],
     ) as SetRowRef | undefined;
     if (!weRow) throw new Error("workout exercise not found: " + workoutExerciseId);
-    const workoutId = String(weRow.workout_exercise_id);
+    const workoutId = String(weRow.workout_id);
     const id = this.newId();
     const now = nowUtc();
     // One transaction: the set row + its dirty marker commit atomically.
@@ -186,7 +227,7 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
           "duration_seconds, distance_meters, rpe, rir, side, completed_at, created_at, updated_at) " +
           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
-          id, workoutExerciseId, position, input.setType,
+          id, workoutExerciseId, position, input.setType ?? "normal",
           input.weightKg ?? null, input.reps ?? null, input.durationSeconds ?? null,
           input.distanceMeters ?? null, input.rpe ?? null, input.rir ?? null,
           input.side ?? null, completedAtUtc ?? null, now, now,
@@ -269,8 +310,23 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
       );
       if (result.changes === 0) throw new Error("set not found: " + setId);
       this.dirty.mark(null, "workout_set", setId, "sets_changed");
-      if (weRow) this.markWorkoutDirty(String(weRow.workout_exercise_id), "sets_changed");
+      if (weRow) this.markWorkoutDirty(String(weRow.workout_id), "sets_changed");
     });
+    return this.requireSet(setId);
+  }
+
+  uncompleteSet(setId: string): WorkoutSet {
+    const result = this.driver.run(
+      "UPDATE workout_sets SET completed_at = NULL, updated_at = ? WHERE id = ?",
+      [nowUtc(), setId],
+    );
+    if (result.changes === 0) throw new Error("set not found: " + setId);
+    this.dirty.mark(null, "workout_set", setId, "sets_changed");
+    const weRow = this.driver.get(
+      "SELECT workout_id FROM workout_exercises WHERE id = (SELECT workout_exercise_id FROM workout_sets WHERE id = ?)",
+      [setId],
+    ) as SetRowRef | undefined;
+    if (weRow?.workout_id != null) this.markWorkoutDirty(String(weRow.workout_id), "sets_changed");
     return this.requireSet(setId);
   }
 
@@ -299,6 +355,87 @@ export class SqliteWorkoutRepository implements WorkoutRepository {
       this.markWorkoutDirty(id, "workout_discarded");
     });
     return this.requireWorkout(id);
+  }
+
+  deleteActive(id: string): void {
+    this.driver.transaction(() => {
+      const row = this.driver.get("SELECT profile_id, status FROM workouts WHERE id = ?", [id]);
+      if (!row) throw new Error("workout not found: " + id);
+      if (String(row.status) !== "active") {
+        throw new Error("only the active workout can be deleted (workout is " + String(row.status) + ")");
+      }
+      // Capture set ids so their dirty markers can be removed after the
+      // cascade; stale markers would confuse the Phase 5 worker.
+      const setIds = this.driver
+        .all(
+          "SELECT ws.id FROM workout_sets ws JOIN workout_exercises we ON we.id = ws.workout_exercise_id WHERE we.workout_id = ?",
+          [id],
+        )
+        .map((r) => String(r.id));
+      this.driver.run("DELETE FROM workouts WHERE id = ?", [id]); // cascades
+      this.driver.run("DELETE FROM derived_dirty WHERE entity_type = 'workout' AND entity_id = ?", [id]);
+      for (const setId of setIds) {
+        this.driver.run("DELETE FROM derived_dirty WHERE entity_type = 'workout_set' AND entity_id = ?", [setId]);
+      }
+    });
+  }
+
+  getPreviousPerformance(
+    profileId: string,
+    exerciseId: string,
+    excludeWorkoutId?: string | null,
+  ): PreviousPerformance | null {
+    // Latest completed workout (by start, then id for stability) that has at
+    // least one completed set for this exercise.
+    const workoutRow = this.driver.get(
+      "SELECT w.id AS wid, w.started_at AS started_at FROM workouts w " +
+        "JOIN workout_exercises we ON we.workout_id = w.id " +
+        "JOIN workout_sets ws ON ws.workout_exercise_id = we.id AND ws.completed_at IS NOT NULL " +
+        "WHERE w.profile_id = ? AND we.exercise_id = ? AND w.status = 'completed' " +
+        (excludeWorkoutId ? "AND w.id != ? " : "") +
+        "GROUP BY w.id ORDER BY w.started_at DESC, w.id DESC LIMIT 1",
+      excludeWorkoutId ? [profileId, exerciseId, excludeWorkoutId] : [profileId, exerciseId],
+    );
+    if (!workoutRow) return null;
+    const workoutId = String(workoutRow.wid);
+    const sets = this.driver
+      .all(
+        "SELECT ws.* FROM workout_sets ws " +
+          "JOIN workout_exercises we ON we.id = ws.workout_exercise_id " +
+          "WHERE we.workout_id = ? AND we.exercise_id = ? AND ws.completed_at IS NOT NULL " +
+          "ORDER BY we.position ASC, ws.position ASC",
+        [workoutId, exerciseId],
+      )
+      .map(mapWorkoutSet);
+    return { workoutId, startedAt: String(workoutRow.started_at), sets };
+  }
+
+  listRecentExerciseIds(profileId: string, limit: number): string[] {
+    return this.driver
+      .all(
+        "SELECT we.exercise_id AS eid, MAX(w.started_at) AS last_at FROM workout_exercises we " +
+          "JOIN workouts w ON w.id = we.workout_id " +
+          "WHERE w.profile_id = ? AND w.status != 'discarded' " +
+          "GROUP BY we.exercise_id ORDER BY last_at DESC LIMIT " + String(Math.trunc(limit)),
+        [profileId],
+      )
+      .map((r) => String(r.eid));
+  }
+
+  setTargetsSnapshot(workoutExerciseId: string, targets: readonly SetTargetSnapshot[]): void {
+    const json = JSON.stringify(targets.map((t) => ({
+      setType: t.setType,
+      targetRepsMin: t.targetRepsMin,
+      targetRepsMax: t.targetRepsMax,
+      targetWeightKg: t.targetWeightKg,
+      targetRpe: t.targetRpe,
+      targetRir: t.targetRir,
+    })));
+    const result = this.driver.run(
+      "UPDATE workout_exercises SET targets_json = ? WHERE id = ?",
+      [json, workoutExerciseId],
+    );
+    if (result.changes === 0) throw new Error("workout exercise not found: " + workoutExerciseId);
   }
 
   // ------------------------------------------------------------------ //

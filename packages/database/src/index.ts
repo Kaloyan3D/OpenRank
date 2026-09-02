@@ -96,6 +96,10 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
 }
 
 export { SCHEMA_VERSION, MIGRATIONS, migrate, schemaVersion } from "./migrations";
+export { createServices } from "./services";
+export type { OpenRankServices, WorkoutSummary } from "./services";
+export { WorkoutService, RoutineService, RestTimerService, ActiveWorkoutConflictError, IncompleteSetsError, SetValidationError, computeLogicalTrainingDate, computeStartLocalDate } from "./services";
+export { SqliteRestTimerRepository } from "./repositories/rest-timer";
 export { catalogFingerprint, installedFingerprint, seedCatalog, stableHash } from "./seed";
 export type { SeedOptions, SeedStats } from "./seed";
 export type { DatabaseDriver, SqlParam, SqlRow } from "./driver";

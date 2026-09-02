@@ -50,7 +50,8 @@ export class ExpoSqliteDriver implements DatabaseDriver {
   }
 
   transaction<T>(fn: () => T): T {
-    if (this.inTransaction) throw new Error("nested transactions are not supported");
+    // Reentrant: nested calls join the open transaction instead of failing.
+    if (this.inTransaction) return fn();
     this.inTransaction = true;
     let out!: T;
     try {

@@ -30,6 +30,48 @@ export interface WorkoutExercise {
   restSeconds: number | null;
   supersetGroup: string | null;
   notes: string | null;
+  /**
+   * Target-set snapshot copied from the routine when the workout started
+   * (Phase 4). Null for freestyle exercises. Later routine edits never
+   * mutate this - the workout owns its session structure once started.
+   */
+  targetSets: SetTargetSnapshot[] | null;
+}
+
+/** One routine target set, snapshotted into a workout at start time. */
+export interface SetTargetSnapshot {
+  setType: SetType;
+  targetRepsMin: number | null;
+  targetRepsMax: number | null;
+  targetWeightKg: number | null;
+  targetRpe: number | null;
+  targetRir: number | null;
+}
+
+/** The most relevant prior completed performance for one exercise. */
+export interface PreviousPerformance {
+  workoutId: string;
+  startedAt: string;
+  /** Completed sets of that workout for the exercise, in logged order. */
+  sets: WorkoutSet[];
+}
+
+/** Persisted rest-timer state (authoritative: timestamps, not countdowns). */
+export interface RestTimerState {
+  profileId: string;
+  workoutId: string;
+  workoutExerciseId: string | null;
+  startedAt: string;
+  /** Absolute end instant - the countdown is always derived from this. */
+  endsAt: string;
+  durationSeconds: number;
+  /**
+   * Derived remaining seconds (max(0, endsAt - now)). Computed on read with
+   * the caller's clock, so backgrounding and process restarts are free.
+   */
+  remainingSeconds: number;
+  /** True when ends_at <= now (the rest period is over). */
+  expired: boolean;
 }
 
 export interface Workout {

@@ -21,6 +21,9 @@ export type {
   WorkoutExercise,
   WorkoutSet,
   WorkoutStatus,
+  SetTargetSnapshot,
+  PreviousPerformance,
+  RestTimerState,
 } from "./workout";
 export type {
   Routine,
@@ -50,5 +53,7 @@ export type {
   WorkoutSetInput,
   WorkoutExerciseDetail,
   WorkoutDetail,
+  RestTimerRepository,
+  RestTimerStartInput,
   BodyweightAddInput,
 } from "./repositories";

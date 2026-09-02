@@ -4,7 +4,7 @@ import { MIGRATIONS, migrate, schemaVersion, SCHEMA_VERSION } from "./migrations
 import { openTestDb, openTestFileDb } from "./testing/helpers";
 
 describe("migrations", () => {
-  it("applies schema version 1 to an empty database", () => {
+  it("applies the latest schema (v" + String(SCHEMA_VERSION) + ") to an empty database", () => {
     const { driver, repos } = openTestDb();
     expect(repos.schemaVersion).toBe(SCHEMA_VERSION);
     expect(schemaVersion(driver)).toBe(SCHEMA_VERSION);
@@ -16,7 +16,7 @@ describe("migrations", () => {
       "profiles", "bodyweight_entries", "exercises", "muscles", "exercise_muscles",
       "exercise_aliases", "exercise_instructions", "exercise_media",
       "routines", "routine_exercises", "routine_set_targets",
-      "workouts", "workout_exercises", "workout_sets",
+      "workouts", "workout_exercises", "workout_sets", "rest_timer",
       "imports", "derived_dirty", "catalog_meta",
     ]) {
       expect(tables, expected).toContain(expected);

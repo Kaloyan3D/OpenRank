@@ -31,6 +31,9 @@ function initializeDatabase(): DatabaseStatus {
   try {
     const driver = ExpoSqliteDriver.open();
     const repos = openDatabase(driver, { catalog, newId: newExpoId });
+    // Attach the driver so the service layer can run cross-repository
+    // transactions on the SAME connection (see ServicesProvider).
+    (repos as OpenDatabaseResult & { __driver?: unknown }).__driver = driver;
     return { state: "ready", repos };
   } catch (err) {
     return {

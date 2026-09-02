@@ -10,7 +10,16 @@
  * - Every meaningful write is transactional; completed sets survive a crash.
  */
 
-import type { BodyweightEntry, Profile, Workout, WorkoutExercise, WorkoutSet } from "./workout";
+import type {
+  BodyweightEntry,
+  PreviousPerformance,
+  Profile,
+  RestTimerState,
+  SetTargetSnapshot,
+  Workout,
+  WorkoutExercise,
+  WorkoutSet,
+} from "./workout";
 import type { Exercise, ExerciseMuscle, MajorGroup, TrackingType } from "./exercise";
 import type { Routine, RoutineDetail, RoutineExercise, RoutineSetTarget } from "./routine";
 
@@ -213,12 +222,15 @@ export interface WorkoutCreateInput {
   startedAt: string;
   /** Local calendar date (YYYY-MM-DD) at the start instant. */
   startLocalDate: string;
+  /** Logical training day (defaults to startLocalDate; WorkoutService computes the 04:00 boundary). */
+  logicalTrainingDate?: string | undefined;
   /** Local UTC offset in minutes at the start instant. */
   startTimezoneOffsetMinutes: number;
 }
 
 export interface WorkoutSetInput {
-  setType: WorkoutSet["setType"];
+  /** Required when creating a set; optional in partial edit updates. */
+  setType?: WorkoutSet["setType"];
   weightKg?: number | null;
   reps?: number | null;
   durationSeconds?: number | null;
@@ -248,6 +260,13 @@ export interface WorkoutRepository {
   listHistory(profileId: string, limit?: number): WorkoutDetail[];
   updateNotes(id: string, notes: string | null): void;
   setTitle(id: string, title: string | null): void;
+  /** Notes on one workout exercise block (autosave commit point). */
+  updateExerciseNotes(workoutExerciseId: string, notes: string | null): void;
+  /** Adjust rest seconds / superset group of one workout exercise block. */
+  updateWorkoutExercise(
+    workoutExerciseId: string,
+    patch: { restSeconds?: number | null; supersetGroup?: string | null },
+  ): void;
   addExercise(workoutId: string, input: RoutineExerciseAddInput): WorkoutExercise;
   removeExercise(workoutExerciseId: string): void;
   reorderExercises(workoutId: string, orderedIds: string[]): void;
@@ -256,10 +275,56 @@ export interface WorkoutRepository {
   deleteSet(setId: string): void;
   /** Mark a set completed (autosave transaction - no Finish action needed). */
   completeSet(setId: string, completedAtUtc: string): WorkoutSet;
+  /** Clear completed_at while keeping the logged values. */
+  uncompleteSet(setId: string): WorkoutSet;
   /** Finish the workout (status completed + finished_at). */
   complete(id: string, finishedAtUtc: string): Workout;
   /** Discard without deleting (audit trail). */
   discard(id: string, discardedAtUtc: string): Workout;
+  /**
+   * Permanently delete an active workout and its sets (discard flow, Phase 4).
+   * Cascades to workout_exercises/workout_sets and removes stale dirty
+   * markers, all in one transaction.
+   */
+  deleteActive(id: string): void;
+  /**
+   * The most relevant prior completed performance for an exercise: the
+   * latest completed workout (excluding excludeWorkoutId) that has at least
+   * one completed set for it, with those sets in logged order.
+   */
+  getPreviousPerformance(
+    profileId: string,
+    exerciseId: string,
+    excludeWorkoutId?: string | null,
+  ): PreviousPerformance | null;
+  /** Recently logged exercise ids (completed or active workouts), newest first. */
+  listRecentExerciseIds(profileId: string, limit: number): string[];
+  /** Store the routine target snapshot for one workout exercise (start-from-routine). */
+  setTargetsSnapshot(workoutExerciseId: string, targets: readonly SetTargetSnapshot[]): void;
+}
+
+// ---------------------------------------------------------------------------
+// Rest timer (Phase 4) - one row per profile, upsert semantics
+// ---------------------------------------------------------------------------
+
+export interface RestTimerStartInput {
+  workoutId: string;
+  workoutExerciseId?: string | null;
+  durationSeconds: number;
+  startedAtUtc: string;
+}
+
+export interface RestTimerRepository {
+  /** Start (or restart) the profile's single rest timer. */
+  start(profileId: string, input: RestTimerStartInput): void;
+  /** Shift the end instant by deltaSeconds (positive extends, negative shortens). */
+  adjustEnd(profileId: string, deltaSeconds: number): void;
+  /** The current timer with derived remaining/expired fields, or null. */
+  get(profileId: string, nowUtcIso: string): RestTimerState | null;
+  /** Clear the timer (skip, finish, discard). */
+  clear(profileId: string): void;
+  /** Clear the timer only if it belongs to the given workout. */
+  clearIfWorkout(profileId: string, workoutId: string): void;
 }
 
 // ---------------------------------------------------------------------------

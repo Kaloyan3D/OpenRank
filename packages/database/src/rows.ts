@@ -13,6 +13,7 @@ import type {
   Routine,
   RoutineExercise,
   RoutineSetTarget,
+  SetTargetSnapshot,
   SetType,
   TrackingType,
   Workout,
@@ -135,7 +136,30 @@ export function mapWorkoutExercise(row: SqlRow): WorkoutExercise {
     restSeconds: row.rest_seconds == null ? null : Number(row.rest_seconds),
     supersetGroup: asStr(row.superset_group),
     notes: asStr(row.notes),
+    targetSets: parseTargetsJson(asStr(row.targets_json)),
   };
+}
+
+/** Parse the target-set snapshot JSON (null when absent or malformed). */
+function parseTargetsJson(json: string | null): SetTargetSnapshot[] | null {
+  if (json == null) return null;
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!Array.isArray(parsed)) return null;
+    return parsed.map((t) => {
+      const o = t as Record<string, unknown>;
+      return {
+        setType: String(o.setType) as SetTargetSnapshot["setType"],
+        targetRepsMin: o.targetRepsMin == null ? null : Number(o.targetRepsMin),
+        targetRepsMax: o.targetRepsMax == null ? null : Number(o.targetRepsMax),
+        targetWeightKg: o.targetWeightKg == null ? null : Number(o.targetWeightKg),
+        targetRpe: o.targetRpe == null ? null : Number(o.targetRpe),
+        targetRir: o.targetRir == null ? null : Number(o.targetRir),
+      };
+    });
+  } catch {
+    return null;
+  }
 }
 
 export function mapWorkoutSet(row: SqlRow): WorkoutSet {

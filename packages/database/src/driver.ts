@@ -26,8 +26,10 @@ export interface DatabaseDriver {
   /** All rows. */
   all(sql: string, params?: readonly SqlParam[]): SqlRow[];
   /**
-   * Run fn inside BEGIN IMMEDIATE ... COMMIT; rolls back on throw. Drivers
-   * must reject nested calls (the repositories never nest).
+   * Run fn inside BEGIN IMMEDIATE ... COMMIT; rolls back on throw.
+   * Reentrant: calls made while a transaction is already open on this
+   * connection run directly inside it (services compose repository calls
+   * into one atomic unit; the inner transactions become no-ops).
    */
   transaction<T>(fn: () => T): T;
   close(): void;

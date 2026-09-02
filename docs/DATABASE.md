@@ -1,8 +1,10 @@
-# Database design (Phase 3)
+# Database design (Phases 3-4)
 
-This document records the Phase 3 persistence decisions: the ORM/library
-evaluation, the schema v1 layout, the source-of-truth rules, IDs, units,
-migration and seeding policies, transactions, indexes and integrity tests.
+This document records the persistence decisions: the ORM/library
+evaluation, the schema layout (v1 baseline, v2 workout-session additions), the
+source-of-truth rules, IDs, units, migration and seeding policies,
+transactions, indexes and integrity tests. Phase 4 additions are marked
+"Phase 4" throughout.
 
 ## 1. Library decision: expo-sqlite + hand-rolled migrations (no Drizzle)
 
@@ -52,9 +54,15 @@ databases (in-memory test databases keep their own journal mode).
   The database stores per-exercise *eligibility metadata* copied from the
   catalog seed (see section 8); it never computes ranks.
 
-## 3. Schema version 1
+## 3. Schema
 
-`SCHEMA_VERSION = 1`, stored in `PRAGMA user_version`. Migration v1 creates:
+`SCHEMA_VERSION = 2` (Phase 4), stored in `PRAGMA user_version`. Migration
+v1 creates the baseline; migration v2 (Phase 4) adds the rest-timer table and
+the workout target snapshot column.
+
+### 3.1 Version 1 (baseline)
+
+Migration v1 creates:
 
 **Tables (17):** `profiles`, `bodyweight_entries`, `muscles`, `exercises`,
 `exercise_muscles`, `exercise_aliases`, `exercise_instructions`,
@@ -117,6 +125,25 @@ CHECK constraints guard the domain invariants at the storage layer:
 `workout_sets.weight_kg >= 0`, `rpe BETWEEN 1 AND 10`, `rir BETWEEN 0 AND 10`,
 `bodyweight_entries.weight_kg > 0`, `workouts.status != 'completed' OR
 finished_at IS NOT NULL`, and set-type/route/status enum checks.
+
+### 3.2 Version 2 (Phase 4: workout session)
+
+Migration v2 adds two changes, each transactional with the `user_version`
+bump:
+
+- **`rest_timer`** - one row per profile (primary key `profile_id` -> profiles
+  CASCADE) holding the authoritative rest-timer state:
+  `workout_id -> workouts` CASCADE, `workout_exercise_id -> workout_exercises`
+  SET NULL, `started_at`, `ends_at` (both ISO-8601 UTC), `duration_seconds`
+  (> 0) and `updated_at`. The **absolute `ends_at` timestamp is the source of
+  truth** - remaining time is always derived on read, so backgrounding and
+  process death cost nothing. Upserts use
+  `ON CONFLICT(profile_id) DO UPDATE` (one live timer per profile).
+- **`workout_exercises.targets_json`** (nullable TEXT) - the routine
+  target-set snapshot copied at workout start (type, rep range, weight, RPE,
+  RIR per planned set). Stored as JSON on the workout block (not rows) so a
+  session owns its structure without pre-created empty sets; later routine
+  edits never touch it (see docs/WORKOUT_SPEC.md section "Snapshot").
 
 ## 4. IDs
 
@@ -216,14 +243,21 @@ engine remains the only rank classifier.
 - Reordering child rows (routine/workout exercises, sets) uses a two-phase
   update (shift positions negative, then assign dense final positions) so the
   position uniqueness constraints can never be violated mid-transaction.
+- **Driver transactions are reentrant (Phase 4)**: calling `transaction()`
+  while already inside one joins the outer transaction instead of issuing a
+  nested `BEGIN`. This lets services compose several repository calls into a
+  single atomic `BEGIN IMMEDIATE` (e.g. complete-set = set update + dirty
+  markers + rest-timer start) without the repository layer knowing about
+  services.
 
-## 10. Integrity test list
+## 10. Integrity + service test list
 
-`packages/database/src` (47 tests, all running against real SQLite):
+`packages/database/src` (all running against real SQLite):
 
-- `migrations.test.ts` - schema v1 applied to an empty database; migrate is
-  idempotent; versions contiguous; a failed migration rolls back with no
-  partial DDL; `foreign_keys = ON` on every connection; WAL on file DBs.
+- `migrations.test.ts` - latest schema applied to an empty database
+  (including `rest_timer`); migrate is idempotent; versions contiguous; a
+  failed migration rolls back with no partial DDL; `foreign_keys = ON` on
+  every connection; WAL on file DBs.
 - `seed.test.ts` - full seed counts; reseed is a no-op (`unchanged`);
   deterministic ids/fingerprint; user custom exercise + user alias survive
   reseeds; a changed catalog updates rows in place; `catalog_meta` recorded.
@@ -249,6 +283,28 @@ engine remains the only rank classifier.
   reorder; complete/discard + history; dirty markers on every write.
 - `crash-reopen.test.ts` - hard close mid-workout; reopen; active workout and
   all sets intact; dirty queue intact; workout continues.
+- `services/logical-date.test.ts` (Phase 4) - the centralized 04:00 logical
+  training-day helper: same-day boundaries, early-morning rollover to the
+  previous local day, offset handling.
+- `services/set-validation.test.ts` (Phase 4) - edit-time vs completion-time
+  validation per tracking type: negatives/NaN/Infinity rejected, decimals
+  allowed, RPE 1-10 / RIR 0-10 ranges, completion requires the fields the
+  tracking type demands.
+- `services/workout-service.test.ts` (Phase 4) - start empty/from routine,
+  conflict error, snapshot semantics (later routine edits never mutate a
+  started workout), finish policies (remove vs reject incomplete sets),
+  summary math, discard cascade + dirty cleanup, recent exercises, previous
+  performance.
+- `services/routine-service.test.ts` (Phase 4) - routine CRUD/archive lists,
+  validation, per-tracking-type set operations, dirty markers for
+  completed/changed/deleted completed sets.
+- `services/rest-timer-service.test.ts` (Phase 4) - persisted timer
+  survives a full database close/reopen; remaining time derived from
+  `ends_at`; expired state after restart.
+- `services/process-death.test.ts` (Phase 4) - the full acceptance
+  scenario (task U): structure, sets, set types, notes, duration derivation,
+  dirty queue AND rest-timer recovery after a simulated process death with
+  a clock jump past the timer's end.
 
 ## 11. Exports
 
