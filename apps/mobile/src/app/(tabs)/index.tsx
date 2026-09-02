@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ActiveWorkoutConflictError, computeLogicalTrainingDate, resolveHomeSessionView } from "@openrank/database";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { RankBadge } from "../../components/ui/RankBadge";
@@ -60,8 +60,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const repos = useRepos();
   const services = useServices();
-  const [nonce, setNonce] = useState(0);
-  void nonce;
+  // Canonical invalidation (Phase 8.2): Home stays mounted across tab
+  // switches, so it MUST re-render when any canonical mutation commits
+  // (workout finished, schedule changed, streak/PR/rank derived updates...).
+  useCanonicalRevision();
 
   const profile = repos.profile.getDefault();
   if (!profile) {
@@ -127,7 +129,6 @@ export default function HomeScreen() {
       }
       throw err;
     }
-    setNonce((n) => n);
   };
 
   const nextLabel = next

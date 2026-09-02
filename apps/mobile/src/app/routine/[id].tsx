@@ -1,10 +1,11 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import type { RoutineDetail, SetType } from "@openrank/domain";
 import { ActiveWorkoutConflictError } from "@openrank/database";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { supersetChoices } from "../../ui/supersets";
 import { colors } from "../../design/colors";
 import { spacing, typography } from "../../theme/tokens";
@@ -24,9 +25,9 @@ export default function RoutineBuilderScreen() {
   const routineId = typeof params.id === "string" ? params.id : "";
   const repos = useRepos();
   const services = useServices();
-  const [nonce, setNonce] = useState(0);
-  const refresh = useCallback(() => setNonce((n) => n + 1), []);
-  void nonce;
+  // Canonical invalidation (Phase 8.2): every routine mutation commits ->
+  // revision++ -> this editor re-renders with fresh canonical state.
+  useCanonicalRevision();
 
   const [renameOpen, setRenameOpen] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
@@ -105,7 +106,6 @@ export default function RoutineBuilderScreen() {
           onPress={() => {
             if (routine.archivedAt == null) services.routine.archive(routine.id);
             else services.routine.unarchive(routine.id);
-            refresh();
           }}
         >
           <Text style={styles.secondaryText}>{routine.archivedAt == null ? "Archive" : "Unarchive"}</Text>
@@ -144,7 +144,7 @@ export default function RoutineBuilderScreen() {
                 {re.supersetGroup ? " - superset " + re.supersetGroup : ""}
               </Text>
             </View>
-            <Pressable accessibilityLabel="Remove exercise" onPress={() => { services.routine.removeExercise(re.id); refresh(); }} style={styles.iconBtn}>
+            <Pressable accessibilityLabel="Remove exercise" onPress={() => services.routine.removeExercise(re.id)} style={styles.iconBtn}>
               <Text style={styles.deleteText}>{"\u00D7"}</Text>
             </Pressable>
           </View>
@@ -179,7 +179,6 @@ export default function RoutineBuilderScreen() {
                         targetRir: x.targetRir,
                       })),
                     );
-                    refresh();
                   }}
                 >
                   <Text style={styles.deleteText}>{"\u00D7"}</Text>
@@ -202,7 +201,6 @@ export default function RoutineBuilderScreen() {
                     })),
                     { setType: "normal", targetRepsMin: 8, targetRepsMax: 10 },
                   ]);
-                  refresh();
                 }}
               >
                 <Text style={styles.optionText}>+ target set</Text>
@@ -225,7 +223,6 @@ export default function RoutineBuilderScreen() {
                     targetRpe: x.targetRpe,
                     targetRir: x.targetRir,
                   })));
-                  refresh();
                 }}
               >
                 <Text style={styles.optionText}>reps range</Text>
@@ -234,10 +231,10 @@ export default function RoutineBuilderScreen() {
           </View>
 
           <View style={styles.optionsRow}>
-            <Pressable accessibilityLabel="Move up" onPress={() => reorder(services, exercises, routine.id, i, -1, refresh)} style={styles.optionBtn}>
+            <Pressable accessibilityLabel="Move up" onPress={() => reorder(services, exercises, routine.id, i, -1)} style={styles.optionBtn}>
               <Text style={styles.optionText}>{"\u2191"}</Text>
             </Pressable>
-            <Pressable accessibilityLabel="Move down" onPress={() => reorder(services, exercises, routine.id, i, 1, refresh)} style={styles.optionBtn}>
+            <Pressable accessibilityLabel="Move down" onPress={() => reorder(services, exercises, routine.id, i, 1)} style={styles.optionBtn}>
               <Text style={styles.optionText}>{"\u2193"}</Text>
             </Pressable>
             <Pressable
@@ -247,7 +244,6 @@ export default function RoutineBuilderScreen() {
                 const presets = [null, 60, 90, 120, 180, 240];
                 const idx = presets.indexOf(re.restSeconds);
                 services.routine.setRestSeconds(re.id, presets[(idx + 1) % presets.length]!);
-                refresh();
               }}
             >
               <Text style={styles.optionText}>rest {re.restSeconds ?? "-"}</Text>
@@ -259,7 +255,6 @@ export default function RoutineBuilderScreen() {
                 const choices = supersetChoices();
                 const idx = choices.findIndex((c) => c.value === re.supersetGroup);
                 services.routine.setSupersetGroup(re.id, choices[(idx + 1) % choices.length]!.value);
-                refresh();
               }}
             >
               <Text style={styles.optionText}>ss: {re.supersetGroup ?? "none"}</Text>
@@ -279,7 +274,6 @@ export default function RoutineBuilderScreen() {
                   targetRpe: x.targetRpe,
                   targetRir: x.targetRir,
                 })));
-                refresh();
               }}
             >
               <Text style={styles.optionText}>type: {re.targets[re.targets.length - 1]?.setType ?? "-"}</Text>
@@ -313,7 +307,6 @@ export default function RoutineBuilderScreen() {
                     Alert.alert("Cannot rename", err instanceof Error ? err.message : String(err));
                   }
                   setRenameOpen(false);
-                  refresh();
                 }}
               >
                 <Text style={styles.primaryText}>Save</Text>
@@ -332,7 +325,6 @@ function reorder(
   routineId: string,
   i: number,
   dir: -1 | 1,
-  refresh: () => void,
 ): void {
   const j = i + dir;
   if (j < 0 || j >= exercises.length) return;
@@ -340,8 +332,9 @@ function reorder(
   const swapped = [...ids];
   swapped[i] = swapped[j]!;
   swapped[j] = ids[i]!;
+  // The committed reorder publishes the canonical revision; the editor
+  // re-renders with the new order (no manual refresh needed).
   services.routine.reorderExercises(routineId, swapped);
-  refresh();
 }
 
 const styles = StyleSheet.create({

@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 import { colors } from "../design/colors";
 import { radius } from "../design/radii";
 import { space } from "../design/spacing";
@@ -15,6 +16,7 @@ import { AnimatedProgress } from "../ui/AnimatedProgress";
 export default function AchievementsScreen() {
   const repos = useRepos();
   const services = useServices();
+  useCanonicalRevision(); // canonical invalidation (Phase 8.2)
   const profile = repos.profile.getDefault();
 
   if (!profile) {

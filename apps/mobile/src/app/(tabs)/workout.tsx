@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { useRouter } from "expo-router";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Routine } from "@openrank/domain";
 import { ActiveWorkoutConflictError } from "@openrank/database";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { countCompletedSets, useNow } from "../../hooks/workout";
 import { RestTimerBar } from "../../ui/RestTimerBar";
 import { formatDuration } from "../../ui/format";
@@ -28,8 +28,9 @@ export default function WorkoutHubScreen() {
   const router = useRouter();
   const repos = useRepos();
   const services = useServices();
-  const [nonce, setNonce] = useState(0);
-  void nonce; // re-render trigger after discard
+  // Canonical invalidation (Phase 8.2): start/discard/rest-timer mutations
+  // commit -> revision++ -> the hub re-renders with fresh canonical state.
+  useCanonicalRevision();
 
   const profile = repos.profile.getDefault();
   const active = profile ? services.workout.resumeActiveWorkout(profile.id) : null;
@@ -117,7 +118,6 @@ export default function WorkoutHubScreen() {
   const discardActive = () => {
     if (!active) return;
     services.workout.discardWorkout(active.workout.id);
-    setNonce((n) => n + 1);
   };
 
   return (
@@ -160,11 +160,9 @@ export default function WorkoutHubScreen() {
                 rest={rest}
                 onAdjust={(d) => {
                   if (profile) services.restTimer.addSeconds(profile.id, d);
-                  setNonce((n) => n + 1);
                 }}
                 onSkip={() => {
                   if (profile) services.restTimer.skip(profile.id);
-                  setNonce((n) => n + 1);
                 }}
               />
             ) : null}

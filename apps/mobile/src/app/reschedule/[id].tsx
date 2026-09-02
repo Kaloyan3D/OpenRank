@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { RescheduleError, addDays, computeLogicalTrainingDate, isoWeekdayOf, startOfIsoWeek } from "@openrank/database";
 import type { ScheduledSession } from "@openrank/domain";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { colors, spacing, typography } from "../../theme/tokens";
 
 /**
@@ -20,8 +20,9 @@ export default function RescheduleScreen() {
   const repos = useRepos();
   const services = useServices();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [nonce, setNonce] = useState(0);
-  void nonce;
+  // Canonical invalidation (Phase 8.2): reschedule/pause mutations publish
+  // -> the occupied-day map recomputes from fresh canonical state.
+  useCanonicalRevision();
 
   const profile = repos.profile.getDefault();
   const session: ScheduledSession | null = id ? repos.scheduledSessions.getById(id) : null;
@@ -63,7 +64,6 @@ export default function RescheduleScreen() {
     } catch (err) {
       if (err instanceof RescheduleError) {
         Alert.alert("Cannot reschedule", err instanceof Error ? err.message : String(err));
-        setNonce((n) => n + 1);
         return;
       }
       throw err;

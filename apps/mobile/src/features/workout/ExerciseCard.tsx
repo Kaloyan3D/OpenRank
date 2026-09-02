@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Exercise, PreviousPerformance, WorkoutExerciseDetail, WorkoutSetInput } from "@openrank/domain";
 import { fieldsForTracking } from "../../ui/tracking";
 import { formatSetSummary } from "../../ui/format";
+import { equipmentLabel } from "../../ui/equipment";
 import { colors } from "../../design/colors";
 import { radius } from "../../design/radii";
 import { space } from "../../design/spacing";
@@ -50,7 +51,7 @@ export function ExerciseCard(props: {
         <View style={{ flex: 1 }}>
           <Text style={styles.exerciseName}>{meta?.name ?? "Exercise"}</Text>
           <Text style={styles.exerciseMeta}>
-            {[meta?.equipment ?? "bodyweight", meta?.rankingGroup].filter(Boolean).join(" \u00B7 ")}
+            {[equipmentLabel(meta?.equipment), meta?.rankingGroup].filter(Boolean).join(" \u00B7 ")}
           </Text>
         </View>
         <Pressable

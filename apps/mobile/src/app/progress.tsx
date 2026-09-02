@@ -5,6 +5,7 @@ import { GROUPS } from "@openrank/ranking-core";
 import type { GroupKey } from "@openrank/ranking-core";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 import { useUnits } from "../ui/units";
 import { formatWeight } from "../ui/format";
 import { Screen } from "../components/ui/Screen";
@@ -36,6 +37,8 @@ export default function ProgressScreen() {
   const services = useServices();
   const units = useUnits();
   const [range, setRange] = useState<ProgressRange>("12W");
+  // Canonical invalidation (Phase 8.2): analytics re-derive on every commit.
+  useCanonicalRevision();
   const profile = repos.profile.getDefault();
 
   if (!profile) {

@@ -4,6 +4,8 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-na
 import type { Exercise, MajorGroup, TrackingType } from "@openrank/domain";
 import { MAJOR_GROUPS } from "@openrank/exercise-catalog";
 import { useRepos } from "../../db/DatabaseProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
+import { equipmentLabel } from "../../ui/equipment";
 import { colors } from "../../design/colors";
 import { radius } from "../../design/radii";
 import { space } from "../../design/spacing";
@@ -33,6 +35,7 @@ const TRACKING_LABELS: Partial<Record<TrackingType, string>> = {
 export default function ExercisesScreen() {
   const router = useRouter();
   const repos = useRepos();
+  useCanonicalRevision(); // canonical invalidation (Phase 8.2)
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState<MajorGroup | null>(null);
   const [tracking, setTracking] = useState<TrackingType | null>(null);
@@ -97,7 +100,7 @@ export default function ExercisesScreen() {
           >
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.meta}>
-              {[item.equipment ?? "bodyweight", rankLabel(item)].filter(Boolean).join(" - ")}
+              {[equipmentLabel(item.equipment), rankLabel(item)].filter(Boolean).join(" - ")}
             </Text>
           </Pressable>
         )}

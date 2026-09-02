@@ -3,6 +3,7 @@ import { isPerfectWeek } from "@openrank/database";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { useUnits } from "../../ui/units";
 import { formatDateTime, formatDurationRough, formatVolume } from "../../ui/format";
 import { formatSetSummary } from "../../ui/format";
@@ -26,6 +27,7 @@ export default function HistoryDetailScreen() {
   const repos = useRepos();
   const services = useServices();
   const units = useUnits();
+  useCanonicalRevision(); // canonical invalidation (Phase 8.2): PR/highlights refresh live
 
   let data: ReturnType<typeof services.workout.getSummary> | null = null;
   try {

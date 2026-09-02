@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { useUnits } from "../../ui/units";
 import { formatDateTime, formatProgressPercent, formatRankLabel } from "../../ui/format";
 import { Screen } from "../../components/ui/Screen";
@@ -38,20 +39,19 @@ export default function RanksScreen() {
   const services = useServices();
   const units = useUnits();
   const [mode, setMode] = useState<"muscle" | "exercise">("muscle");
-  const [reloadKey] = useState(0);
-  void reloadKey;
+  // Canonical invalidation (Phase 8.2): rank/PR rebuilds and bodyweight adds
+  // publish -> this screen re-renders with fresh snapshots.
+  useCanonicalRevision();
 
   const profile = repos.profile.getDefault();
   const view = profile ? services.derived.getStrengthProfile(profile.id) : null;
   const recent = profile ? services.derived.recentRankEvents(profile.id, 12) : [];
   const exerciseSnapshots = useMemoSafe(() => {
     if (!profile || mode !== "exercise") return [];
-    void reloadKey;
     return repos.rankSnapshots.latestForProfile(profile.id).filter((s) => s.scopeType === "exercise");
   });
   const exerciseById = useMemoSafe(() => {
     if (mode !== "exercise") return new Map<string, string>();
-    void reloadKey;
     return new Map(repos.exercise.listRankSupported().map((e) => [e.id, e.name]));
   });
 

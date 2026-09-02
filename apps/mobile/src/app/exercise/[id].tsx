@@ -3,8 +3,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { useUnits } from "../../ui/units";
 import { formatDateTime, formatProgressPercent, formatRankLabel, formatWeight } from "../../ui/format";
+import { equipmentLabel } from "../../ui/equipment";
 import { Screen } from "../../components/ui/Screen";
 import { Card } from "../../components/ui/Card";
 import { Chip } from "../../components/ui/Chip";
@@ -28,6 +30,7 @@ export default function ExerciseDetailScreen() {
   const repos = useRepos();
   const services = useServices();
   const units = useUnits();
+  useCanonicalRevision(); // canonical invalidation (Phase 8.2)
   const params = useLocalSearchParams<{ id: string }>();
   const slug = typeof params.id === "string" ? decodeURIComponent(params.id) : "";
 
@@ -125,7 +128,7 @@ export default function ExerciseDetailScreen() {
           <Chip label={exercise.category} />
           {exercise.mechanic ? <Chip label={exercise.mechanic} /> : null}
           {exercise.force ? <Chip label={exercise.force} /> : null}
-          <Chip label={exercise.equipment ?? "bodyweight"} />
+          <Chip label={equipmentLabel(exercise.equipment)} />
           <Chip label={exercise.trackingType.replace(/_/g, " ")} />
         </View>
 

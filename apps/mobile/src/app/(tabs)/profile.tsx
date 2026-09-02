@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { useUnits } from "../../ui/units";
 import { formatDateTime } from "../../ui/format";
 import { Screen } from "../../components/ui/Screen";
@@ -31,8 +32,9 @@ export default function ProfileScreen() {
   const [weightInput, setWeightInput] = useState("");
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
-  const [nonce, setNonce] = useState(0);
-  void nonce;
+  // Canonical invalidation (Phase 8.2): profile/bodyweight/rank mutations
+  // commit -> revision++ -> this screen re-renders and re-reads SQLite.
+  useCanonicalRevision();
 
   const profile = repos.profile.getDefault();
   const history = profile ? repos.bodyweight.history(profile.id) : [];
@@ -51,14 +53,10 @@ export default function ProfileScreen() {
       return;
     }
     try {
-      repos.bodyweight.add({
-        profileId: profile.id,
-        measuredAt: new Date().toISOString(),
-        weightKg: Math.round(kg * 1000) / 1000,
-        source: "manual entry",
-      });
+      // Canonical write through the service layer (commit publishes the
+      // revision; no manual refresh is needed or allowed).
+      services.profile.addBodyweight(profile.id, kg, new Date().toISOString());
       setWeightInput("");
-      setNonce((n) => n + 1);
     } catch (err) {
       Alert.alert("Cannot save bodyweight", err instanceof Error ? err.message : String(err));
     }
@@ -67,10 +65,9 @@ export default function ProfileScreen() {
   const setStandard = (standard: "male" | "female") => {
     if (!profile || profile.strengthStandard === standard) return;
     try {
-      repos.profile.updateStrengthStandard(profile.id, standard);
+      services.profile.updateStrengthStandard(profile.id, standard);
       // Ranks rebuild on the next worker pass; trigger it right away.
       services.derived.processPending();
-      setNonce((n) => n + 1);
     } catch (err) {
       Alert.alert("Cannot change standard", err instanceof Error ? err.message : String(err));
     }
@@ -79,8 +76,7 @@ export default function ProfileScreen() {
   const setUnits = (system: "metric" | "imperial") => {
     if (!profile || profile.unitSystem === system) return;
     try {
-      repos.profile.updateUnitSystem(profile.id, system);
-      setNonce((n) => n + 1);
+      services.profile.updateUnitSystem(profile.id, system);
     } catch (err) {
       Alert.alert("Cannot change units", err instanceof Error ? err.message : String(err));
     }
@@ -107,7 +103,6 @@ export default function ProfileScreen() {
     try {
       services.profile.updateDisplayName(profile.id, nameDraft);
       setEditingName(false);
-      setNonce((n) => n + 1);
     } catch (err) {
       Alert.alert("Cannot rename", err instanceof Error ? err.message : String(err));
     }

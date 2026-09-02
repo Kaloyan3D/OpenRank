@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { usePathname, useRouter } from "expo-router";
 import { resolveRootRoute } from "@openrank/database";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { colors } from "../../design/colors";
 import { space } from "../../design/spacing";
 import { type } from "../../design/typography";
@@ -36,6 +37,9 @@ export function RoutingGate(props: { children: ReactNode }) {
   const router = useRouter();
   const services = useServices();
   const pathname = usePathname();
+  // Canonical invalidation (Phase 8.2): onboarding step writes publish, so
+  // the gate re-evaluates the root route from fresh canonical state.
+  useCanonicalRevision();
 
   const profile = services.profile.getDefaultProfile();
   const target = resolveRootRoute(profile);

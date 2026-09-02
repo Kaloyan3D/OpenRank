@@ -25,10 +25,12 @@ import type {
   RestTimerState,
   ProfileRepository,
   ExerciseRepository,
+  RoutineExerciseAddInput,
   RoutineRepository,
   SetTargetSnapshot,
   Workout,
   WorkoutDetail,
+  WorkoutExercise,
   WorkoutExerciseDetail,
   WorkoutRepository,
   WorkoutSet,
@@ -280,6 +282,16 @@ export class WorkoutService {
   /** Exercise-level notes (autosave commit point). */
   updateExerciseNotes(workoutExerciseId: string, notes: string | null): void {
     this.repos.workout.updateExerciseNotes(workoutExerciseId, notes);
+  }
+
+  /**
+   * Phase 8.2: canonical add-exercise flows through the service layer (the
+   * exercise picker is UI and must never mutate the workout repository
+   * directly). Behavior-preserving delegation; the repository remains the
+   * only SQL consumer and keeps ownership of ordering.
+   */
+  addExercise(workoutId: string, input: RoutineExerciseAddInput): WorkoutExercise {
+    return this.repos.workout.addExercise(workoutId, input);
   }
 
   /**

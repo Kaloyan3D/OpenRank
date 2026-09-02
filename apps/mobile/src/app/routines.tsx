@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 import { colors } from "../design/colors";
 import { spacing, typography } from "../theme/tokens";
 
@@ -14,10 +15,9 @@ export default function RoutinesScreen() {
   const router = useRouter();
   const repos = useRepos();
   const services = useServices();
-  // Service-backed reads refresh on navigation; nonce forces a re-render when
-  // the user returns from a builder screen.
-  const [nonce] = useState(0);
-  void nonce;
+  // Canonical invalidation (Phase 8.2): routine create/edit/delete commits
+  // -> revision++ -> this list re-renders when the builder screen returns.
+  useCanonicalRevision();
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
 

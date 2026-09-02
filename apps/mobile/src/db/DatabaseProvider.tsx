@@ -18,6 +18,8 @@ import type { CatalogV1 } from "@openrank/exercise-catalog";
 import type { OpenDatabaseResult } from "@openrank/database";
 import { openDatabase } from "@openrank/database";
 import { ExpoSqliteDriver, newExpoId } from "@openrank/database/expo";
+import { ChangeNotifyingDriver } from "../local-data/ChangeNotifyingDriver";
+import { localDataChangeStore } from "../local-data/LocalDataChangeStore";
 import { colors } from "../design/colors";
 
 const catalog = catalogJson as unknown as CatalogV1;
@@ -30,7 +32,11 @@ export type DatabaseStatus =
 /** One synchronous init pass: open -> pragmas -> migrate -> seed. */
 function initializeDatabase(): DatabaseStatus {
   try {
-    const driver = ExpoSqliteDriver.open();
+    // Phase 8.2 P0: the connection is wrapped so every successful canonical
+    // write (repository, service, derived/streak worker) publishes a
+    // LocalDataChangeStore revision AFTER commit - the single app-wide
+    // invalidation stream every data-driven screen subscribes to.
+    const driver = new ChangeNotifyingDriver(ExpoSqliteDriver.open(), () => localDataChangeStore.publish());
     const repos = openDatabase(driver, { catalog, newId: newExpoId });
     // Attach the driver so the service layer can run cross-repository
     // transactions on the SAME connection (see ServicesProvider).

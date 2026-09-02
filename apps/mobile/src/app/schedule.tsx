@@ -5,6 +5,7 @@ import { SchedulePauseOverlapError, RescheduleError, computeLogicalTrainingDate 
 import type { ScheduleWeekday } from "@openrank/domain";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 import { colors } from "../design/colors";
 import { radius } from "../design/radii";
 import { space } from "../design/spacing";
@@ -24,12 +25,13 @@ export default function ScheduleScreen() {
   const router = useRouter();
   const repos = useRepos();
   const services = useServices();
-  const [nonce, setNonce] = useState(0);
+  // Canonical invalidation (Phase 8.2): schedule/pause/preference mutations
+  // commit -> revision++ -> this editor and every mounted consumer (Home,
+  // notifications) re-render with fresh canonical state.
+  useCanonicalRevision();
   const [pauseReason, setPauseReason] = useState("");
   const [reminderAskDismissed, setReminderAskDismissed] = useState(false);
   const [pickerDay, setPickerDay] = useState<ScheduleWeekday | null>(null);
-  const refresh = () => setNonce((n) => n + 1);
-  void nonce;
 
   const profile = repos.profile.getDefault();
   const offset = -new Date().getTimezoneOffset();
@@ -65,7 +67,6 @@ export default function ScheduleScreen() {
       services.notifications.setReminderTimeForEnabledDays(profile.id, 1020); // 17:00
       reconcileNotifications();
     }
-    refresh();
   };
   const routines = services.routine.list(profile.id).active;
   const upcoming = services.schedule.getUpcomingSessions(profile.id, { timezoneOffsetMinutes: offset }).slice(0, 10);
@@ -79,19 +80,19 @@ export default function ScheduleScreen() {
     services.schedule.updateWeeklySchedule(profile.id, next.map((d) => ({
       weekday: d.weekday, enabled: d.enabled, routineId: d.routineId,
     })), { timezoneOffsetMinutes: offset });
-    refresh(); reconcileNotifications();
+    reconcileNotifications();
   };
 
   const assignRoutine = (weekday: ScheduleWeekday, routineId: string | null) => {
     services.schedule.updateWeeklySchedule(profile.id, days.map((d) => ({
       weekday: d.weekday, enabled: d.enabled, routineId: d.weekday === weekday ? routineId : d.routineId,
     })), { timezoneOffsetMinutes: offset });
-    refresh(); reconcileNotifications();
+    reconcileNotifications();
   };
 
   const toggleSchedule = (enabled: boolean) => {
     services.schedule.setScheduleEnabled(profile.id, enabled, { timezoneOffsetMinutes: offset });
-    refresh(); reconcileNotifications();
+    reconcileNotifications();
   };
 
   const isValidIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value + "T00:00:00Z"));
@@ -112,7 +113,7 @@ export default function ScheduleScreen() {
     try {
       services.schedule.addPause(profile.id, start, end, pauseReason.trim() || null, { timezoneOffsetMinutes: offset });
       setPauseReason("");
-      refresh(); reconcileNotifications();
+      reconcileNotifications();
     } catch (err) {
       if (err instanceof SchedulePauseOverlapError) {
         Alert.alert("Overlapping pause", "This overlaps an existing planned pause.");
@@ -125,7 +126,7 @@ export default function ScheduleScreen() {
   const removePause = (id: string) => {
     try {
       services.schedule.removeFuturePause(id, { timezoneOffsetMinutes: offset });
-      refresh(); reconcileNotifications();
+      reconcileNotifications();
     } catch (err) {
       if (err instanceof RescheduleError) {
         Alert.alert("Cannot remove", "A fully elapsed pause is history.");

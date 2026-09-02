@@ -4,15 +4,29 @@ import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, Vi
 import type { Exercise, MajorGroup, TrackingType } from "@openrank/domain";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 import { colors } from "../design/colors";
 import { spacing, typography } from "../theme/tokens";
+import {
+  EQUIPMENT_FILTERS,
+  equipmentLabel,
+  exercisePickerSearchOptions,
+  toggleEquipmentFilter,
+  type EquipmentFilterState,
+} from "../ui/equipment";
 
 /**
- * Exercise picker (Phase 4, task E): offline search + filters over the
- * SQLite repository. Ranking support is an indicator only - unsupported and
- * provisional exercises remain fully loggable (ranking != availability).
- * Adding an exercise that is already present asks for confirmation instead
- * of silently creating a duplicate block.
+ * Exercise picker (Phase 4, task E; Phase 8.2 P0.1 filter correctness):
+ * offline search + filters over the SQLite repository. Ranking support is an
+ * indicator only - unsupported and provisional exercises remain fully
+ * loggable (ranking != availability). Adding an exercise that is already
+ * present asks for confirmation instead of silently creating a duplicate
+ * block.
+ *
+ * Equipment filter semantics (see ui/equipment.ts): the default state is
+ * undefined = no equipment filter, so the whole catalog is browsable. null
+ * is only ever used as an explicit "No equipment" filter and is never the
+ * default. Search runs without a row cap so "All" really means all.
  */
 
 const GROUP_LABELS: Record<MajorGroup, string> = {
@@ -34,8 +48,6 @@ const TRACKING_LABELS: Partial<Record<TrackingType, string>> = {
   distance_duration: "Distance",
 };
 
-const EQUIPMENT = ["barbell", "dumbbell", "machine", "cable", "kettlebell", "bodyweight", "bands"];
-
 export default function ExercisePickerScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ context?: string; id?: string }>();
@@ -48,18 +60,19 @@ export default function ExercisePickerScreen() {
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState<MajorGroup | null>(null);
   const [tracking, setTracking] = useState<TrackingType | null>(null);
-  const [equipment, setEquipment] = useState<string | null>(null);
+  // undefined = no equipment filter (All); never initialize to null, which
+  // the repository would interpret as "equipment IS NULL" (ui/equipment.ts).
+  const [equipment, setEquipment] = useState<EquipmentFilterState>(undefined);
+  // Canonical invalidation: any committed mutation (ours included) re-renders
+  // this screen so "already added" checks and the recent list stay current.
+  useCanonicalRevision();
 
   const profile = repos.profile.getDefault();
   const results: Exercise[] = useMemo(
     () =>
-      repos.exercise.search({
-        query,
-        majorGroup: group,
-        trackingType: tracking,
-        equipment,
-        limit: 60,
-      }),
+      repos.exercise.search(
+        exercisePickerSearchOptions({ query, group, tracking, equipment }),
+      ),
     [repos, query, group, tracking, equipment],
   );
 
@@ -83,8 +96,10 @@ export default function ExercisePickerScreen() {
   const add = useCallback(
     (exercise: Exercise) => {
       const insert = () => {
+        // Canonical mutations flow through the service layer - never the
+        // repository directly (docs/REACTIVE_LOCAL_DATA.md).
         if (context === "workout") {
-          repos.workout.addExercise(containerId, { exerciseId: exercise.id });
+          services.workout.addExercise(containerId, { exerciseId: exercise.id });
         } else {
           services.routine.addExercise(containerId, { exerciseId: exercise.id });
         }
@@ -99,7 +114,7 @@ export default function ExercisePickerScreen() {
       }
       insert();
     },
-    [context, containerId, repos, services, router, alreadyPresent],
+    [context, containerId, services, router, alreadyPresent],
   );
 
   const renderItem = useCallback(
@@ -108,7 +123,7 @@ export default function ExercisePickerScreen() {
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{item.name}</Text>
           <Text style={styles.meta}>
-            {[item.equipment ?? "bodyweight", item.trackingType.replace(/_/g, " ")].join(" - ")}
+            {[equipmentLabel(item.equipment), item.trackingType.replace(/_/g, " ")].join(" - ")}
           </Text>
         </View>
         {item.rankingEligibility !== "unsupported" && item.rankingGroup ? (
@@ -136,15 +151,20 @@ export default function ExercisePickerScreen() {
         autoFocus
       />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll} contentContainerStyle={styles.chipsRow}>
-        <Chip label="All" active={group === null && tracking === null && equipment === null} onPress={() => { setGroup(null); setTracking(null); setEquipment(null); }} />
+        <Chip label="All" active={group === null && tracking === null && equipment === undefined} onPress={() => { setGroup(null); setTracking(null); setEquipment(undefined); }} />
         {(Object.keys(GROUP_LABELS) as MajorGroup[]).map((g) => (
           <Chip key={g} label={GROUP_LABELS[g]} active={group === g} onPress={() => setGroup(group === g ? null : g)} />
         ))}
         {(Object.keys(TRACKING_LABELS) as TrackingType[]).map((t) => (
           <Chip key={t} label={TRACKING_LABELS[t] ?? t} active={tracking === t} onPress={() => setTracking(tracking === t ? null : t)} />
         ))}
-        {EQUIPMENT.map((eq) => (
-          <Chip key={eq} label={eq} active={equipment === eq} onPress={() => setEquipment(equipment === eq ? null : eq)} />
+        {EQUIPMENT_FILTERS.map((option) => (
+          <Chip
+            key={option.value ?? "no-equipment"}
+            label={option.label}
+            active={equipment === option.value}
+            onPress={() => setEquipment(toggleEquipmentFilter(equipment, option.value))}
+          />
         ))}
       </ScrollView>
 

@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 import { colors } from "../design/colors";
 import { radius } from "../design/radii";
 import { space } from "../design/spacing";
@@ -40,6 +41,7 @@ const STATUS_COLOR: Record<string, string> = {
 export default function StreakHistoryScreen() {
   const repos = useRepos();
   const services = useServices();
+  useCanonicalRevision(); // canonical invalidation (Phase 8.2)
   const profile = repos.profile.getDefault();
   if (!profile) {
     return (

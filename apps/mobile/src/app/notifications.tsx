@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-nat
 import type { NotificationPermissionStatus, ScheduleWeekday } from "@openrank/domain";
 import { useRepos } from "../db/DatabaseProvider";
 import { useServices } from "../services/ServicesProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 import { colors } from "../design/colors";
 import { radius } from "../design/radii";
 import { space } from "../design/spacing";
@@ -35,12 +36,15 @@ function delayLabel(minutes: number): string {
 export default function NotificationsScreen() {
   const repos = useRepos();
   const services = useServices();
-  const [nonce, setNonce] = useState(0);
+  // Canonical invalidation (Phase 8.2): preference writes commit -> the
+  // revision advances -> this screen re-renders with persisted preferences.
+  // "permission" and "explainerDismissed" are transient UI state (OS status
+  // / local dismissal of the explainer), never canonical data.
+  useCanonicalRevision();
   const [permission, setPermission] = useState<NotificationPermissionStatus>("undetermined");
+  const [explainerDismissed, setExplainerDismissed] = useState(false);
 
   const profile = repos.profile.getDefault();
-  const refresh = () => setNonce((n) => n + 1);
-  void nonce;
 
   useEffect(() => {
     if (!profile) return;
@@ -81,7 +85,6 @@ export default function NotificationsScreen() {
       }
       reconcile();
     }
-    refresh();
   };
 
   const openSystemSettings = () => {
@@ -91,7 +94,6 @@ export default function NotificationsScreen() {
   const setDayTime = (weekday: ScheduleWeekday, minutes: number | null) => {
     services.notifications.setDayReminderTime(profile.id, weekday, minutes);
     reconcile();
-    refresh();
   };
 
   return (
@@ -116,7 +118,7 @@ export default function NotificationsScreen() {
             <Text style={styles.buttonText}>Open system settings</Text>
           </Pressable>
         </View>
-      ) : (
+      ) : explainerDismissed ? null : (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Never miss a planned workout</Text>
           <Text style={styles.muted}>
@@ -125,7 +127,7 @@ export default function NotificationsScreen() {
           <Pressable style={styles.primaryButton} onPress={() => void enableReminders()}>
             <Text style={styles.primaryButtonText}>Enable reminders</Text>
           </Pressable>
-          <Pressable onPress={() => refresh()}>
+          <Pressable onPress={() => setExplainerDismissed(true)}>
             <Text style={styles.linkText}>Not now</Text>
           </Pressable>
         </View>
@@ -139,7 +141,6 @@ export default function NotificationsScreen() {
           onValueChange={(v) => {
             services.notifications.updatePreferences(profile.id, { trainingRemindersEnabled: v });
             reconcile();
-            refresh();
           }}
         />
       </View>
@@ -153,7 +154,6 @@ export default function NotificationsScreen() {
             onPress={() => {
               services.notifications.updatePreferences(profile.id, { reminderStyle: style });
               reconcile();
-              refresh();
             }}
           >
             <Text style={styles.chipText}>{style}</Text>
@@ -174,7 +174,6 @@ export default function NotificationsScreen() {
           onValueChange={(v) => {
             services.notifications.updatePreferences(profile.id, { secondaryReminderEnabled: v });
             reconcile();
-            refresh();
           }}
         />
       </View>
@@ -187,7 +186,6 @@ export default function NotificationsScreen() {
               onPress={() => {
                 services.notifications.updatePreferences(profile.id, { secondaryDelayMinutes: d });
                 reconcile();
-                refresh();
               }}
             >
               <Text style={styles.chipText}>+{delayLabel(d)}</Text>
@@ -205,7 +203,6 @@ export default function NotificationsScreen() {
           onValueChange={(v) => {
             services.notifications.updatePreferences(profile.id, { restTimerNotificationsEnabled: v });
             reconcile();
-            refresh();
           }}
         />
       </View>

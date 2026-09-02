@@ -84,6 +84,12 @@ only hold temporary UI state.
 4. Rank snapshots and rank events store the `ranking_version` that produced them.
 5. Kilograms are the internal storage unit, always.
 6. Rest timer state is an absolute `restEndsAt` timestamp, never a decremented counter.
+7. Local-data reactivity (Phase 8.2): every successful canonical mutation
+   publishes a revision AFTER commit (`ChangeNotifyingDriver` ->
+   `LocalDataChangeStore`); mounted screens subscribe via
+   `useCanonicalRevision` (useSyncExternalStore) and re-read canonical
+   SQLite. UI never writes repositories directly - canonical UI writes go
+   through services. docs/REACTIVE_LOCAL_DATA.md.
 
 ## Decisions log (Phase 2)
 
@@ -340,3 +346,32 @@ triggers: docs/NOTIFICATIONS_SPEC.md is the contract.
   PersonalRecordRepository.listEventsForProfile (Home Recent Wins).
 - Spec-52 policy tests live in apps/mobile/tests/design-policy.test.ts
   (source-level invariants + pure token/motion/range/column mapping).
+
+## Phase 8.2 P0: app-wide reactive local data
+
+- Real-emulator testing showed stale mounted screens after successful
+  SQLite writes (app-wide, not workout-specific). Fix: a lightweight
+  first-party invalidation layer - SQLite remains the ONLY canonical state
+  and nothing is mirrored into React (docs/REACTIVE_LOCAL_DATA.md).
+- `apps/mobile/src/local-data/`: `LocalDataChangeStore` (subscribe /
+  getSnapshot / publish over a monotonically increasing GLOBAL revision -
+  invalidation metadata only, no domain records, no external state
+  library), `ChangeNotifyingDriver` (a DatabaseDriver decorator that
+  publishes after successful writes and exactly once after the outermost
+  transaction commit - silence on failure, inert reads), and
+  `useCanonicalRevision` (React subscription via useSyncExternalStore).
+- DatabaseProvider wraps the single app connection, so every canonical
+  writer (screens, services, derived/streak workers, notification
+  reconcile) invalidates by construction - commit -> publish ordering is
+  enforced in one place and cannot be bypassed.
+- Every data-driven screen consumes the revision and re-reads canonical
+  data synchronously on render; the per-screen nonce/refresh patchwork was
+  removed (the History manual retry key is transient UI state and stays).
+  Focus refresh remains permitted as secondary defense only.
+- UI canonical-write violations fixed: exercise picker
+  (`repos.workout.addExercise` -> `services.workout.addExercise`),
+  Profile tab (`repos.bodyweight.add`, `repos.profile.updateStrengthStandard`,
+  `repos.profile.updateUnitSystem` -> ProfileService, incl. the new
+  `addBodyweight`). Permanent source-level architecture test bans
+  repository mutators and raw SQL from UI (services-only policy;
+  documented exceptions: none).

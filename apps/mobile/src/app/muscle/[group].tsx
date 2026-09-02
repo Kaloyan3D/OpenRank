@@ -5,6 +5,7 @@ import type { GroupKey } from "@openrank/ranking-core";
 import { useRepos } from "../../db/DatabaseProvider";
 import { TierTimeline } from "../../features/charts/TierTimeline";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { formatDateTime, formatProgressPercent, formatRankLabel } from "../../ui/format";
 import { colors } from "../../design/colors";
 import { radius } from "../../design/radii";
@@ -24,6 +25,7 @@ export default function MuscleDetailScreen() {
   const groupKey = typeof params.group === "string" ? params.group : "";
   const repos = useRepos();
   const services = useServices();
+  useCanonicalRevision(); // canonical invalidation (Phase 8.2)
 
   const cfg = GROUPS[groupKey as GroupKey];
   const profile = repos.profile.getDefault();

@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import { kgToLb, lbToKg } from "@openrank/shared";
 import type { UnitSystem } from "@openrank/shared";
 import { useRepos } from "../db/DatabaseProvider";
+import { useCanonicalRevision } from "../local-data/useCanonicalRevision";
 
 export interface Units {
   system: UnitSystem;
@@ -28,6 +29,9 @@ const METERS_PER_MILE = 1609.344;
 
 export function useUnits(): Units {
   const repos = useRepos();
+  // Canonical invalidation (Phase 8.2): a unit-system change publishes ->
+  // every consumer of useUnits re-renders with the persisted system.
+  useCanonicalRevision();
   const system = repos.profile.getDefault()?.unitSystem ?? "metric";
   return useMemo(() => buildUnits(system), [system]);
 }

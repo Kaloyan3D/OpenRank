@@ -125,6 +125,31 @@ export class ProfileService {
     return this.deps.profile.getDefault()!;
   }
 
+  /**
+   * Manual bodyweight measurement (Phase 8.2): user-facing canonical writes
+   * flow through the service layer - the UI never calls the repository
+   * directly. One transactional add; values are stored in kilograms.
+   */
+  addBodyweight(
+    profileId: string,
+    weightKg: number,
+    measuredAtUtc: string,
+    note: string | null = null,
+  ): BodyweightEntry {
+    if (!(weightKg > 0) || !Number.isFinite(weightKg)) {
+      throw new Error("bodyweight must be a positive finite number of kilograms");
+    }
+    return this.driver.transaction(() =>
+      this.deps.bodyweight.add({
+        profileId,
+        measuredAt: measuredAtUtc,
+        weightKg: Math.round(weightKg * 1000) / 1000,
+        source: "manual entry",
+        note,
+      }),
+    );
+  }
+
   /** Ranking reference only - selects thresholds, never identity. */
   updateStrengthStandard(profileId: string, standard: "male" | "female"): Profile {
     this.deps.profile.updateStrengthStandard(profileId, standard);

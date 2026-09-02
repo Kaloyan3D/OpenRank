@@ -3,6 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { formatDateTime, formatDurationRough } from "../../ui/format";
 import { Screen } from "../../components/ui/Screen";
 import { Card } from "../../components/ui/Card";
@@ -33,14 +34,17 @@ export default function HistoryScreen() {
   const router = useRouter();
   const repos = useRepos();
   const services = useServices();
+  // reloadKey is ONLY the manual retry for a failed read (transient UI state).
+  // Fresh canonical data arrives via the revision: finishing a workout
+  // publishes -> this memo recomputes -> the new workout is listed (K).
   const [reloadKey, setReloadKey] = useState(0);
+  const revision = useCanonicalRevision();
 
   const profile = repos.profile.getDefault();
 
   const entries = useMemo<HistoryEntry[] | null>(() => {
     try {
       if (!profile) return [];
-      void reloadKey;
       return services.workout.listHistory(profile.id).map((detail) => {
         const summary = services.workout.getSummary(detail.workout.id);
         return {
@@ -57,7 +61,7 @@ export default function HistoryScreen() {
       return null; // render the user-safe error state
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id, reloadKey]);
+  }, [profile?.id, reloadKey, revision]);
 
   const renderItem = useCallback(
     ({ item }: { item: HistoryEntry }) => (

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import type { TrackingType, WorkoutSetInput } from "@openrank/domain";
 import { useRepos } from "../../db/DatabaseProvider";
 import { useServices } from "../../services/ServicesProvider";
+import { useCanonicalRevision } from "../../local-data/useCanonicalRevision";
 import { useUnits } from "../../ui/units";
 import { usesWeightField } from "../../ui/tracking";
 import { groupSupersets } from "../../ui/supersets";
@@ -33,8 +34,10 @@ export function ActiveWorkoutScreen() {
   const units = useUnits();
 
   const profile = repos.profile.getDefault();
-  const [, setNonce] = useState(0);
-  const refresh = () => setNonce((n) => n + 1);
+  // Canonical invalidation (Phase 8.2): every workout mutation (set values,
+  // completion, add/remove/reorder, notes, rest timer) commits -> revision++
+  // -> this screen re-renders and re-reads the active session.
+  useCanonicalRevision();
 
   // Canonical read (service -> repository -> SQLite) on every render. React
   // state below is transient input only - a reload reproduces everything.
@@ -96,12 +99,10 @@ export function ActiveWorkoutScreen() {
       services.workout.completeSet(setId);
     } catch (err) {
       if (err instanceof Error && err.message.startsWith("set not found")) {
-        refresh();
-        return;
+        return; // already gone; the deleting mutation already invalidated us
       }
       Alert.alert("Cannot complete set", err instanceof Error ? err.message : String(err));
     }
-    refresh();
   };
 
   if (!profile || !session) {
@@ -144,7 +145,6 @@ export function ActiveWorkoutScreen() {
       input.durationSeconds = lastSet?.durationSeconds ?? null;
     }
     services.workout.addSet(workoutExerciseId, input);
-    refresh();
   };
 
   const finishWith = (policy: "remove" | "reject") => {
@@ -229,7 +229,6 @@ export function ActiveWorkoutScreen() {
           onBack={() => router.push("/(tabs)/workout")}
           onNotes={(notes) => {
             services.workout.updateWorkoutNotes(workout.id, notes);
-            refresh();
           }}
         />
         <View style={styles.headerActions}>
@@ -263,11 +262,9 @@ export function ActiveWorkoutScreen() {
                   onComplete={completeSet}
                   onUncomplete={(setId) => {
                     services.workout.uncompleteSet(setId);
-                    refresh();
                   }}
                   onDeleteSet={(setId) => {
                     services.workout.deleteSet(setId);
-                    refresh();
                   }}
                   onAddSet={() =>
                     addSet(
@@ -281,7 +278,6 @@ export function ActiveWorkoutScreen() {
                   }
                   onNotes={(notes) => {
                     services.workout.updateExerciseNotes(e.workoutExercise.id, notes);
-                    refresh();
                   }}
                   onRemove={() =>
                     Alert.alert(
@@ -295,7 +291,6 @@ export function ActiveWorkoutScreen() {
                           onPress: () => {
                             // Canonical mutation through the service layer.
                             services.workout.removeExercise(e.workoutExercise.id);
-                            refresh();
                           },
                         },
                       ],
@@ -311,12 +306,10 @@ export function ActiveWorkoutScreen() {
                     swapped[j] = ids[i]!;
                     // Canonical mutation through the service layer.
                     services.workout.reorderExercises(workout.id, swapped);
-                    refresh();
                   }}
                   onSuperset={(g) => {
                     // Canonical mutation through the service layer.
                     services.workout.updateSuperset(e.workoutExercise.id, g);
-                    refresh();
                   }}
                 />
               );
@@ -343,11 +336,9 @@ export function ActiveWorkoutScreen() {
             rest={rest}
             onAdjust={(d) => {
               services.restTimer.addSeconds(profile.id, d);
-              refresh();
             }}
             onSkip={() => {
               services.restTimer.skip(profile.id);
-              refresh();
             }}
           />
         </View>
