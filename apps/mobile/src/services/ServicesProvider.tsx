@@ -19,7 +19,18 @@ const ServicesContext = createContext<OpenRankServices | null>(null);
 
 export function ServicesProvider(props: { children: ReactNode }) {
   const repos: OpenDatabaseResult = useRepos();
-  const services = useMemo(() => createServices(containerDriver(repos), repos), [repos]);
+  const services = useMemo(() => {
+    const created = createServices(containerDriver(repos), repos);
+    // App-start repair (Phase 5, spec W): consume leftover dirty markers from
+    // a previous session (crash / deferred derivation). Non-blocking for the
+    // user: any failure leaves the markers for the next attempt.
+    try {
+      created.derived.processPending();
+    } catch {
+      /* repaired on the next start */
+    }
+    return created;
+  }, [repos]);
   return <ServicesContext.Provider value={services}>{props.children}</ServicesContext.Provider>;
 }
 

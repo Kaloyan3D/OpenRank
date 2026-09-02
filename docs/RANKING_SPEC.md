@@ -153,3 +153,24 @@ engine is authoritative for ranks; the catalog group is for UI organization.
 Templates whose Hevy primary is `full_body` are not routable by the frozen
 engine (`PRIMARY_TO_GROUP` has no entry) and stay unmatched until Phase 9
 provides curated mapping or a future engine version (new ranking id) adds it.
+
+## Phase 5: application-level projection
+
+The engine remains untouched. OpenRank stores rank state per workout in
+SQLite and adds three application-level rules (versioned as
+`openrank-ranking-projection-v1`, never as an engine change):
+
+1. **Eligibility gating** - only `eligible`/`provisional` catalog exercises
+   become engine inputs; provisional exercises receive per-exercise ranks but
+   are excluded from muscle aggregates in v1; `unsupported` exercises never
+   rank. Custom (user-created) exercises are unsupported by default.
+2. **Per-exercise tiers** - an exercise's own lift `eqRatio` mapped through
+   its engine group's thresholds with the standard's sex factor; isolation
+   lifts are capped at Titan (the projection's interpretation of the engine's
+   isolation cap).
+3. **Divisions** - within-tier progress represented as IV/III/II/I with exact
+   boundaries (<25/25-50/50-75/>=75%); Mythic has no division or progress.
+   Divisions are display state and never change thresholds or scores.
+
+Full contract (records, snapshots, events, worker semantics, invalidation):
+docs/DERIVED_STATE.md.

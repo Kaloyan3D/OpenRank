@@ -47,6 +47,9 @@ importers:
       '@openrank/exercise-catalog':
         specifier: workspace:*
         version: link:../../packages/exercise-catalog
+      '@openrank/ranking-core':
+        specifier: workspace:*
+        version: link:../../packages/ranking-core
       '@openrank/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -96,6 +99,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@openrank/ranking-core':
+        specifier: workspace:*
+        version: link:../ranking-core
       '@openrank/shared':
         specifier: workspace:*
         version: link:../shared

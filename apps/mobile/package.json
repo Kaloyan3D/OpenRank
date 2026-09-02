@@ -26,7 +26,8 @@
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.2"
+    "react-native-screens": "~4.26.2",
+    "@openrank/ranking-core": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "~19.2.18",

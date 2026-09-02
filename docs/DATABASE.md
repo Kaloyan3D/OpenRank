@@ -1,10 +1,10 @@
-# Database design (Phases 3-4)
+# Database design (Phases 3-5)
 
 This document records the persistence decisions: the ORM/library
-evaluation, the schema layout (v1 baseline, v2 workout-session additions), the
-source-of-truth rules, IDs, units, migration and seeding policies,
-transactions, indexes and integrity tests. Phase 4 additions are marked
-"Phase 4" throughout.
+evaluation, the schema layout (v1 baseline, v2 workout-session additions, v3
+derived-state projections), the source-of-truth rules, IDs, units, migration
+and seeding policies, transactions, indexes and integrity tests. Phase
+additions are marked "Phase 4" / "Phase 5" throughout.
 
 ## 1. Library decision: expo-sqlite + hand-rolled migrations (no Drizzle)
 
@@ -315,3 +315,34 @@ never pulls React Native. Platform drivers are subpath exports:
 `openDatabase(driver, { catalog?, newId? })` performs: PRAGMAs -> migrate ->
 seed -> construct repositories, returning them plus `schemaVersion`,
 `catalogFingerprint` and `seedUnchanged`.
+
+## Phase 5 additions (schema v3): derived-state projections
+
+Migration `schema_v3_derived_state` adds the rebuildable caches described in
+docs/DERIVED_STATE.md:
+
+- `personal_records` - current best per
+  UNIQUE(profile_id, exercise_id, record_type, qualifier_key).
+  `qualifier_key` is NOT NULL DEFAULT '' (an empty-string sentinel, because
+  SQLite UNIQUE treats NULLs as distinct and would bypass the key).
+- `personal_record_events` - unlock history, one row per record-setting set
+  (UNIQUE includes source_set_id), `previous_value` NULL = first record.
+- `rank_snapshots` - rank state per (profile, scope, producing workout);
+  insert order is chronological, "latest" reads use MAX(rowid) per scope.
+  Division/progress are NULL at Mythic.
+- `rank_events` - tier transitions (up AND down), one per
+  (profile, scope, producing workout); re-derivation with changed inputs
+  replaces the row instead of duplicating it.
+- `exercise_aliases.source_id` (nullable TEXT) - the Hevy template id from
+  the Phase 2 alias build; seeded from the bundled catalog and required by
+  the RankingInputBuilder to synthesize the engine catalog.
+- `idx_workouts_profile_status_started` - ranking walks read completed
+  workouts chronologically per profile.
+
+Provenance columns are intentionally plain TEXT (no FK): derived rows are
+owned by the rebuild, so canonical deletions must not cascade into
+half-updated projections. Integrity tests keep asserting FK wiring for
+canonical tables only.
+
+Seed policy is unchanged (idempotent, transactional, preserves user data);
+alias rows now also carry `source_id`, refreshed on every seed run.

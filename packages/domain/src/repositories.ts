@@ -22,6 +22,15 @@ import type {
 } from "./workout";
 import type { Exercise, ExerciseMuscle, MajorGroup, TrackingType } from "./exercise";
 import type { Routine, RoutineDetail, RoutineExercise, RoutineSetTarget } from "./routine";
+import type {
+  PersonalRecord,
+  PersonalRecordEvent,
+  PersonalRecordType,
+  RankDirection,
+  RankEvent,
+  RankScopeType,
+  RankSnapshot,
+} from "./derived";
 
 /** Entity kinds the dirty queue tracks (derived-state rebuild inputs). */
 export type DerivedEntityType =
@@ -346,3 +355,61 @@ export interface DerivedStateRepository {
   clear(ids: string[]): void;
   clearAll(): void;
 }
+// ---------------------------------------------------------------------------
+// Derived state (Phase 5): rebuildable caches owned by the DerivedDataWorker
+// ---------------------------------------------------------------------------
+
+export interface PersonalRecordRepository {
+  /** The current best row for one record key. */
+  best(
+    profileId: string,
+    exerciseId: string,
+    recordType: PersonalRecordType,
+    qualifierKey: string,
+  ): PersonalRecord | null;
+  /**
+   * Insert or update the current-best row. Returns "inserted", "updated" or
+   * "unchanged" (strictly-better values only; equality keeps provenance).
+   */
+  upsertBest(record: PersonalRecord): "inserted" | "updated" | "unchanged";
+  /** Records of one exercise (all types), for the exercise detail screen. */
+  listForExercise(profileId: string, exerciseId: string): PersonalRecord[];
+  listForProfile(profileId: string): PersonalRecord[];
+  /** Deterministic full-replace (rebuild path). */
+  replaceAllForProfile(profileId: string, records: readonly PersonalRecord[]): void;
+  appendEvent(event: PersonalRecordEvent): void;
+  replaceAllEventsForProfile(profileId: string, events: readonly PersonalRecordEvent[]): void;
+  listEventsForExercise(profileId: string, exerciseId: string, limit?: number): PersonalRecordEvent[];
+  /** "Which PRs were achieved by this workout?" (workout summary). */
+  listEventsForWorkout(workoutId: string): PersonalRecordEvent[];
+}
+
+export interface RankSnapshotRepository {
+  latest(profileId: string, scopeType: RankScopeType, scopeKey: string): RankSnapshot | null;
+  /** Current state: latest snapshot per scope (insert order = chronology). */
+  latestForProfile(profileId: string): RankSnapshot[];
+  history(profileId: string, scopeType: RankScopeType, scopeKey: string): RankSnapshot[];
+  /**
+   * Insert a snapshot; an existing snapshot for the same
+   * (profile, scope, source_workout) is replaced - re-derivation with changed
+   * inputs legitimately supersedes it and never duplicates rows.
+   */
+  upsert(snapshot: RankSnapshot): void;
+  replaceAllForProfile(profileId: string, snapshots: readonly RankSnapshot[]): void;
+}
+
+export interface RankEventRepository {
+  append(event: RankEvent): void;
+  /**
+   * Transition events for one scope, chronological (rank timeline).
+   */
+  historyForScope(profileId: string, scopeType: RankScopeType, scopeKey: string): RankEvent[];
+  /** Most recent transitions across all scopes. */
+  listForProfile(profileId: string, limit?: number): RankEvent[];
+  listForWorkout(workoutId: string): RankEvent[];
+  replaceAllForProfile(profileId: string, events: readonly RankEvent[]): void;
+  /** Distinct scope keys that have at least one event (repair checks). */
+  countForProfile(profileId: string): number;
+}
+
+export type { RankDirection };

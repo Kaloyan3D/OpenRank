@@ -212,3 +212,27 @@ only hold temporary UI state.
   drawers. The exercise picker searches SQLite with rank eligibility shown
   as an indicator only (unsupported/provisional exercises stay fully
   loggable).
+## Decisions log (Phase 5 - Personal Records + Ranked Core)
+
+- **Derived-data layer:** new `packages/database/src/derived` -
+  `RankingInputBuilder` (pure canonical-to-engine translation),
+  PR engine (pure candidate computation), rank projection (engine results ->
+  per-scope states + divisions + provenance) and `DerivedDataWorker`
+  (queue consumer). `DerivedDataService` exposes read models + the worker
+  facade through `createServices`.
+- **Schema v3:** `personal_records`, `personal_record_events`,
+  `rank_snapshots`, `rank_events` (all with UNIQUE keys that make retries
+  and rebuilds idempotent), `exercise_aliases.source_id` (Hevy template
+  bridge) and the ranking-walk index `workouts(profile_id, status,
+  started_at)`. See docs/DERIVED_STATE.md for the full contract.
+- **Two-version provenance:** every snapshot/event stores the frozen engine
+  version (`hevy-ranks-compatible-v1`) AND the projection version
+  (`openrank-ranking-projection-v1`), so application-level rules (eligibility
+  gating, provisional policy, divisions) can evolve without touching the
+  engine.
+- **Derived processing:** finish-workout -> canonical commit -> worker pass in
+  the same UI flow ("Workout saved successfully. Updating records and
+  ranks..."); failure downgrades gracefully ("Workout is safely saved. Ranks
+  will be recalculated automatically.") and the app-start repair retries.
+- **No overall rank, no streaks:** the Ranks tab is the Strength Profile
+  (six muscle groups). Scheduled streaks remain Phase 6 per docs/STREAK_SPEC.md.

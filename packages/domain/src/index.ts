@@ -1,3 +1,4 @@
+export type * from "./derived";
 export type {
   MajorGroup,
   RankingEligibility,
@@ -56,4 +57,7 @@ export type {
   RestTimerRepository,
   RestTimerStartInput,
   BodyweightAddInput,
+  PersonalRecordRepository,
+  RankSnapshotRepository,
+  RankEventRepository,
 } from "./repositories";

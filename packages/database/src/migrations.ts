@@ -13,7 +13,7 @@
 
 import type { DatabaseDriver } from "./driver";
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export interface Migration {
   version: number;
@@ -264,10 +264,124 @@ const V2_STATEMENTS: readonly string[] = [
   `ALTER TABLE workout_exercises ADD COLUMN targets_json TEXT`,
 ];
 
+/** Phase 5: derived-state projections (rebuildable caches over canonical data). */
+const V3_STATEMENTS: readonly string[] = [
+  // Hevy template-id bridge on aliases (Phase 2 catalog data carried
+  // sourceId on alias rows; the v1/v2 schema had no column for it - Phase 5
+  // ranking inputs need it to build the engine catalog deterministically).
+  `ALTER TABLE exercise_aliases ADD COLUMN source_id TEXT`,
+
+  // Current best personal record per (profile, exercise, type, qualifier).
+  // qualifier_key: "" for non-weight-keyed types; "w=<kg>" (canonical kg
+  // rounded to 4 decimals) for max_reps_at_weight - NOT NULL so the UNIQUE
+  // constraint can never be bypassed by NULL-distinct semantics.
+  // Provenance columns are plain TEXT (no FK): derived rows are fully owned
+  // by the rebuild; canonical history stays untouched by projections.
+  `CREATE TABLE personal_records (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    exercise_id TEXT NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+    record_type TEXT NOT NULL CHECK (record_type IN
+      ('max_weight', 'max_e1rm', 'max_set_volume', 'max_reps_at_weight')),
+    qualifier_key TEXT NOT NULL DEFAULT '',
+    value REAL NOT NULL CHECK (value >= 0),
+    source_reps INTEGER,
+    source_set_id TEXT NOT NULL,
+    source_workout_id TEXT NOT NULL,
+    achieved_at TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE (profile_id, exercise_id, record_type, qualifier_key)
+  )`,
+
+  `CREATE INDEX idx_personal_records_exercise
+    ON personal_records(profile_id, exercise_id, record_type)`,
+
+  // Immutable PR transition/unlock events. One event per (record, source set):
+  // a set can be the first achiever of exactly one new best per record key,
+  // so retries/rebuilds can never duplicate history.
+  `CREATE TABLE personal_record_events (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    exercise_id TEXT NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+    record_type TEXT NOT NULL CHECK (record_type IN
+      ('max_weight', 'max_e1rm', 'max_set_volume', 'max_reps_at_weight')),
+    qualifier_key TEXT NOT NULL DEFAULT '',
+    previous_value REAL,
+    value REAL NOT NULL CHECK (value >= 0),
+    source_set_id TEXT NOT NULL,
+    source_workout_id TEXT NOT NULL,
+    achieved_at TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE (profile_id, exercise_id, record_type, qualifier_key, source_set_id)
+  )`,
+
+  `CREATE INDEX idx_personal_record_events_exercise
+    ON personal_record_events(profile_id, exercise_id, achieved_at)`,
+  `CREATE INDEX idx_personal_record_events_workout
+    ON personal_record_events(source_workout_id)`,
+
+  // Rank snapshots: one row per (profile, scope, producing workout). Insert
+  // order is chronological (the worker appends as state evolves); "latest"
+  // reads use MAX(rowid) per scope. Division/progress are NULL at Mythic.
+  `CREATE TABLE rank_snapshots (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    scope_type TEXT NOT NULL CHECK (scope_type IN ('exercise', 'muscle')),
+    scope_key TEXT NOT NULL,
+    tier_index INTEGER NOT NULL CHECK (tier_index BETWEEN 0 AND 8),
+    tier_name TEXT NOT NULL,
+    division TEXT CHECK (division IN ('IV', 'III', 'II', 'I') OR division IS NULL),
+    score REAL NOT NULL CHECK (score >= 0),
+    progress REAL,
+    ranking_version TEXT NOT NULL,
+    projection_version TEXT NOT NULL,
+    calculated_at TEXT NOT NULL,
+    source_workout_id TEXT NOT NULL,
+    details_json TEXT NOT NULL,
+    UNIQUE (profile_id, scope_type, scope_key, source_workout_id)
+  )`,
+
+  `CREATE INDEX idx_rank_snapshots_scope
+    ON rank_snapshots(profile_id, scope_type, scope_key, calculated_at)`,
+
+  // Immutable-in-intent rank transition events (up AND down; one per
+  // (profile, scope, producing workout), replaced wholesale on re-derivation
+  // with changed inputs - never duplicated).
+  `CREATE TABLE rank_events (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    scope_type TEXT NOT NULL CHECK (scope_type IN ('exercise', 'muscle')),
+    scope_key TEXT NOT NULL,
+    from_tier_index INTEGER CHECK (from_tier_index IS NULL OR from_tier_index BETWEEN 0 AND 8),
+    from_tier TEXT,
+    from_division TEXT,
+    to_tier_index INTEGER NOT NULL CHECK (to_tier_index BETWEEN 0 AND 8),
+    to_tier TEXT NOT NULL,
+    to_division TEXT,
+    direction TEXT NOT NULL CHECK (direction IN ('up', 'down')),
+    score REAL NOT NULL CHECK (score >= 0),
+    ranking_version TEXT NOT NULL,
+    projection_version TEXT NOT NULL,
+    source_workout_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE (profile_id, scope_type, scope_key, source_workout_id)
+  )`,
+
+  `CREATE INDEX idx_rank_events_scope
+    ON rank_events(profile_id, scope_type, scope_key, created_at)`,
+  `CREATE INDEX idx_rank_events_workout ON rank_events(source_workout_id)`,
+
+  // Performance: completed workouts by profile + chronology (ranking walks).
+  `CREATE INDEX idx_workouts_profile_status_started
+    ON workouts(profile_id, status, started_at)`,
+];
+
 /** Ordered, immutable migration list. */
 export const MIGRATIONS: readonly Migration[] = [
   { version: 1, name: "schema_v1_core", statements: V1_STATEMENTS },
   { version: 2, name: "schema_v2_workout_session", statements: V2_STATEMENTS },
+  { version: 3, name: "schema_v3_derived_state", statements: V3_STATEMENTS },
 ];
 
 /** Current PRAGMA user_version (0 on a fresh database). */

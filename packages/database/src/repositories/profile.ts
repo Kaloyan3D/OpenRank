@@ -46,7 +46,9 @@ export class SqliteProfileRepository implements ProfileRepository {
   }
 
   updateUnitSystem(id: string, unitSystem: "metric" | "imperial"): void {
-    this.update(id, { unit_system: unitSystem });
+    // Display units only - canonical kg and ranking math are unaffected, so
+    // this must NOT invalidate derived ranking state (Phase 5 spec rule I).
+    this.update(id, { unit_system: unitSystem }, { markDirty: false });
   }
 
   updateStrengthStandard(id: string, strengthStandard: "male" | "female"): void {
@@ -57,7 +59,11 @@ export class SqliteProfileRepository implements ProfileRepository {
     this.update(id, { onboarding_completed: 1 });
   }
 
-  private update(id: string, fields: Record<string, string | number>): void {
+  private update(
+    id: string,
+    fields: Record<string, string | number>,
+    opts: { markDirty?: boolean } = {},
+  ): void {
     const keys = Object.keys(fields);
     if (keys.length === 0) return;
     const set = keys.map((k) => k + " = ?").join(", ");
@@ -66,7 +72,9 @@ export class SqliteProfileRepository implements ProfileRepository {
       [...keys.map((k) => fields[k] as string | number), nowUtc(), id],
     );
     if (result.changes === 0) throw new Error("profile not found: " + id);
-    this.dirty.mark(id, "profile", id, "profile_changed");
+    if (opts.markDirty !== false) {
+      this.dirty.mark(id, "profile", id, "profile_changed");
+    }
   }
 }
 

@@ -16,15 +16,20 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@openrank/shared": "workspace:*"
+    "@openrank/shared": "workspace:*",
+    "@openrank/ranking-core": "workspace:*"
   },
   "peerDependencies": {
     "expo-crypto": "*",
     "expo-sqlite": "*"
   },
   "peerDependenciesMeta": {
-    "expo-crypto": { "optional": true },
-    "expo-sqlite": { "optional": true }
+    "expo-crypto": {
+      "optional": true
+    },
+    "expo-sqlite": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@openrank/domain": "workspace:*",

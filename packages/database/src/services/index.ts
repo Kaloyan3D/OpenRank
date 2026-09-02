@@ -19,12 +19,15 @@ import type { OpenDatabaseResult } from "../index";
 import { RestTimerService } from "./rest-timer-service";
 import { WorkoutService } from "./workout-service";
 import { RoutineService } from "./routine-service";
+import { DerivedDataService } from "./derived-service";
 import { SqliteRestTimerRepository } from "../repositories/rest-timer";
 
 export interface OpenRankServices {
   workout: WorkoutService;
   routine: RoutineService;
   restTimer: RestTimerService;
+  /** Phase 5: derived-state reads + worker facade (never canonical). */
+  derived: DerivedDataService;
 }
 
 /** Build the service layer over an opened database (call once per app run). */
@@ -35,9 +38,20 @@ export function createServices(
 ): OpenRankServices {
   const restTimerRepo = new SqliteRestTimerRepository(driver);
   const restTimer = new RestTimerService(driver, restTimerRepo, options.now);
+  const derived = new DerivedDataService(
+    repos,
+    driver,
+    {
+      personalRecords: repos.personalRecords,
+      rankSnapshots: repos.rankSnapshots,
+      rankEvents: repos.rankEvents,
+    },
+    { now: options.now ?? (() => new Date().toISOString()), newId: repos.newId ?? (() => crypto.randomUUID()) },
+  );
   return {
     workout: new WorkoutService(driver, repos, restTimer, options.now),
     routine: new RoutineService(repos),
     restTimer,
+    derived,
   };
 }

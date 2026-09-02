@@ -227,9 +227,9 @@ export function seedCatalog(driver: DatabaseDriver, catalog: CatalogV1, options:
 
     for (const a of catalog.aliases) {
       driver.run(
-        "INSERT INTO exercise_aliases (id, exercise_id, alias, normalized_alias, locale, source) " +
-          "VALUES (?, ?, ?, ?, ?, ?)",
-        [aliasRowId(a.exerciseId, a.normalizedAlias, a.source), a.exerciseId, a.alias, a.normalizedAlias, a.locale, a.source],
+        "INSERT INTO exercise_aliases (id, exercise_id, alias, normalized_alias, locale, source, source_id) " +
+          "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [aliasRowId(a.exerciseId, a.normalizedAlias, a.source), a.exerciseId, a.alias, a.normalizedAlias, a.locale, a.source, a.sourceId ?? null],
       );
       stats.aliases += 1;
     }

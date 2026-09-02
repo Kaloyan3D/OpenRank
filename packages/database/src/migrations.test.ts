@@ -17,6 +17,8 @@ describe("migrations", () => {
       "exercise_aliases", "exercise_instructions", "exercise_media",
       "routines", "routine_exercises", "routine_set_targets",
       "workouts", "workout_exercises", "workout_sets", "rest_timer",
+      "personal_records", "personal_record_events",
+      "rank_snapshots", "rank_events",
       "imports", "derived_dirty", "catalog_meta",
     ]) {
       expect(tables, expected).toContain(expected);

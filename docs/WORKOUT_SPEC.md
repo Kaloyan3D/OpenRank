@@ -153,3 +153,18 @@ instant + local offset to the athlete's training day with a **04:00 local
 boundary** (`LOGICAL_DAY_BOUNDARY_MINUTES = 240`): sessions started before
 04:00 local belong to the previous calendar day. Boundary cases are
 unit-tested; no other component may compute training dates.
+
+## Phase 5: finish-flow integration
+
+Finishing a workout is unchanged at the canonical layer (validate -> complete
+-> clear rest timer, one transaction). On top of it the UI runs one derived
+processing pass and the summary communicates honestly in all three cases:
+
+- success: "Workout saved successfully. Updating records and ranks..." plus
+  NEW PR / RANK UP sections built from the worker's events;
+- worker reported errors: "Workout is safely saved. Ranks will be
+  recalculated automatically." - the workout is durable regardless;
+- app start: a non-blocking repair pass consumes any markers left by a crash
+  or a deferred pass.
+
+Derived state never blocks or rejects a finish (spec V).

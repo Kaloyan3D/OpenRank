@@ -155,12 +155,24 @@ export default function ActiveWorkoutScreen() {
 
   const finishWith = (policy: "remove" | "reject") => {
     flushAll();
+    let summary: ReturnType<typeof services.workout.finishWorkout>;
     try {
-      const summary = services.workout.finishWorkout(workout.id, { incompleteSetPolicy: policy });
-      router.replace("/history/" + summary.workout.id);
+      summary = services.workout.finishWorkout(workout.id, { incompleteSetPolicy: policy });
     } catch (err) {
       Alert.alert("Cannot finish", err instanceof Error ? err.message : String(err));
+      return;
     }
+    // Workout completion is already durable here. Record/rank updates are a
+    // derived layer on top: run them now (fast, local); if anything fails the
+    // summary still shows and the app-start repair finishes the work later.
+    let derivedStatus: "done" | "deferred" = "deferred";
+    try {
+      const report = services.derived.processPending();
+      derivedStatus = report.errors.length === 0 ? "done" : "deferred";
+    } catch {
+      derivedStatus = "deferred";
+    }
+    router.replace("/history/" + summary.workout.id + "?derived=" + derivedStatus);
   };
 
   const finishWorkout = () => {

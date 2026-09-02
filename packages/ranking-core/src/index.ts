@@ -16,7 +16,10 @@ export type {
 } from "./config.ts";
 
 export {
+  COMPOSITE_WEIGHTS,
+  FEW_SESSIONS_TIER_CAP,
   GROUPS,
+  ISOLATION_TIER_CAP,
   MIN_SESSIONS,
   RANK_TIERS,
 } from "./port/constants.js";
@@ -41,7 +44,7 @@ export type {
   UnmatchedDetail,
 } from "./port/types.js";
 
-export { estimate1RM, weightForReps } from "./port/math.js";
+export { estimate1RM, weightForReps, ratioToTierIndex } from "./port/math.js";
 export { effectiveLoad } from "./port/load.js";
 export { sexFactor } from "./port/math.js";
 export { inferGroupFromTitle } from "./port/text.js";

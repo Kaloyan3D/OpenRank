@@ -7,10 +7,11 @@ packages:
 nodeLinker: hoisted
 minimumReleaseAgeExclude:
   - babel-preset-expo@57.0.10
-# Dependencies that are allowed to run install scripts.
-onlyBuiltDependencies:
-  - "@swc/core"
-  - core-js
-  - esbuild
-  - expo-modules-core
-  - simple-git-hooks
+# Dependencies allowed to run install scripts (pnpm 11.25 "allowBuilds" map;
+# replaces the deprecated onlyBuiltDependencies list).
+allowBuilds:
+  "@swc/core": true
+  core-js: true
+  esbuild: true
+  expo-modules-core: true
+  simple-git-hooks: true

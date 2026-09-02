@@ -21,7 +21,10 @@ import type {
   BodyweightRepository,
   DerivedStateRepository,
   ExerciseRepository,
+  PersonalRecordRepository,
   ProfileRepository,
+  RankEventRepository,
+  RankSnapshotRepository,
   RoutineRepository,
   WorkoutRepository,
 } from "@openrank/domain";
@@ -34,6 +37,7 @@ import { SqliteExerciseRepository } from "./repositories/exercise";
 import { SqliteRoutineRepository } from "./repositories/routine";
 import { SqliteWorkoutRepository } from "./repositories/workout";
 import { SqliteDerivedStateRepository } from "./repositories/dirty";
+import { SqlitePersonalRecordRepository, SqliteRankEventRepository, SqliteRankSnapshotRepository } from "./repositories/derived";
 
 export interface OpenDatabaseResult {
   profile: ProfileRepository;
@@ -42,12 +46,17 @@ export interface OpenDatabaseResult {
   routine: RoutineRepository;
   workout: WorkoutRepository;
   dirty: DerivedStateRepository;
+  personalRecords: PersonalRecordRepository;
+  rankSnapshots: RankSnapshotRepository;
+  rankEvents: RankEventRepository;
   /** Schema version after migration (equals SCHEMA_VERSION). */
   schemaVersion: number;
   /** Fingerprint of the seeded catalog, or null when no catalog supplied. */
   catalogFingerprint: string | null;
   /** True when the seed found the same fingerprint already installed. */
   seedUnchanged: boolean | null;
+  /** The UUIDv7 generator used for user-data ids (reused by services). */
+  newId: () => string;
 }
 
 export interface OpenDatabaseOptions {
@@ -75,6 +84,9 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
   const exercise = new SqliteExerciseRepository(driver, newId);
   const routine = new SqliteRoutineRepository(driver, newId);
   const workout = new SqliteWorkoutRepository(driver, dirty, newId);
+  const personalRecords = new SqlitePersonalRecordRepository(driver);
+  const rankSnapshots = new SqliteRankSnapshotRepository(driver);
+  const rankEvents = new SqliteRankEventRepository(driver);
 
   let fingerprint: string | null = null;
   let seedUnchanged: boolean | null = null;
@@ -89,6 +101,8 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
 
   return {
     profile, bodyweight, exercise, routine, workout, dirty,
+    personalRecords, rankSnapshots, rankEvents,
+    newId,
     schemaVersion: version,
     catalogFingerprint: fingerprint ?? installedFingerprint(driver),
     seedUnchanged,
@@ -98,6 +112,7 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
 export { SCHEMA_VERSION, MIGRATIONS, migrate, schemaVersion } from "./migrations";
 export { createServices } from "./services";
 export type { OpenRankServices, WorkoutSummary } from "./services";
+export { DerivedDataService } from "./services/derived-service";
 export { WorkoutService, RoutineService, RestTimerService, ActiveWorkoutConflictError, IncompleteSetsError, SetValidationError, computeLogicalTrainingDate, computeStartLocalDate } from "./services";
 export { SqliteRestTimerRepository } from "./repositories/rest-timer";
 export { catalogFingerprint, installedFingerprint, seedCatalog, stableHash } from "./seed";

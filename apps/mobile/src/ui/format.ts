@@ -39,6 +39,27 @@ export function formatDurationRough(totalSeconds: number): string {
 export function formatVolume(volumeKg: number, unitLabel: string): string {
   return Math.round(volumeKg).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " " + unitLabel;
 }
+/**
+ * Rank display helpers (Phase 5). Formatting only - no ranking math.
+ * "Diamond II" for tiers with divisions; "MYTHIC" for the top tier, which
+ * has no division or progress representation.
+ */
+export function formatRankLabel(tierName: string, division: string | null): string {
+  if (tierName === "Mythic" || division == null) return "MYTHIC";
+  return tierName + " " + division;
+}
+
+/** 0..1 -> "42%". */
+export function formatProgressPercent(progress: number | null): string {
+  if (progress == null) return "-";
+  return String(Math.round(Math.min(1, Math.max(0, progress)) * 100)) + "%";
+}
+
+/** Canonical kg -> display weight string with unit label. */
+export function formatWeight(kg: number, unitLabel: string): string {
+  return Math.round(kg * 10) / 10 + " " + unitLabel;
+}
+
 /** One-line human summary of a logged set ("60 x 8", "5:00", "5 km 25:30"). */
 export function formatSetSummary(
   s: {
