@@ -119,7 +119,19 @@ export class StreakService {
     return report;
   }
 
-  /** Workout -> obligation matching (spec K/L). Bonus workouts match nothing. */
+  /**
+   * Workout -> obligation matching (spec K/L + Phase 7 hardening).
+   *
+   * Deterministic temporal semantics: attendance outcomes depend ONLY on the
+   * canonical timeline (workout.finishedAt vs. the instant an obligation
+   * stopped being pending), never on asynchronous processing order. A
+   * completed workout satisfies the obligation on its logical training date
+   * when the session is still pending, OR when the session was system-
+   * inactivated (missed/paused/cancelled) AT OR AFTER the workout finished -
+   * i.e. the obligation was still valid at completion time (pending_until
+   * evidence, see docs/STREAK_SPEC.md). Both processing orders produce the
+   * same result.
+   */
   private matchCompletedWorkouts(profileId: string, markers: readonly StreakDirtyRecord[]): number {
     let matched = 0;
     for (const marker of markers) {
@@ -129,9 +141,12 @@ export class StreakService {
       if (detail.workout.status !== "completed") continue;
       // Idempotency: already linked?
       if (this.repos.sessions.forWorkout(detail.workout.id)) continue;
-      const session = this.repos.sessions.firstPendingOnDate(profileId, detail.workout.logicalTrainingDate);
-      if (!session) continue; // bonus workout: no obligation on its logical day
-      this.repos.sessions.linkCompletion(session.id, detail.workout.id, detail.workout.finishedAt ?? this.now(), this.now());
+      const finishedAt = detail.workout.finishedAt ?? this.now();
+      const session =
+        this.repos.sessions.firstPendingOnDate(profileId, detail.workout.logicalTrainingDate) ??
+        this.repos.sessions.firstInactiveButValidOnDate(profileId, detail.workout.logicalTrainingDate, finishedAt);
+      if (!session) continue; // bonus workout: no valid obligation on its logical day
+      this.repos.sessions.linkCompletion(session.id, detail.workout.id, finishedAt, this.now());
       matched += 1;
     }
     return matched;

@@ -7,6 +7,8 @@ packages:
 nodeLinker: hoisted
 minimumReleaseAgeExclude:
   - babel-preset-expo@57.0.10
+  - expo-constants@57.0.17
+  - expo-notifications@57.0.16
 # Dependencies allowed to run install scripts (pnpm 11.25 "allowBuilds" map;
 # replaces the deprecated onlyBuiltDependencies list).
 allowBuilds:

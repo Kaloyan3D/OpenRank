@@ -37,6 +37,7 @@ import type {
   TrainingSchedule,
   TrainingScheduleDay,
 } from "./streak";
+import type { NotificationJob, NotificationPreferences } from "./notifications";
 import type {
   PersonalRecord,
   PersonalRecordEvent,
@@ -442,7 +443,12 @@ export interface TrainingScheduleRepository {
   bumpRevision(scheduleId: string): number;
   getDays(scheduleId: string): TrainingScheduleDay[];
   /** Keyed (schedule_id, weekday) upsert; exactly one row per weekday. */
-  upsertDay(scheduleId: string, day: { weekday: ScheduleWeekday; enabled: boolean; routineId: string | null }): void;
+  upsertDay(scheduleId: string, day: { weekday: ScheduleWeekday; enabled: boolean; routineId: string | null; reminderMinutesAfterMidnight?: number | null }): void;
+  /**
+   * Phase 7: per-day reminder time (notification configuration). Deliberately
+   * does NOT touch enabled/routineId or the attendance revision (spec E).
+   */
+  setDayReminder(scheduleId: string, weekday: ScheduleWeekday, reminderMinutesAfterMidnight: number | null): void;
   replaceAllForProfile(profileId: string, schedule: TrainingSchedule | null, days: readonly TrainingScheduleDay[]): void;
 }
 
@@ -476,6 +482,13 @@ export interface ScheduledSessionRepository {
     rescheduledFromDate?: string | null | undefined;
   }): boolean;
   setStatus(sessionId: string, status: ScheduledSessionStatus, now: string): void;
+  /**
+   * Phase 7 hardening: first SYSTEM-inactivated (missed/paused/cancelled)
+   * session on a date whose pending-until instant is still at/after the given
+   * instant - i.e. the obligation was still valid when the referenced
+   * completion happened, regardless of asynchronous processing order.
+   */
+  firstInactiveButValidOnDate(profileId: string, scheduledDate: string, atInstant: string): ScheduledSession | null;
   linkCompletion(sessionId: string, workoutId: string, completedAt: string, now: string): void;
   setStreakAfter(sessionId: string, streakAfter: number): void;
   replaceAllForProfile(profileId: string, sessions: readonly ScheduledSession[]): void;
@@ -505,6 +518,34 @@ export interface StreakEventRepository {
   listForProfile(profileId: string): StreakEvent[];
   listByType(profileId: string, type: StreakEventType): StreakEvent[];
   replaceAllForProfile(profileId: string, events: readonly StreakEvent[]): void;
+  countForProfile(profileId: string): number;
+}
+
+export interface NotificationPreferencesRepository {
+  getForProfile(profileId: string): NotificationPreferences | null;
+  /** Conservative defaults: everything disabled, style normal (spec D). */
+  ensureDefault(profileId: string): NotificationPreferences;
+  update(profileId: string, patch: Partial<Pick<NotificationPreferences, "trainingRemindersEnabled" | "secondaryReminderEnabled" | "secondaryDelayMinutes" | "reminderStyle" | "restTimerNotificationsEnabled" | "permissionStatus" | "permissionPromptSeen">>): NotificationPreferences;
+  replaceAllForProfile(profileId: string, prefs: NotificationPreferences | null): void;
+}
+
+export interface NotificationJobRepository {
+  getById(id: string): NotificationJob | null;
+  /** All currently scheduled jobs for a profile (reconciliation input). */
+  scheduledForProfile(profileId: string): NotificationJob[];
+  scheduledByDedupeKey(profileId: string, dedupeKey: string): NotificationJob | null;
+  listBySession(profileId: string, scheduledSessionId: string): NotificationJob[];
+  listForProfile(profileId: string): NotificationJob[];
+  /** INSERT OR IGNORE under the partial unique index on scheduled rows. */
+  insert(job: NotificationJob): boolean;
+  /** Update scheduling intent on an existing scheduled job (drift repair). */
+  updateScheduled(id: string, fields: { scheduledFor: string; payloadHash: string; platformNotificationId: string | null; now: string }): void;
+  setPlatformId(id: string, platformNotificationId: string | null, now: string): void;
+  markCancelled(ids: readonly string[], now: string): void;
+  markExpired(ids: readonly string[], now: string): void;
+  /** Bounded retention (spec AJ): delete terminal rows older than cutoff. */
+  pruneTerminalBefore(cutoff: string): number;
+  replaceAllForProfile(profileId: string, jobs: readonly NotificationJob[]): void;
   countForProfile(profileId: string): number;
 }
 

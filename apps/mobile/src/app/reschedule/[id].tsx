@@ -52,6 +52,12 @@ export default function RescheduleScreen() {
   const move = (target: string) => {
     try {
       services.schedule.rescheduleSession(session.id, target, { timezoneOffsetMinutes: offset });
+      void services.notifications
+        .reconcileNotifications(profile.id, {
+          todayUtc: new Date().toISOString(),
+          timezoneOffsetMinutes: offset,
+        })
+        .catch(() => {});
       Alert.alert("Session moved", "Your planned session moved to " + target + ".");
       router.back();
     } catch (err) {

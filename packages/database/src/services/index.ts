@@ -20,6 +20,13 @@ export type { StreakProcessReport, StreakCurrentState } from "./streak-service";
 export { computeStreakState, STREAK_MILESTONES, isPerfectWeek } from "./streak-engine";
 export type { StreakComputation, SessionStreakMark } from "./streak-engine";
 export { isoWeekKey, isoWeekdayOf, addDays, startOfIsoWeek, datesBetween } from "./iso-week";
+export { NotificationService, NOTIFICATION_HORIZON_DAYS } from "./notifications/notification-service";
+export type { NotificationReconcileReport, ReconcileOptions as NotificationReconcileOptions } from "./notifications/notification-service";
+export { NullNotificationPlatform } from "./notifications/platform";
+export type { NotificationPlatform, PlatformNotificationRequest, NotificationChannelId } from "./notifications/platform";
+export { reminderInstant, logicalDayEndInstant, localWallInstant } from "./notifications/time";
+export { primaryReminderContent, secondaryReminderContent, restTimerContent } from "./notifications/content";
+export { validateNotificationPayload, resolveNotificationRoute, trainingDedupeKey, restDedupeKey, stableHash } from "./notifications/payload";
 
 import type { DatabaseDriver } from "../driver";
 import type { OpenDatabaseResult } from "../index";
@@ -30,6 +37,9 @@ import { DerivedDataService } from "./derived-service";
 import { ScheduleService } from "./schedule-service";
 import { StreakService } from "./streak-service";
 import { SqliteRestTimerRepository } from "../repositories/rest-timer";
+import { NotificationService } from "./notifications/notification-service";
+import { NullNotificationPlatform } from "./notifications/platform";
+import type { NotificationPlatform } from "./notifications/platform";
 
 export interface OpenRankServices {
   workout: WorkoutService;
@@ -41,16 +51,44 @@ export interface OpenRankServices {
   schedule: ScheduleService;
   /** Phase 6: scheduled-session streaks (projection over the ledger). */
   streak: StreakService;
+  /** Phase 7: local notification scheduling/reconciliation (opt-in). */
+  notifications: NotificationService;
 }
 
 /** Build the service layer over an opened database (call once per app run). */
 export function createServices(
   driver: DatabaseDriver,
   repos: OpenDatabaseResult,
-  options: { now?: () => string } = {},
+  options: { now?: () => string; notificationPlatform?: NotificationPlatform } = {},
 ): OpenRankServices {
-  const restTimerRepo = new SqliteRestTimerRepository(driver);
-  const restTimer = new RestTimerService(driver, restTimerRepo, options.now);
+  const nowFn = options.now ?? (() => new Date().toISOString());
+  const newIdFn = repos.newId ?? (() => crypto.randomUUID());
+  const notificationPlatform = options.notificationPlatform ?? new NullNotificationPlatform();
+  const notifications = new NotificationService(
+    driver,
+    {
+      prefs: repos.notificationPreferences,
+      jobs: repos.notificationJobs,
+      sessions: repos.scheduledSessions,
+      schedule: repos.trainingSchedule,
+      restTimer: new SqliteRestTimerRepository(driver),
+      routines: repos.routine,
+    },
+    notificationPlatform,
+    { now: nowFn, newId: newIdFn },
+  );
+  // Optional rest-complete notification: delivery is fire-and-forget and can
+  // never affect timer correctness (spec AB). Deferred to a macrotask so the
+  // reconcile never interleaves with the synchronous canonical flow (and
+  // never consumes the shared clock mid-operation); failures retry at the
+  // next reconcile (app start / next mutation).
+  const restTimer = new RestTimerService(driver, new SqliteRestTimerRepository(driver), options.now, (profileId) => {
+    setTimeout(() => {
+      void notifications.reconcileNotifications(profileId).catch(() => {
+        /* retried on the next reconcile */
+      });
+    }, 0);
+  });
   const derived = new DerivedDataService(
     repos,
     driver,
@@ -61,8 +99,6 @@ export function createServices(
     },
     { now: options.now ?? (() => new Date().toISOString()), newId: repos.newId ?? (() => crypto.randomUUID()) },
   );
-  const nowFn = options.now ?? (() => new Date().toISOString());
-  const newIdFn = repos.newId ?? (() => crypto.randomUUID());
   const schedule = new ScheduleService(
     driver,
     {
@@ -96,5 +132,6 @@ export function createServices(
     derived,
     schedule,
     streak,
+    notifications,
   };
 }

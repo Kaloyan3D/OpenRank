@@ -17,6 +17,13 @@ export class RestTimerService {
     private readonly driver: DatabaseDriver,
     private readonly repo: RestTimerRepository,
     private readonly now: () => string = nowUtc,
+    /**
+     * Phase 7: optional notification hook. Called after every timer
+     * mutation (start/adjust/skip/clear) so the optional rest-complete
+     * notification can reconcile. Delivery is best-effort and MUST NOT be
+     * able to fail timer correctness (spec AB) - the caller wraps it.
+     */
+    private readonly onChange?: ((profileId: string) => void) | null,
   ) {}
 
   /** Start (or restart) the profile's rest timer. */
@@ -32,6 +39,7 @@ export class RestTimerService {
       durationSeconds,
       startedAtUtc: this.now(),
     });
+    this.onChange?.(profileId);
   }
 
   /** +15 s / -15 s adjustments (UI chips). */
@@ -39,11 +47,13 @@ export class RestTimerService {
     this.driver.transaction(() => {
       this.repo.adjustEnd(profileId, seconds);
     });
+    this.onChange?.(profileId);
   }
 
   /** Skip: clear the timer entirely. */
   skip(profileId: string): void {
     this.repo.clear(profileId);
+    this.onChange?.(profileId);
   }
 
   /** Current state with derived remaining/expired fields, or null. */
@@ -54,5 +64,6 @@ export class RestTimerService {
   /** Clear when the timer belongs to the given workout (finish/discard). */
   clearForWorkout(profileId: string, workoutId: string): void {
     this.repo.clearIfWorkout(profileId, workoutId);
+    this.onChange?.(profileId);
   }
 }

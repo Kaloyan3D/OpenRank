@@ -129,6 +129,12 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
 
+      <Text style={styles.section}>Notifications</Text>
+      <Text style={styles.meta}>Local reminders for planned sessions and rest timers.</Text>
+      <Pressable style={styles.button} onPress={() => router.push("/notifications")}>
+        <Text style={styles.buttonText}>Notification settings</Text>
+      </Pressable>
+
       <Text style={styles.section}>Training schedule</Text>
       <Text style={styles.meta}>Set your weekly training days, pauses and planned sessions.</Text>
       <Pressable style={styles.button} onPress={() => router.push("/schedule")}>

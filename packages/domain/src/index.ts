@@ -1,5 +1,6 @@
 export type * from "./derived";
 export type * from "./streak";
+export type * from "./notifications";
 export type {
   MajorGroup,
   RankingEligibility,
@@ -66,5 +67,7 @@ export type {
   StreakCacheRepository,
   StreakEventRepository,
   StreakDirtyRepository,
+  NotificationPreferencesRepository,
+  NotificationJobRepository,
   RankEventRepository,
 } from "./repositories";

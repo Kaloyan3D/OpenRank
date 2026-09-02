@@ -372,3 +372,39 @@ projections (full contract: docs/STREAK_SPEC.md):
   re-celebrate.
 - `streak_dirty` - dedicated repair queue (spec S option B), UNIQUE per
   (profile, entity, reason) for coalescing.
+## Phase 7 additions (schema v5): local notifications
+
+Migration `schema_v5_notifications` adds the notification job store and its
+configuration (full contract: docs/NOTIFICATIONS_SPEC.md):
+
+- `scheduled_sessions.pending_until` (nullable TEXT) - Phase 7 hardening
+  (spec AB): records the instant a session STOPPED being the pending
+  obligation via a SYSTEM transition (missed / paused / cancelled), set
+  first-write-wins via COALESCE; cleared whenever status returns to
+  `pending`. User-declared transitions (reschedules) leave it null. The
+  completed-workout matcher may fall back to a session that was invalidated
+  only AFTER the workout finished (`pending_until >= finishedAt`), which
+  makes matching deterministic regardless of processing order - the
+  disable/finish race can no longer turn a real session into a bonus.
+- `training_schedule_days.reminder_minutes_after_midnight` (nullable
+  INTEGER) - per-training-day reminder wall time in minutes after local
+  midnight; null = no reminder for that day.
+- `notification_preferences` (UNIQUE profile_id) - opt-in flags:
+  training_reminders_enabled / secondary_reminder_enabled (both default 0),
+  secondary_delay_minutes (CHECK 5..720, default 150), reminder_style
+  ('gentle' | 'normal' | 'competitive', default 'normal'),
+  rest_timer_notifications_enabled (default 0), permission_status
+  ('undetermined' | 'granted' | 'denied') and permission_prompt_seen.
+- `notification_jobs` - the reconciler's durable ledger, one row per
+  desired OS notification: kind CHECK ('training_primary',
+  'training_secondary', 'rest_timer'), state CHECK ('scheduled',
+  'cancelled', 'expired'), dedupe_key, payload_hash (FNV-1a over the exact
+  OS copy + payload), platform_notification_id, cancelled_at. Partial
+  UNIQUE `idx_notification_jobs_active(profile_id, dedupe_key) WHERE
+  state='scheduled'` makes reconcile inserts idempotent (INSERT OR IGNORE).
+
+Notification rows are projections: they are rebuildable from
+`scheduled_sessions` + `training_schedule_days` + `rest_timer` at any
+time, so deleting canonical rows must never be blocked by them. A fresh
+reconcile on an empty job table repairs the OS scheduler from scratch
+(drift repair, spec AC).

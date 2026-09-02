@@ -51,6 +51,12 @@ export interface TrainingScheduleDay {
   enabled: boolean;
   /** Optional planned routine - context only, never an attendance requirement. */
   routineId: string | null;
+  /**
+   * Notification configuration (Phase 7): local minutes after midnight for the
+   * reminder of this training day. NULL = no reminder time set for the day.
+   * Deliberately NOT part of attendance revision semantics (spec E).
+   */
+  reminderMinutesAfterMidnight: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -72,6 +78,14 @@ export interface ScheduledSession {
   rescheduledFromDate: string | null;
   /** Read model: running streak value after this completed session (projection). */
   streakAfter: number | null;
+  /**
+   * Phase 7 hardening (temporal validity): the instant this session stopped
+   * being pending through a SYSTEM-driven transition (missed / paused /
+   * cancelled). NULL while pending and for user-declared neutral states
+   * (rescheduled). Deterministic attendance semantics: a completed workout
+   * satisfies an inactive session iff pendingUntil >= workout.finishedAt.
+   */
+  pendingUntil: string | null;
   createdAt: string;
   updatedAt: string;
 }

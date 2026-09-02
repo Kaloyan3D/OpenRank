@@ -13,7 +13,7 @@
 
 import type { DatabaseDriver } from "./driver";
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export interface Migration {
   version: number;
@@ -503,11 +503,67 @@ const V4_STATEMENTS: readonly string[] = [
   )`,
 ];
 
+// ---------------------------------------------------------------------------
+// Schema v5 (Phase 7): notifications + Phase 6 temporal-validity hardening.
+// - scheduled_sessions.pending_until: the instant a session stopped being
+//   pending through a SYSTEM-driven transition (missed/paused/cancelled).
+//   Deterministic attendance semantics: a completed workout satisfies an
+//   inactive session iff pending_until >= workout.finished_at - attendance
+//   outcomes no longer depend on asynchronous processing order.
+// - training_schedule_days.reminder_minutes_after_midnight: per-day local
+//   reminder time. NOTIFICATION configuration - deliberately outside the
+//   attendance revision semantics (spec E).
+// - notification_preferences / notification_jobs: local scheduling intent.
+//   Stable dedupe identity via partial UNIQUE index over scheduled rows.
+// ---------------------------------------------------------------------------
+const V5_STATEMENTS: string[] = [
+  `ALTER TABLE scheduled_sessions ADD COLUMN pending_until TEXT`,
+
+  `ALTER TABLE training_schedule_days ADD COLUMN reminder_minutes_after_midnight INTEGER`,
+
+  `CREATE TABLE notification_preferences (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL UNIQUE REFERENCES profiles(id) ON DELETE CASCADE,
+    training_reminders_enabled INTEGER NOT NULL DEFAULT 0 CHECK (training_reminders_enabled IN (0,1)),
+    secondary_reminder_enabled INTEGER NOT NULL DEFAULT 0 CHECK (secondary_reminder_enabled IN (0,1)),
+    secondary_delay_minutes INTEGER NOT NULL DEFAULT 150 CHECK (secondary_delay_minutes BETWEEN 5 AND 720),
+    reminder_style TEXT NOT NULL DEFAULT 'normal' CHECK (reminder_style IN ('gentle','normal','competitive')),
+    rest_timer_notifications_enabled INTEGER NOT NULL DEFAULT 0 CHECK (rest_timer_notifications_enabled IN (0,1)),
+    permission_status TEXT NOT NULL DEFAULT 'undetermined' CHECK (permission_status IN ('undetermined','granted','denied')),
+    permission_prompt_seen INTEGER NOT NULL DEFAULT 0 CHECK (permission_prompt_seen IN (0,1)),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )`,
+
+  `CREATE TABLE notification_jobs (
+    id TEXT PRIMARY KEY NOT NULL,
+    profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL CHECK (kind IN ('training_primary','training_secondary','rest_timer')),
+    scheduled_session_id TEXT,
+    dedupe_key TEXT NOT NULL,
+    scheduled_for TEXT NOT NULL,
+    platform_notification_id TEXT,
+    state TEXT NOT NULL CHECK (state IN ('scheduled','cancelled','expired')),
+    payload_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    cancelled_at TEXT
+  )`,
+
+  // Idempotency (spec H): at most one SCHEDULED job per (profile, dedupe key).
+  `CREATE UNIQUE INDEX idx_notification_jobs_active
+    ON notification_jobs(profile_id, dedupe_key) WHERE state = 'scheduled'`,
+
+  `CREATE INDEX idx_notification_jobs_profile
+    ON notification_jobs(profile_id, state, scheduled_for)`,
+];
+
 export const MIGRATIONS: readonly Migration[] = [
   { version: 1, name: "schema_v1_core", statements: V1_STATEMENTS },
   { version: 2, name: "schema_v2_workout_session", statements: V2_STATEMENTS },
   { version: 3, name: "schema_v3_derived_state", statements: V3_STATEMENTS },
   { version: 4, name: "schema_v4_scheduled_streaks", statements: V4_STATEMENTS },
+  { version: 5, name: "schema_v5_notifications", statements: V5_STATEMENTS },
 ];
 
 /** Current PRAGMA user_version (0 on a fresh database). */

@@ -189,3 +189,15 @@ Phase 5 derived pass:
 Starting from Home's planned session uses the day's associated routine when
 one exists (context only) and an empty workout otherwise; any other valid
 workout started elsewhere still satisfies the day's obligation (spec K/AT).
+## Phase 7: notification integration
+
+- Finishing a workout reconciles notifications AFTER streak processing
+  (fire-and-forget): the completed session's remaining reminders cancel;
+  a reconcile failure never blocks or breaks the finish (the workout is
+  already durable before any notification work).
+- Rest-timer notifications are driven by RestTimerService changes; the
+  workout screen's +15 / -15 / skip controls need no extra wiring.
+- Tapping a reminder deep-links via validated payload only: training
+  reminders open Home (the user starts the session themselves - a tap
+  never creates a workout); rest-timer taps open the active workout only
+  if it still exists. docs/NOTIFICATIONS_SPEC.md.

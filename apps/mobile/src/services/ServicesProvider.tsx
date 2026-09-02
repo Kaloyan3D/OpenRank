@@ -12,6 +12,7 @@ import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { OpenDatabaseResult } from "@openrank/database";
 import { createServices } from "@openrank/database";
+import { ExpoNotificationPlatform } from "./notifications/ExpoNotificationPlatform";
 import type { OpenRankServices } from "@openrank/database";
 import { useRepos } from "../db/DatabaseProvider";
 
@@ -20,7 +21,9 @@ const ServicesContext = createContext<OpenRankServices | null>(null);
 export function ServicesProvider(props: { children: ReactNode }) {
   const repos: OpenDatabaseResult = useRepos();
   const services = useMemo(() => {
-    const created = createServices(containerDriver(repos), repos);
+    const created = createServices(containerDriver(repos), repos, {
+      notificationPlatform: new ExpoNotificationPlatform(),
+    });
     // App-start repair (Phase 5, spec W): consume leftover dirty markers from
     // a previous session (crash / deferred derivation). Non-blocking for the
     // user: any failure leaves the markers for the next attempt.
@@ -37,6 +40,18 @@ export function ServicesProvider(props: { children: ReactNode }) {
       });
     } catch {
       /* repaired on the next start */
+    }
+    // Phase 7 (spec AL): notification reconciliation runs ASYNCHRONOUSLY and
+    // must never block or break workout logging / history / ranks / streaks.
+    const offset = -new Date().getTimezoneOffset();
+    const todayUtc = new Date().toISOString();
+    const profile = repos.profile.getDefault();
+    if (profile) {
+      void created.notifications
+        .reconcileNotifications(profile.id, { todayUtc, timezoneOffsetMinutes: offset })
+        .catch(() => {
+          /* retried at the next reconcile point */
+        });
     }
     return created;
   }, [repos]);

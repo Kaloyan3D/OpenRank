@@ -135,13 +135,16 @@ export class ScheduleService {
    * Enable/disable the schedule. Disabling cancels today/future pending
    * obligations (never creates misses, never touches history) - spec AH/AI.
    */
-  setScheduleEnabled(profileId: string, enabled: boolean, options: ScheduleClockOptions = {}): void {
+  setScheduleEnabled(profileId: string, enabled: boolean, _options: ScheduleClockOptions = {}): void {
     this.driver.transaction(() => {
       const schedule = this.repos.schedule.ensureDefault(profileId);
       if (schedule.enabled === enabled) return;
       this.repos.schedule.setEnabled(schedule.id, enabled);
       if (!enabled) {
-        this.cancelPendingFrom(profileId, this.todayLogical(options));
+        // No misses while disabled (spec AH/AI): ALL pending obligations are
+        // cancelled, including past-due ones whose windows were still open.
+        // They can never silently turn into misses on re-enable.
+        this.cancelPendingFrom(profileId, "");
       }
       this.streakDirty?.mark(profileId, "schedule", schedule.id, "schedule_enabled_changed");
     });
@@ -169,7 +172,9 @@ export class ScheduleService {
       const schedule = this.repos.schedule.ensureDefault(profileId);
       const today = this.todayLogical(options);
       if (!schedule.enabled) {
-        report.cancelled += this.cancelPendingFrom(profileId, today);
+        // Disabled: no misses while disabled - past-due pending is cancelled,
+        // never expired (re-enabling regenerates the horizon from today).
+        report.cancelled += this.cancelPendingFrom(profileId, "");
         return report;
       }
       // 1. Generate the rolling horizon from the CURRENT revision.
@@ -178,9 +183,20 @@ export class ScheduleService {
         if (d.enabled) routineByWeekday.set(d.weekday, d.routineId);
       }
       const horizonEnd = addDays(today, GENERATION_HORIZON_DAYS - 1);
+      // Reschedule intent (spec U/V): a date whose obligation the user moved
+      // away (same revision) must NOT regenerate - the moved target IS the
+      // obligation. A schedule EDIT bumps the revision, so Monday comes back
+      // when the user re-adds it explicitly.
+      const movedAway = new Set(
+        this.repos.sessions
+          .forProfile(profileId)
+          .filter((s) => s.status === "rescheduled" && s.scheduleRevision === schedule.revision)
+          .map((s) => s.scheduledDate),
+      );
       for (const date of datesBetween(today, horizonEnd)) {
         const weekday = isoWeekdayOf(date);
         if (!routineByWeekday.has(weekday)) continue;
+        if (movedAway.has(date)) continue;
         const created = this.repos.sessions.generateIfMissing({
           id: this.newId(),
           profileId,

@@ -18,6 +18,8 @@
 
 import { uuidv7 } from "@openrank/shared";
 import type {
+  NotificationJobRepository,
+  NotificationPreferencesRepository,
   BodyweightRepository,
   DerivedStateRepository,
   ExerciseRepository,
@@ -52,6 +54,10 @@ import {
   SqliteStreakEventRepository,
   SqliteTrainingScheduleRepository,
 } from "./repositories/schedule";
+import {
+  SqliteNotificationJobRepository,
+  SqliteNotificationPreferencesRepository,
+} from "./repositories/notifications";
 
 export interface OpenDatabaseResult {
   profile: ProfileRepository;
@@ -69,6 +75,9 @@ export interface OpenDatabaseResult {
   streakCache: StreakCacheRepository;
   streakEvents: StreakEventRepository;
   streakDirty: StreakDirtyRepository;
+  /** Phase 7: local notification configuration + scheduling intent ledger. */
+  notificationPreferences: NotificationPreferencesRepository;
+  notificationJobs: NotificationJobRepository;
   /** Schema version after migration (equals SCHEMA_VERSION). */
   schemaVersion: number;
   /** Fingerprint of the seeded catalog, or null when no catalog supplied. */
@@ -113,6 +122,8 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
   const streakCache = new SqliteStreakCacheRepository(driver);
   const streakEvents = new SqliteStreakEventRepository(driver, newId);
   const streakDirty = new SqliteStreakDirtyRepository(driver, newId);
+  const notificationPreferences = new SqliteNotificationPreferencesRepository(driver, newId);
+  const notificationJobs = new SqliteNotificationJobRepository(driver);
 
   let fingerprint: string | null = null;
   let seedUnchanged: boolean | null = null;
@@ -130,6 +141,7 @@ export function openDatabase(driver: DatabaseDriver, options: OpenDatabaseOption
     personalRecords, rankSnapshots, rankEvents,
     trainingSchedule, scheduledSessions, scheduleExceptions,
     streakCache, streakEvents, streakDirty,
+    notificationPreferences, notificationJobs,
     newId,
     schemaVersion: version,
     catalogFingerprint: fingerprint ?? installedFingerprint(driver),
@@ -146,6 +158,14 @@ export {
   computeLogicalTrainingDate, computeStartLocalDate, ScheduleService, StreakService,
   SchedulePauseOverlapError, RescheduleError, computeStreakState, isPerfectWeek, STREAK_MILESTONES,
   isoWeekKey, isoWeekdayOf, addDays, startOfIsoWeek, datesBetween,
+  NotificationService, NullNotificationPlatform, NOTIFICATION_HORIZON_DAYS,
+  reminderInstant, logicalDayEndInstant, localWallInstant,
+  primaryReminderContent, secondaryReminderContent, restTimerContent,
+  validateNotificationPayload, resolveNotificationRoute, trainingDedupeKey, restDedupeKey,
+} from "./services";
+export type {
+  NotificationPlatform, PlatformNotificationRequest, NotificationChannelId,
+  NotificationReconcileReport, NotificationReconcileOptions,
 } from "./services";
 export { SqliteRestTimerRepository } from "./repositories/rest-timer";
 export { catalogFingerprint, installedFingerprint, seedCatalog, stableHash } from "./seed";

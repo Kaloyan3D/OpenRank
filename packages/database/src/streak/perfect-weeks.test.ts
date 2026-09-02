@@ -27,6 +27,7 @@ function session(partial: Partial<ScheduledSession> & { scheduledDate: string })
     completedAt: null,
     rescheduledFromDate: null,
     streakAfter: null,
+      pendingUntil: null,
     createdAt: "2026-02-01T00:00:00.000Z",
     updatedAt: "2026-02-01T00:00:00.000Z",
   };

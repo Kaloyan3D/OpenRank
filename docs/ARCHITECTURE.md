@@ -261,3 +261,23 @@ only hold temporary UI state.
   will be recalculated automatically.") and the app-start repair retries.
 - **No overall rank, no streaks:** the Ranks tab is the Strength Profile
   (six muscle groups). Scheduled streaks remain Phase 6 per docs/STREAK_SPEC.md.
+## Phase 7: local notifications (adapter-isolated)
+
+Notifications are a projection layer over the obligation ledger, never a
+second source of truth. NotificationService re-derives the desired OS
+notification set on every reconcile; NotificationPlatform is the only
+boundary to the OS scheduler (NullNotificationPlatform by default,
+ExpoNotificationPlatform in apps/mobile - the sole consumer of
+expo-notifications). No push backend, no server, no recurring OS
+triggers: docs/NOTIFICATIONS_SPEC.md is the contract.
+
+- Opt-in only; permission is requested after a pre-permission explainer;
+  denial changes nothing about training.
+- Reconcile is fire-and-forget at every call site (startup, schedule
+  edits, reschedules, workout finish, rest-timer changes) - ledger
+  commits and workout logging never wait on it.
+- Rest-timer notifications ride the existing RestTimerService change
+  hook (deferred to a macrotask so writes commit first).
+- Phase 7 also hardened the ledger itself (pending_until temporal
+  validity, disable-cancels-past-due, reschedule generation skip) -
+  docs/STREAK_SPEC.md.

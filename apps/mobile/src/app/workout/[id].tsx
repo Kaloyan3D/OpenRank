@@ -183,6 +183,14 @@ export default function ActiveWorkoutScreen() {
     } catch {
       streakStatus = "deferred";
     }
+    // Phase 7 (spec K/P): the obligation resolved - remaining future
+    // reminders for it must go. Fire-and-forget; the workout is already safe.
+    void services.notifications
+      .reconcileNotifications(profile.id, {
+        todayUtc: new Date().toISOString(),
+        timezoneOffsetMinutes: -new Date().getTimezoneOffset(),
+      })
+      .catch(() => {});
     router.replace("/history/" + summary.workout.id + "?derived=" + derivedStatus + "&streak=" + streakStatus);
   };
 

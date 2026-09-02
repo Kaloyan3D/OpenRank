@@ -50,6 +50,7 @@ function mapDay(row: SqlRow): TrainingScheduleDay {
     weekday: Number(row.weekday) as ScheduleWeekday,
     enabled: row.enabled === 1,
     routineId: row.routine_id == null ? null : String(row.routine_id),
+    reminderMinutesAfterMidnight: row.reminder_minutes_after_midnight == null ? null : Number(row.reminder_minutes_after_midnight),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
@@ -68,6 +69,7 @@ function mapSession(row: SqlRow): ScheduledSession {
     completedAt: row.completed_at == null ? null : String(row.completed_at),
     rescheduledFromDate: row.rescheduled_from_date == null ? null : String(row.rescheduled_from_date),
     streakAfter: row.streak_after == null ? null : Number(row.streak_after),
+    pendingUntil: row.pending_until == null ? null : String(row.pending_until),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
@@ -164,23 +166,41 @@ export class SqliteTrainingScheduleRepository implements TrainingScheduleReposit
       .map(mapDay);
   }
 
-  upsertDay(scheduleId: string, day: { weekday: ScheduleWeekday; enabled: boolean; routineId: string | null }): void {
+  upsertDay(scheduleId: string, day: { weekday: ScheduleWeekday; enabled: boolean; routineId: string | null; reminderMinutesAfterMidnight?: number | null }): void {
     const existing = this.driver.get(
       "SELECT id FROM training_schedule_days WHERE schedule_id = ? AND weekday = ?",
       [scheduleId, day.weekday],
     );
     const ts = now();
     if (existing) {
+      // reminder_minutes is notification configuration: only touched when
+      // explicitly provided (attendance edits leave it alone, spec E).
       this.driver.run(
-        "UPDATE training_schedule_days SET enabled = ?, routine_id = ?, updated_at = ? WHERE id = ?",
-        [day.enabled ? 1 : 0, day.routineId, ts, String(existing.id)],
+        "UPDATE training_schedule_days SET enabled = ?, routine_id = ?, updated_at = ?" +
+          (day.reminderMinutesAfterMidnight === undefined ? "" : ", reminder_minutes_after_midnight = ?") +
+        " WHERE id = ?",
+        day.reminderMinutesAfterMidnight === undefined
+          ? [day.enabled ? 1 : 0, day.routineId, ts, String(existing.id)]
+          : [day.enabled ? 1 : 0, day.routineId, ts, day.reminderMinutesAfterMidnight, String(existing.id)],
       );
     } else {
       this.driver.run(
-        "INSERT INTO training_schedule_days (id, schedule_id, weekday, enabled, routine_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [this.newId(), scheduleId, day.weekday, day.enabled ? 1 : 0, day.routineId, ts, ts],
+        "INSERT INTO training_schedule_days (id, schedule_id, weekday, enabled, routine_id, reminder_minutes_after_midnight, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [this.newId(), scheduleId, day.weekday, day.enabled ? 1 : 0, day.routineId, day.reminderMinutesAfterMidnight ?? null, ts, ts],
       );
     }
+  }
+
+  setDayReminder(scheduleId: string, weekday: ScheduleWeekday, reminderMinutesAfterMidnight: number | null): void {
+    const existing = this.driver.get(
+      "SELECT id FROM training_schedule_days WHERE schedule_id = ? AND weekday = ?",
+      [scheduleId, weekday],
+    );
+    if (!existing) return;
+    this.driver.run(
+      "UPDATE training_schedule_days SET reminder_minutes_after_midnight = ?, updated_at = ? WHERE id = ?",
+      [reminderMinutesAfterMidnight, now(), String(existing.id)],
+    );
   }
 
   replaceAllForProfile(profileId: string, schedule: TrainingSchedule | null, days: readonly TrainingScheduleDay[]): void {
@@ -192,8 +212,8 @@ export class SqliteTrainingScheduleRepository implements TrainingScheduleReposit
     );
     for (const d of days) {
       this.driver.run(
-        "INSERT INTO training_schedule_days (id, schedule_id, weekday, enabled, routine_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [d.id, d.scheduleId, d.weekday, d.enabled ? 1 : 0, d.routineId, d.createdAt, d.updatedAt],
+        "INSERT INTO training_schedule_days (id, schedule_id, weekday, enabled, routine_id, reminder_minutes_after_midnight, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [d.id, d.scheduleId, d.weekday, d.enabled ? 1 : 0, d.routineId, d.reminderMinutesAfterMidnight ?? null, d.createdAt, d.updatedAt],
       );
     }
   }
@@ -283,7 +303,37 @@ export class SqliteScheduledSessionRepository implements ScheduledSessionReposit
   }
 
   setStatus(sessionId: string, status: ScheduledSessionStatus, nowTs: string): void {
+    // Temporal validity (Phase 7 hardening): record WHEN a session stopped
+    // being pending through a system-driven transition. Miss/pause/cancel set
+    // pending_until (first transition wins - it is the historical instant);
+    // reopening (paused -> pending) clears it. User-declared neutral states
+    // (rescheduled) do not set it.
+    if (status === "missed" || status === "paused" || status === "cancelled") {
+      this.driver.run(
+        "UPDATE scheduled_sessions SET status = ?, pending_until = COALESCE(pending_until, ?), updated_at = ? WHERE id = ?",
+        [status, nowTs, nowTs, sessionId],
+      );
+      return;
+    }
+    if (status === "pending") {
+      this.driver.run(
+        "UPDATE scheduled_sessions SET status = 'pending', pending_until = NULL, updated_at = ? WHERE id = ?",
+        [nowTs, sessionId],
+      );
+      return;
+    }
     this.driver.run("UPDATE scheduled_sessions SET status = ?, updated_at = ? WHERE id = ?", [status, nowTs, sessionId]);
+  }
+
+  firstInactiveButValidOnDate(profileId: string, scheduledDate: string, atInstant: string): ScheduledSession | null {
+    const row = this.driver.get(
+      "SELECT * FROM scheduled_sessions WHERE profile_id = ? AND scheduled_date = ?" +
+        " AND status IN ('missed', 'paused', 'cancelled')" +
+        " AND pending_until IS NOT NULL AND pending_until >= ?" +
+        " ORDER BY pending_until DESC, id LIMIT 1",
+      [profileId, scheduledDate, atInstant],
+    );
+    return row ? mapSession(row) : null;
   }
 
   linkCompletion(sessionId: string, workoutId: string, completedAt: string, nowTs: string): void {
@@ -301,8 +351,8 @@ export class SqliteScheduledSessionRepository implements ScheduledSessionReposit
     this.driver.run("DELETE FROM scheduled_sessions WHERE profile_id = ?", [profileId]);
     for (const s of sessions) {
       this.driver.run(
-        "INSERT INTO scheduled_sessions (id, profile_id, original_date, scheduled_date, routine_id, status, schedule_revision, workout_id, completed_at, rescheduled_from_date, streak_after, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [s.id, s.profileId, s.originalDate, s.scheduledDate, s.routineId, s.status, s.scheduleRevision, s.workoutId, s.completedAt, s.rescheduledFromDate, s.streakAfter, s.createdAt, s.updatedAt],
+        "INSERT INTO scheduled_sessions (id, profile_id, original_date, scheduled_date, routine_id, status, schedule_revision, workout_id, completed_at, rescheduled_from_date, streak_after, pending_until, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [s.id, s.profileId, s.originalDate, s.scheduledDate, s.routineId, s.status, s.scheduleRevision, s.workoutId, s.completedAt, s.rescheduledFromDate, s.streakAfter, s.pendingUntil, s.createdAt, s.updatedAt],
       );
     }
   }

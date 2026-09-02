@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { DatabaseGate, DatabaseProvider } from "../db/DatabaseProvider";
 import { ServicesProvider } from "../services/ServicesProvider";
+import { NotificationTapHandler } from "../services/notifications/NotificationTapHandler";
 import { colors } from "../theme/tokens";
 
 /**
@@ -17,15 +18,18 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <DatabaseGate
         ready={
-          <Stack
-            screenOptions={{
-              headerStyle: { backgroundColor: colors.surface },
-              headerTintColor: colors.text,
-              contentStyle: { backgroundColor: colors.background },
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
+          <NotificationTapHandler>
+            <Stack
+              screenOptions={{
+                headerStyle: { backgroundColor: colors.surface },
+                headerTintColor: colors.text,
+                contentStyle: { backgroundColor: colors.background },
+              }}
+            >
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
+            </Stack>
+          </NotificationTapHandler>
         }
       />
       </ServicesProvider>

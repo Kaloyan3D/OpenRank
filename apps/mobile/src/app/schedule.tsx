@@ -22,9 +22,23 @@ export default function ScheduleScreen() {
   const [nonce, setNonce] = useState(0);
   const [pauseDays, setPauseDays] = useState("3");
   const [pauseReason, setPauseReason] = useState("");
+  const [reminderAskDismissed, setReminderAskDismissed] = useState(false);
+  const refresh = () => setNonce((n) => n + 1);
   void nonce;
 
   const profile = repos.profile.getDefault();
+  const offset = -new Date().getTimezoneOffset();
+  const todayLogical = computeLogicalTrainingDate(new Date().toISOString(), offset);
+
+  const reconcileNotifications = () => {
+    void services.notifications
+      .reconcileNotifications(profile?.id ?? "", {
+        todayUtc: new Date().toISOString(),
+        timezoneOffsetMinutes: offset,
+      })
+      .catch(() => {});
+  };
+
   if (!profile) {
     return (
       <View style={styles.center}>
@@ -33,9 +47,19 @@ export default function ScheduleScreen() {
     );
   }
 
-  const offset = -new Date().getTimezoneOffset();
-  const todayLogical = computeLogicalTrainingDate(new Date().toISOString(), offset);
   const { schedule, days } = services.schedule.getSchedule(profile.id);
+  const prefs = services.notifications.getPreferences(profile.id);
+  const anyDayEnabled = days.some((d) => d.enabled);
+
+  const askReminders = async () => {
+    const status = await services.notifications.requestPermission(profile.id);
+    if (status === "granted") {
+      services.notifications.updatePreferences(profile.id, { trainingRemindersEnabled: true });
+      services.notifications.setReminderTimeForEnabledDays(profile.id, 1020); // 17:00
+      reconcileNotifications();
+    }
+    refresh();
+  };
   const routines = services.routine.list(profile.id).active;
   const upcoming = services.schedule.getUpcomingSessions(profile.id, { timezoneOffsetMinutes: offset }).slice(0, 10);
   const pauses = services.schedule.listPauses(profile.id);
@@ -48,19 +72,19 @@ export default function ScheduleScreen() {
     services.schedule.updateWeeklySchedule(profile.id, next.map((d) => ({
       weekday: d.weekday, enabled: d.enabled, routineId: d.routineId,
     })), { timezoneOffsetMinutes: offset });
-    setNonce((n) => n + 1);
+    refresh(); reconcileNotifications();
   };
 
   const assignRoutine = (weekday: ScheduleWeekday, routineId: string | null) => {
     services.schedule.updateWeeklySchedule(profile.id, days.map((d) => ({
       weekday: d.weekday, enabled: d.enabled, routineId: d.weekday === weekday ? routineId : d.routineId,
     })), { timezoneOffsetMinutes: offset });
-    setNonce((n) => n + 1);
+    refresh(); reconcileNotifications();
   };
 
   const toggleSchedule = (enabled: boolean) => {
     services.schedule.setScheduleEnabled(profile.id, enabled, { timezoneOffsetMinutes: offset });
-    setNonce((n) => n + 1);
+    refresh(); reconcileNotifications();
   };
 
   const addPause = () => {
@@ -74,7 +98,7 @@ export default function ScheduleScreen() {
     try {
       services.schedule.addPause(profile.id, start, end, pauseReason.trim() || null, { timezoneOffsetMinutes: offset });
       setPauseReason("");
-      setNonce((n) => n + 1);
+      refresh(); reconcileNotifications();
     } catch (err) {
       if (err instanceof SchedulePauseOverlapError) {
         Alert.alert("Overlapping pause", "This overlaps an existing planned pause.");
@@ -87,7 +111,7 @@ export default function ScheduleScreen() {
   const removePause = (id: string) => {
     try {
       services.schedule.removeFuturePause(id, { timezoneOffsetMinutes: offset });
-      setNonce((n) => n + 1);
+      refresh(); reconcileNotifications();
     } catch (err) {
       if (err instanceof RescheduleError) {
         Alert.alert("Cannot remove", "A fully elapsed pause is history.");
@@ -138,6 +162,29 @@ export default function ScheduleScreen() {
           ) : null}
         </View>
       ))}
+
+      {anyDayEnabled && prefs && !prefs.trainingRemindersEnabled && !prefs.permissionPromptSeen && !reminderAskDismissed ? (
+        (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Would you like reminders on those days?</Text>
+            <Text style={styles.muted}>
+              OpenRank can remind you only on your training days - never on
+              rest days. You can change this anytime.
+            </Text>
+            <Pressable style={styles.button} onPress={() => void askReminders()}>
+              <Text style={styles.buttonText}>Enable reminders</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                services.notifications.updatePreferences(profile.id, { permissionPromptSeen: true });
+                setReminderAskDismissed(true);
+              }}
+            >
+              <Text style={styles.linkText}>Not now</Text>
+            </Pressable>
+          </View>
+        )
+      ) : null}
 
       <Text style={styles.section}>Planned pause / vacation</Text>
       <Text style={styles.muted}>
@@ -220,8 +267,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   button: { backgroundColor: colors.surface, borderRadius: 8, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, marginTop: spacing.sm, gap: spacing.xs },
+  cardTitle: { ...typography.body, color: colors.text, fontWeight: "700" },
+  linkText: { color: colors.accent, fontWeight: "700" },
   buttonText: { color: colors.accent, fontWeight: "700" },
   pauseRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.xs },
   sessionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.xs },
-  linkText: { color: colors.accent, fontWeight: "700" },
 });

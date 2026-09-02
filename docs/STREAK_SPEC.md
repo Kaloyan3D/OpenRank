@@ -194,3 +194,71 @@ idempotent.
 Reminder/notification anything (Phase 7), Streak Freeze tokens/purchasable
 freezes (forbidden product-wise), achievements beyond streak milestones,
 social/leaderboards/cloud.
+## Phase 7 hardening: temporal validity of the pending obligation
+
+### The disable/processing race (spec AB)
+
+Before Phase 7, "did a completed workout match the pending session?" was
+answered with a stateless query: "is there a pending session on the
+workout's logical training date?". That is order-dependent. Scenario A
+(the race):
+
+1. User finishes Tuesday's planned session at 09:00 (workout logged).
+2. Before the streak worker runs, the user disables the whole schedule -
+   disable cancels every pending session.
+3. The worker finally processes the workout: no pending session on Tuesday
+   -> the workout is treated as a bonus -> the streak is erased.
+
+The workout was completed while the session WAS the pending obligation, so
+it must match that session, no matter when processing happens.
+
+### Fix: `pending_until` + a two-step matcher
+
+Every SYSTEM status transition away from `pending` (missed / paused /
+cancelled) stamps `pending_until = now` (first write wins via COALESCE);
+returning to `pending` clears it. User-declared reschedules set
+`status='rescheduled'` WITHOUT stamping (the obligation moved, it did not
+die - the reschedule target is pending now, and the old row must not match).
+
+The completed-workout matcher (in priority order):
+
+1. `firstPendingOnDate(D)` - the normal case, unchanged.
+2. Fallback `firstInactiveButValidOnDate(D, finishedAt)`: the most
+   recently invalidated (status IN missed/paused/cancelled) session on D
+   whose `pending_until >= finishedAt` - i.e. it was still the obligation
+   when the workout finished. ORDER BY pending_until DESC, id LIMIT 1.
+
+This makes matching deterministic under BOTH processing orders:
+
+- finish -> disable -> worker: the Tuesday row is cancelled with
+  pending_until 09:05 > finishedAt 09:00 -> MATCHES -> completed (test A).
+- disable -> finish -> worker: the disable happened first (pending_until
+  before the workout), the workout is a bonus -> the already-completed
+  streak stays intact (test B).
+- processing order (stale workout markers, late matches) is irrelevant:
+  matching depends only on the timeline, never on which event the worker
+  happened to see first (test C inverts the marker order and asserts the
+  identical ledger).
+
+### Disable cancels past-due pending sessions too
+
+`setScheduleEnabled(false)` (and the disabled-path reconcile) cancels ALL
+pending sessions - including past-due ones (cancelPendingFrom with an
+empty lower bound). While disabled there are no obligations, so nothing
+may silently lapse into 'missed' and poison the perfect-week history; a
+re-enable regenerates the horizon fresh.
+
+### Schedule edits skip regeneration only for user-rescheduled sources
+
+`reconcileUpcomingSessions` builds a `movedAway` set: sessions with
+status='rescheduled' whose schedule_revision equals the CURRENT revision.
+Generation skips those dates - a user's explicit move wins over
+regeneration. A revision bump (schedule edit) re-allows generation, so
+the edit's new plan materializes as usual.
+
+### Notification guarantee
+
+The reconciler derives every reminder from the session ledger, so the
+above semantics flow through: a session that completes, lapses, pauses,
+cancels or is disabled stops producing reminders within one reconcile -
+see docs/NOTIFICATIONS_SPEC.md.
