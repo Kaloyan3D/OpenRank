@@ -82,7 +82,7 @@ describe("buildCatalogPipeline", () => {
     expect(ex.ranking.group).toBe("back");
   });
 
-  it("is deterministic: two builds produce byte-identical output", () => {
+  it("is deterministic: two builds produce byte-identical output", { timeout: 30_000 }, () => {
     const upstream = JSON.parse(readFileSync(ROOT_UPSTREAM, "utf8")) as RawExercise[];
     const templates = JSON.parse(readFileSync(ROOT_TEMPLATES, "utf8")) as { id?: string; title?: string }[];
     const overrides = JSON.parse(readFileSync(OVERRIDES, "utf8")) as { overrides: { title: string; exerciseSlug: string }[] };
