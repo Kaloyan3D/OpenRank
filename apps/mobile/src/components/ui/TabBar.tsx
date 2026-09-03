@@ -42,15 +42,21 @@ export function TabBarLabel(props: { focused: boolean; color: string; label: str
   return <Text style={[styles.label, { color: props.color }]}>{props.label}</Text>;
 }
 
-/** Workout: softly rounded amber plate, visually central, no glow. */
+/**
+ * Workout: the central OpenRank action (guide section 15). A compact plate
+ * keeps it visually central in every state - but color emphasis belongs to
+ * the ACTIVE tab only: idle = quiet outlined plate with a muted glyph,
+ * active = solid amber with a dark glyph. Never a giant floating button,
+ * never a glow.
+ */
 function WorkoutIcon(props: { focused: boolean; color: string }) {
   const filled = props.focused;
   return (
-    <View style={[styles.workoutPlate, filled ? styles.workoutPlateActive : null]}>
+    <View style={[styles.workoutPlate, filled ? styles.workoutPlateActive : styles.workoutPlateRest]}>
       <Ionicons
         name={filled ? "barbell" : "barbell-outline"}
-        size={19}
-        color={filled ? colors.textOnAccent : props.color}
+        size={20}
+        color={filled ? colors.textOnAccent : colors.textSecondary}
       />
     </View>
   );
@@ -59,14 +65,13 @@ function WorkoutIcon(props: { focused: boolean; color: string }) {
 const styles = StyleSheet.create({
   label: { ...type.label, textTransform: "none" },
   workoutPlate: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
   },
+  workoutPlateRest: { backgroundColor: "transparent", borderColor: colors.border },
   workoutPlateActive: { backgroundColor: colors.accent, borderColor: colors.accent },
 });

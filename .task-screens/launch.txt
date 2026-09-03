@@ -1,0 +1,3 @@
+﻿mCurrentFocus=Window{46765a0 u0 app.openrank.mobile/app.openrank.mobile.MainActivity}
+09-03 21:02:22.697  1671  3748 I ReactNativeJS: Running "main" with {"rootTag":11,"initialProps":{},"fabric":true}
+09-03 21:02:24.990  1671  1685 I openrank.mobile: Background young concurrent mark compact GC freed 22MB AllocSpace bytes, 6(320KB) LOS objects, 57% free, 17MB/41MB, paused 2.807ms,31.316ms total 82.166ms

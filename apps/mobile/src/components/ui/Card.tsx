@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import type { ReactNode } from "react";
 import { colors } from "../../design/colors";
+import { radius } from "../../design/radii";
 import { space } from "../../design/spacing";
 
 /**
@@ -10,7 +11,7 @@ import { space } from "../../design/spacing";
  */
 export function Card(props: {
   children: ReactNode;
-  variant?: "default" | "elevated" | "subtle";
+  variant?: "default" | "elevated" | "subtle" | "hero";
   accessibilityLabel?: string;
   style?: object | object[];
 }) {
@@ -33,4 +34,7 @@ const variantStyles = StyleSheet.create({
   default: { backgroundColor: colors.surface, borderColor: colors.border },
   elevated: { backgroundColor: colors.surfaceElevated, borderColor: colors.borderStrong },
   subtle: { backgroundColor: colors.bgSubtle, borderColor: colors.border },
+  // Hero card (guide section 12): the ONE dominant card near the top of the
+  // viewport - elevated surface, slightly larger radius, quiet border.
+  hero: { backgroundColor: colors.surfaceElevated, borderColor: colors.border, borderRadius: radius.lg },
 });

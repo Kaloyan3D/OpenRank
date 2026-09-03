@@ -1,0 +1,4 @@
+List of devices attached
+emulator-5554	device
+
+Error 5: Access is denied.

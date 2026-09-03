@@ -75,4 +75,17 @@ export const colors = {
   overlay: palette.overlay,
 } as const;
 
+/**
+ * Deterministic subtle plate from a solid hex color (guide section 3.2):
+ * shared by badges and rank tints so translucent fills stay consistent.
+ */
+export function withAlpha(hex: string, alpha: number): string {
+  const m = /^#([0-9A-Fa-f]{6})$/.exec(hex);
+  if (!m) return hex;
+  const r = parseInt(m[1]!.slice(0, 2), 16);
+  const g = parseInt(m[1]!.slice(2, 4), 16);
+  const b = parseInt(m[1]!.slice(4, 6), 16);
+  return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
+}
+
 export type ColorToken = keyof typeof colors;

@@ -43,6 +43,19 @@ export default function RootLayout() {
                   <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
         <Stack.Screen name="progress" options={{ headerShown: false }} />
         <Stack.Screen name="achievements" options={{ headerShown: true, title: "Achievements", headerStyle: { backgroundColor: colors.bg }, headerTintColor: colors.text }} />
+                  {/* Human titles for routes that do not self-configure a header
+                      (raw route names like "reschedule/[id]" leak otherwise).
+                      Dedicated screen passes may override these later. */}
+                  <Stack.Screen name="schedule" options={{ title: "Training schedule" }} />
+                  <Stack.Screen name="routines" options={{ title: "Routines" }} />
+                  <Stack.Screen name="routine/[id]" options={{ title: "Routine" }} />
+                  <Stack.Screen name="history/[id]" options={{ title: "Workout details" }} />
+                  <Stack.Screen name="muscle/[group]" options={{ title: "Rank detail" }} />
+                  <Stack.Screen name="streak" options={{ title: "Streak" }} />
+                  <Stack.Screen name="workout/[id]" options={{ title: "Workout" }} />
+                  <Stack.Screen name="exercise-picker" options={{ title: "Exercises" }} />
+                  <Stack.Screen name="exercise/[id]" options={{ title: "Exercise" }} />
+                  <Stack.Screen name="reschedule/[id]" options={{ title: "Reschedule session" }} />
                 </Stack>
               </RoutingGate>
             </NotificationTapHandler>

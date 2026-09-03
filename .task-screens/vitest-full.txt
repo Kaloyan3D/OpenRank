@@ -1,0 +1,426 @@
+﻿Scope: all 8 workspace projects
+✓ Lockfile passes supply-chain policies (verified 3h ago)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 0, reused 1, downloaded 0, added 0
+Progress: resolved 0, reused 50, downloaded 0, added 0
+Packages: -50
+--------------------------------------------------
+Progress: resolved 0, reused 50, downloaded 0, added 0, done
+
+Done in 5.3s using pnpm v11.25.0
+node.exe : $ vitest run
+At C:\Users\nikol\AppData\Roaming\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ vitest run:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the 
+default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` 
+in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 C:/OpenRank
+
+(node:54180) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:54648) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:54136) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39356) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:58572) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59264) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:57408) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:37324) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48592) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:47356) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/notifications/race-hardening.test.ts (7 tests) 8286ms
+     ✓ A: workout finished -> schedule disabled -> worker runs -> obligation COMPLETED  787ms
+     ✓ B: schedule disabled -> workout finished -> worker runs -> BONUS  1008ms
+     ✓ C: processing before/after disable yields the SAME result for one canonical timeline  1362ms
+     ✓ paused race: workout completed before the pause -> obligation completed, not paused  888ms
+     ✓ expired race: workout finished inside the window, expiry processed first -> completed  671ms
+     ✓ rescheduled sources stay neutral (user-declared move wins over completion timing)  383ms
+     ✓ file-db: hard restart between finish and worker keeps the same outcome  3160ms
+ ✓ packages/database/src/streak/streak-matching.test.ts (6 tests) 8585ms
+     ✓ scheduled Monday + completed Monday workout -> linked, streak 1; second workout is a bonus  1202ms
+     ✓ routine mismatch does not block attendance: planned Push, trained Legs (spec K)  716ms
+     ✓ a workout on a day without an obligation is a bonus: nothing linked, streak unchanged  916ms
+     ✓ streak processing is canonical-isolated: workouts, PRs and rank projections untouched (spec BD)  832ms
+     ✓ a marker created at finish survives a hard close; reopen + repair completes the session exactly once  3884ms
+     ✓ streak failure keeps the marker and the workout; retry succeeds (spec R/S/AU)  1028ms
+ ✓ apps/mobile/tests/exercise-picker-catalog.test.ts (24 tests) 8567ms
+     ✓ B: default repository search returns exercises across many equipment types  856ms
+     ✓ C: All includes barbell, dumbbell, bodyweight, machine and cable examples  1005ms
+     ✓ M: All is the complete catalog - never silently truncated to 60  945ms
+     ✓ D: equipment = null still intentionally means only no-equipment records  419ms
+     ✓ E: equipment = bodyweight returns only actual bodyweight rows  1384ms
+     ✓ H: Bench Press is discoverable from the default picker search  925ms
+     ✓ I: Barbell Curl is discoverable  644ms
+     ✓ J: Squat and Deadlift are discoverable  590ms
+     ✓ H/J: dumbbell, cable and machine searches all return their own equipment  638ms
+     ✓ K: unsupported-rank exercises remain selectable and loggable in both contexts  554ms
+(node:59332) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:46860) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56380) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/exercise-repo.test.ts (9 tests) 10095ms
+     ✓ finds by id and slug  1413ms
+     ✓ carries ranking-support metadata from the seed  1092ms
+     ✓ searches by query with alias ranking (exact alias first)  1328ms
+     ✓ filters by major group, tracking type, equipment and rank support  1581ms
+     ✓ listRankSupported returns exactly the 488 participating exercises  1590ms
+     ✓ resolves aliases (exact, variant, curated Hevy)  711ms
+     ✓ returns muscles, muscle groups, instructions and media for the detail screen  1282ms
+     ✓ returns aliases and the full detail aggregate  397ms
+     ✓ creates user custom exercises with unique slugs and alias resolution  694ms
+ ✓ packages/database/src/derived/rank-projection.test.ts (12 tests) 10423ms
+     ✓ ranks all six groups with min 3 sessions, top-3 weighting and compound preference  1191ms
+     ✓ composite weighting uses the engine's [1.0, 0.5, 0.25] over top-3 lifts  890ms
+     ✓ few-session cap: data under 3 sessions still ranks but capped at Platinum  1278ms
+     ✓ isolation fallback caps the group at Titan (ISOLATION_TIER_CAP)  1111ms
+     ✓ provisional exercises never contribute to the muscle composite (v1 policy)  1097ms
+     ✓ unsupported exercises are ignored entirely for ranks (PRs still work)  361ms
+     ✓ records rank increases AND decreases across the timeline  1188ms
+     ✓ per-exercise tier uses the own lift eqRatio with group thresholds and sex factor  738ms
+     ✓ female standard shifts the division mapping (factor 0.72)  637ms
+     ✓ Mythic: division null, progress null (MYTHIC display)  737ms
+     ✓ no bodyweight -> no ranks, but no crash and PRs exist  403ms
+     ✓ next-rank target math is the documented reverse-Epley estimate  782ms
+ ✓ packages/database/src/derived/worker.test.ts (9 tests) 10898ms
+     ✓ processes markers: consumes them, writes PRs + snapshots, leaves canonical data untouched  1277ms
+     ✓ coalesces multiple dirty workouts into one pass (spec Q)  698ms
+     ✓ active-workout markers are consumed without projection; completion re-marks  1810ms
+     ✓ duplicate processing never duplicates events or snapshots (spec U)  1249ms
+     ✓ a failing projection leaves markers for retry, reports the error and succeeds on retry  669ms
+     ✓ bodyweight changes trigger the full-rebuild path (profile-level marker)  708ms
+     ✓ unit-system change does NOT invalidate; strength-standard change rebuilds  919ms
+     ✓ is restart-safe: a file database reprocessed after reopen yields the same state  2895ms
+     ✓ multiple dirty exercises inside one workout coalesce (spec AM)  666ms
+ ✓ packages/database/src/streak/schedule-service.test.ts (15 tests) 10477ms
+     ✓ generates for one training day across a 35-day horizon, idempotently and deterministically  854ms
+     ✓ generates for multiple days and for all seven days  1113ms
+     ✓ generates nothing for a zero-day schedule but a zero-obligation week is not perfect  402ms
+     ✓ does not pre-generate beyond the 35-day horizon  1026ms
+     ✓ advances the rolling window as time passes without duplicating rows  1098ms
+     ✓ bumps the revision only on meaningful changes and stamps sessions with it  335ms
+     ✓ never rewrites historical sessions when the weekly schedule changes (spec AP)  388ms
+     ✓ reconciles today's pending obligation to a changed explicit schedule (spec I)  1695ms
+     ✓ disabling cancels pending obligations without creating misses or erasing history  434ms
+     ✓ re-enabling regenerates future obligations from the current configuration  378ms
+     ✓ 03:59 belongs to the previous logical day, 04:00/04:01 to the current one  770ms
+     ✓ a workout at/after 04:00 stays on its own calendar day  350ms
+     ✓ matches using the workout's own timezone offset (spec AM)  469ms
+     ✓ calendar dates stay dates across a DST weekend: Monday remains Monday (spec AN)  373ms
+     ✓ a late-night workout (before 04:00) satisfies the PREVIOUS day's obligation  777ms
+ ✓ packages/database/src/notifications/rest-timer-notifications.test.ts (10 tests) 10812ms
+     ✓ start timer -> exactly one OS notification at restEndsAt  1321ms
+     ✓ +15 -> old cancelled, new scheduled (still one)  1121ms
+     ✓ -15 -> rescheduled  2105ms
+     ✓ skip -> notification cancelled  1079ms
+     ✓ finish workout -> notification cancelled  1040ms
+     ✓ permission denied -> timer fully functional, zero notifications (spec AB)  629ms
+     ✓ rest notifications disabled -> timer works, zero notifications  366ms
+     ✓ process restart (app killed) -> reconcile repairs without duplicates (spec AC)  2534ms
+     ✓ expired rest (endsAt passed) -> no new notification, job expires  593ms
+(node:57912) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/notifications/notification-reminders.test.ts (17 tests) 11500ms
+     ✓ undetermined permission -> zero jobs, zero OS notifications  1244ms
+     ✓ granted after request -> enabling reconciles jobs  2164ms
+     ✓ denied -> nothing scheduled, schedule/streak/workout features unaffected  970ms
+     ✓ disabling reminders cancels future jobs  339ms
+     ✓ one scheduled session -> exactly one notification at the local reminder time  696ms
+     ✓ 3 training days -> reminders only on those days; Wednesday/Friday/etc get NONE  688ms
+     ✓ repeated reconcile never duplicates (app relaunch scenario)  349ms
+     ✓ completed session -> remaining future jobs cancelled (spec P)  398ms
+     ✓ missed session -> no future job remains (spec R, no shame notification)  697ms
+     ✓ paused session -> zero reminders (spec S)  371ms
+     ✓ cancelled session (schedule disabled) -> zero reminders (spec U)  601ms
+     ✓ reminder time not configured for a day -> no reminder even when enabled  354ms
+     ✓ schedule disabled at the OS level (trainingRemindersEnabled but schedule.enabled=false) -> no reminders  701ms
+     ✓ normal style + routine name in copy  371ms
+     ✓ gentle / competitive styles keep stable, non-stale copy  429ms
+     ✓ early-morning reminder time maps to the NEXT calendar day (same logical day, spec F)  752ms
+     ✓ WED session (reschedule target) is the only reminder day after a move (spec T)  369ms
+(node:53056) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38528) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50968) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1332) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7788) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/analytics/analytics.test.ts (14 tests) 6726ms
+     ✓ A. empty profile -> empty series  679ms
+     ✓ B. measurements return chronological ascending with canonical kg  633ms
+     ✓ C. no completed sets -> no points  469ms
+     ✓ D. PR events produce ascending best-progression points  487ms
+     ✓ E. no ranks -> empty; ranked workouts -> ascending snapshot timeline  1608ms
+     ✓ F. no workouts -> twelve all-zero buckets ending at the current ISO week  391ms
+     ✓ G. workouts land in the correct ISO-week bucket with canonical volume  497ms
+     ✓ H. counts completed sets only, per exercise, in logged order  334ms
+     ✓ I. reports latest rank per group with history depth  331ms
+     ✓ M. integration: real activity flows into the achievement view  946ms
+     ✓ N. projection never writes: repeated evaluation is stable and side-effect free  337ms
+ ✓ packages/database/src/workout-repo.test.ts (6 tests) 4452ms
+     ✓ creates an active workout with local date, logical date and offset  722ms
+     ✓ enforces a single active workout per profile (resume semantics)  548ms
+     ✓ adds exercises and sets, completes, updates and deletes sets (autosave-safe)  551ms
+     ✓ reorders workout exercises  1381ms
+     ✓ completes and discards workouts and lists history newest-first  712ms
+     ✓ marks derived state dirty for every canonical change  531ms
+(node:49036) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/services/routine-service.test.ts (8 tests) 4933ms
+     ✓ creates, renames, archives, unarchives and separates lists  476ms
+     ✓ rejects empty names and unknown exercises  552ms
+     ✓ configures rest, superset groups, reorders and replaces targets  995ms
+     ✓ rejects invalid rest seconds  886ms
+     ✓ adds, edits, completes and deletes sets with validation per tracking type  935ms
+     ✓ uncompletes a set but keeps its values  362ms
+     ✓ emits dirty markers for completed, changed-completed and deleted completed sets  368ms
+     ✓ starts the rest timer automatically after completing a set with rest_seconds > 0  354ms
+ ✓ packages/database/src/profile-bodyweight.test.ts (7 tests) 5072ms
+     ✓ creates a default profile idempotently (first launch)  640ms
+     ✓ updates unit system, strength standard, display name and onboarding  456ms
+     ✓ rejects updates for an unknown profile id  429ms
+     ✓ stores kilograms and returns history newest-first  335ms
+     ✓ resolves bodyweight: latest at-or-before, else earliest, else null  2258ms
+     ✓ marks derived state dirty on bodyweight changes  464ms
+     ✓ rejects non-positive weight  353ms
+ ✓ packages/database/src/seed.test.ts (6 tests) 8491ms
+     ✓ seeds the full Phase 2 catalog  749ms
+     ✓ is idempotent: reseeding the same catalog changes nothing  2085ms
+     ✓ is deterministic: stable row ids and fingerprint  2212ms
+     ✓ preserves user-created exercises and user aliases across reseeds  1124ms
+     ✓ updates dataset rows in place when the catalog changes  1263ms
+     ✓ records catalog metadata (fingerprint, commit, ranking compatibility)  1051ms
+ ✓ packages/database/src/streak/rescheduling.test.ts (10 tests) 5606ms
+     ✓ Monday -> Wednesday keeps ONE obligation; completing it increments once  746ms
+     ✓ moving the target again is allowed and keeps one obligation (chain)  529ms
+     ✓ rejects a target date that already has an active obligation (no silent merge)  461ms
+     ✓ rejects moves outside the same ISO week  588ms
+     ✓ rejects moving a completed session  558ms
+     ✓ rejects moving a missed session (no retroactive repair)  702ms
+     ✓ rejects a repeated reschedule of the same (already moved) session  364ms
+     ✓ rejects rescheduling into the past  653ms
+     ✓ rescheduling to TODAY (a current session) is allowed  578ms
+     ✓ backward moves within the same week are allowed  421ms
+ ✓ packages/database/src/notifications/notification-secondary.test.ts (8 tests) 6222ms
+     ✓ enabled -> creates a second job for the same session  602ms
+     ✓ disabled -> one job only  730ms
+     ✓ completion between primary and secondary cancels the secondary (spec P)  776ms
+     ✓ delay across midnight but within the logical day works (spec O)  451ms
+     ✓ delay reaching the 04:00 boundary produces NO secondary (never next day)  1368ms
+     ✓ delay beyond the 04:00 boundary produces NO secondary  940ms
+     ✓ repeated reconcile never duplicates the secondary  745ms
+     ✓ secondary delay changes re-reconcile in place (cancel old + schedule new, no dup)  578ms
+(node:58596) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48148) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/notifications/notification-reconcile.test.ts (10 tests) 8213ms
+     ✓ Monday -> Wednesday: Monday jobs cancelled, Wednesday jobs created  573ms
+     ✓ pause covering Thursday cancels its jobs; removing the future pause restores them  495ms
+     ✓ MON TUE THU -> MON WED FRI: future jobs follow; attendance history untouched  414ms
+     ✓ 17:30 -> 18:30: same obligation, same revision, old job cancelled, new scheduled  760ms
+     ✓ future job re-created under the new local policy; one job; history untouched  2117ms
+     ✓ DB says scheduled, OS job missing -> rescheduled (same DB row)  1600ms
+     ✓ orphan OS job -> cancelled  369ms
+     ✓ wrong scheduled timestamp in DB (drift) -> cancel + reschedule  987ms
+     ✓ wrong payload hash in DB (drift) -> repaired  498ms
+     ✓ past-due scheduled row no longer OS-present -> expired; retention prunes terminal rows  396ms
+(node:54232) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:45700) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:52332) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56396) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59220) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ packages/exercise-catalog/src/build.test.ts (9 tests | 1 failed) 22437ms
+     ✓ normalizes into the canonical schema 9ms
+     ✓ generates stable canonical ids (id and slug derive deterministically) 2ms
+     ✓ maps muscles through the canonical taxonomy (middle back -> upper_back) 1ms
+     ✓ is deterministic: two builds produce byte-identical output  16282ms
+     × the committed catalog.v1.json matches a fresh pipeline build byte-for-byte 6132ms
+     ✓ fails loudly on upstream drift 3ms
+     ✓ keeps stats consistent with the catalog 1ms
+     ✓ maps catalog exercises onto the domain model 2ms
+     ✓ maps the muscle taxonomy onto the domain model 1ms
+ ✓ apps/mobile/tests/reactive-local-data.test.ts (25 tests) 11976ms
+     ✓ publishes only AFTER the transaction commits, exactly once  552ms
+     ✓ suppresses nested (reentrant) transactions to one publication  382ms
+     ✓ does not publish when a statement or a transaction fails (T)  417ms
+     ✓ never publishes for reads  361ms
+     ✓ profile rename publishes and re-reads fresh (A)  682ms
+     ✓ a failed canonical write does not advance the revision (T)  672ms
+     ✓ bodyweight add via ProfileService publishes exactly once and re-reads fresh (B)  336ms
+     ✓ unit system + strength standard changes publish (profile consumers refresh)  406ms
+     ✓ workout chain start/add-exercise/add-set/complete/finish publishes with fresh reads (E,F,G,H,J,K)  1406ms
+     ✓ derived PR/rank rebuild and streak processing invalidate consumers (N,O,P)  357ms
+     ✓ routine and schedule mutations publish (Q,R)  363ms
+     ✓ notification preference changes publish (S)  645ms
+     ✓ never issues canonical repository writes from UI (services only)  476ms
+     ✓ never opens raw SQL or transactions from UI  1877ms
+     ✓ subscribes every data-driven UI consumer to the canonical revision (V, W)  2803ms
+ ✓ packages/database/src/onboarding/onboarding.test.ts (27 tests) 23251ms
+     ✓ A. fresh database -> no profile, onboarding required  855ms
+     ✓ C. create local profile -> persisted, onboarding incomplete  1139ms
+     ✓ display name validation: empty rejected, length capped in code points, Unicode kept  1133ms
+     ✓ single profile: completed profile -> structured conflict, no second row  879ms
+     ✓ single profile: incomplete profile -> reused (resumed), never duplicated  1039ms
+     ✓ D. restart after the profile-name step -> same profile, resume at units  1761ms
+     ✓ E. restart after units -> same unit selection  1847ms
+     ✓ F. restart after the ranking standard -> same standard  1483ms
+     ✓ G. bodyweight persisted as one onboarding measurement in canonical kg  1249ms
+     ✓ H. bodyweight skipped -> nothing stored (no placeholder data)  409ms
+     ✓ I. back-navigation through bodyweight -> one measurement, updated in place  380ms
+     ✓ rejects non-positive / non-finite bodyweight  517ms
+     ✓ J. zero training days is valid onboarding  2446ms
+     ✓ K. Mon/Tue/Thu persists through the canonical schedule layer  321ms
+     ✓ S. every active routine is selectable for a scheduled weekday (no slice limit)  375ms
+     ✓ M. notifications enabled -> Phase 7 preferences + reconcile used  631ms
+     ✓ L. notification permission denied -> onboarding still completes  356ms
+     ✓ N. completed onboarding -> next boot enters the main tabs, no re-onboarding  932ms
+     ✓ P. deep link with no profile: gate decision routes to onboarding, nothing created  406ms
+     ✓ completeOnboarding clears the step pointer and is idempotent  807ms
+     ✓ R. manual bonus workout on a non-planned day remains a bonus (streak untouched)  477ms
+     ✓ T. pause range: start > end rejected, valid range persisted, overlaps rejected  614ms
+     ✓ U. active-workout UI no longer calls canonical workout mutations directly  618ms
+     ✓ service facade delegates the canonical workout-exercise mutations  2376ms
+(node:55232) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38984) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/streak/streak-parity.test.ts (4 tests) 6285ms
+     ✓ rebuild over processed history reproduces the identical projection  692ms
+     ✓ rebuild-only database equals the incrementally-processed database  1042ms
+     ✓ repeat rebuilds are stable: same result, same history, no duplicate events  1788ms
+     ✓ full ledger (incl. linked workouts and reschedule provenance) survives a rebuild-only wipe  2719ms
+ ✓ packages/database/src/derived/rebuild-parity.test.ts (4 tests) 6034ms
+     ✓ rebuildAll over processed history reproduces the identical derived state  1444ms
+     ✓ rebuild-only database equals incrementally-processed database  2221ms
+     ✓ rebuild is idempotent (running it twice changes nothing)  1496ms
+     ✓ canonical workout/bodyweight data is byte-identical after derivation  863ms
+ ✓ packages/database/src/streak/streak-calculation.test.ts (10 tests) 6950ms
+     ✓ full DB flow: first completed session = 1, bonus does not increment, miss resets, best persists  880ms
+     ✓ multiple workouts on one scheduled day satisfy the obligation exactly once (spec L)  1120ms
+     ✓ repeated processPending and repeated rebuild are idempotent, incl. milestone events (spec AB/T)  1045ms
+     ✓ milestones are celebrated once and never re-celebrated after a rebuild (spec AB)  2211ms
+     ✓ pending future obligations do not count and are not misses (spec O)  1683ms
+ ✓ packages/database/src/services/workout-service.test.ts (9 tests) 6307ms
+     ✓ starts from a routine: snapshot copies order, rest, supersets and targets  888ms
+     ✓ later routine edits never mutate an already-started workout (snapshot semantics)  598ms
+     ✓ finishes a workout: validation, completion, rest-timer clear, summary  692ms
+     ✓ discards a workout permanently (cascade + dirty marker cleanup + timer clear)  1379ms
+     ✓ previous performance returns the latest completed sets and excludes the current workout  1772ms
+     ✓ getRecentExercises returns distinct recently logged exercises, newest first  861ms
+(node:25100) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/database/src/routine-repo.test.ts (5 tests) 5909ms
+     ✓ creates, renames, notes, archives and unarchives routines  975ms
+     ✓ adds, reorders, configures and removes exercises with dense positions  1311ms
+     ✓ rejects reordering with foreign exercise ids  1472ms
+     ✓ replaces target sets transactionally  1049ms
+     ✓ deletes routines and cascades to exercises + targets  1054ms
+ ✓ packages/database/src/integrity.test.ts (7 tests) 7395ms
+     ✓ enforces foreign keys (no orphan rows)  636ms
+     ✓ cascades workout -> exercises -> sets  1864ms
+     ✓ cascades profile deletion to bodyweight, routines and workouts  1107ms
+     ✓ restricts exercise deletion while referenced (routine/workout history is protected)  830ms
+     ✓ enforces unique constraints (slug, alias, active workout, dirty queue, imports)  851ms
+     ✓ enforces domain CHECK constraints  1098ms
+     ✓ keeps user custom exercises out of the dataset seed scope  942ms
+(node:59320) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:51564) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ packages/exercise-catalog/src/taxonomy.test.ts (6 tests) 115ms
+ ✓ packages/database/src/services/process-death.test.ts (1 test) 2635ms
+     ✓ preserves structure, sets, types, notes, duration, dirty queue and rest timer  2611ms
+ ✓ packages/database/src/streak/pauses.test.ts (8 tests) 8353ms
+     ✓ pause over one scheduled day: paused session neither increments nor breaks  1187ms
+     ✓ the spec X example: streak 18 -> vacation week paused -> next completion = 19  956ms
+     ✓ pause spanning a weekend/week boundary keeps both weeks neutral  1404ms
+     ✓ retroactive miss rescue is rejected: finalized misses stay missed (spec Y)  576ms
+     ✓ an unfinalized (never-processed) pending session inside a pause becomes paused, not missed  1679ms
+     ✓ removing a future pause reopens pending sessions; overlapping pauses are rejected  692ms
+     ✓ a fully elapsed pause is history and cannot be removed  886ms
+     ✓ pauses inside the horizon pause sessions as soon as they are generated  964ms
+ ✓ packages/ranking-core/src/testing/ranking.unit.test.ts (32 tests) 194ms
+ ✓ packages/database/src/migrations.test.ts (6 tests) 4583ms
+     ✓ applies the latest schema (v6) to an empty database  1197ms
+     ✓ is idempotent: repeated migration execution is a no-op  1153ms
+     ✓ enables foreign keys on every connection  1186ms
+     ✓ uses WAL journal mode on a file-backed database  1034ms
+ ✓ packages/database/src/streak/perfect-weeks.test.ts (10 tests) 2739ms
+     ✓ end-to-end: a full week of completions awards exactly one perfect week  1042ms
+     ✓ end-to-end: a miss in the week removes perfection (0 perfect weeks)  932ms
+     ✓ end-to-end: Friday+Saturday schedule across the week boundary finalizes Monday  753ms
+ ✓ packages/shared/src/uuid.test.ts (5 tests) 61ms
+ ✓ packages/exercise-catalog/src/normalize.test.ts (23 tests) 25ms
+ ✓ packages/database/src/services/set-validation.test.ts (12 tests) 22ms
+ ✓ packages/database/src/services/rest-timer-service.test.ts (4 tests) 1206ms
+     ✓ survives a full database close/reopen (process restart)  1168ms
+ ✓ packages/database/src/derived/ranking-input.test.ts (6 tests) 7971ms
+     ✓ includes only completed workouts, chronological, day-granular dates  1434ms
+     ✓ excludes warmup sets and incomplete sets  803ms
+     ✓ filters eligibility: unsupported excluded, provisional only in rankable pass  1381ms
+     ✓ maps engine titles to exercises and synthesizes templates from the stored engine group  1116ms
+     ✓ is deterministic: identical canonical state produces identical output  2453ms
+     ✓ flags rank-relevant workouts for the worker skip optimization  779ms
+ ✓ apps/mobile/tests/design-policy.test.ts (16 tests) 21ms
+ ✓ packages/exercise-catalog/src/validation.test.ts (12 tests) 18ms
+ ✓ packages/database/src/crash-reopen.test.ts (1 test) 1311ms
+     ✓ keeps the active workout and all completed sets across a hard close  1254ms
+ ✓ packages/database/src/derived/pr-engine.test.ts (10 tests) 15ms
+ ✓ packages/database/src/services/logical-date.test.ts (7 tests) 12ms
+ ✓ packages/exercise-catalog/src/aliases.test.ts (7 tests) 23ms
+ ✓ packages/database/src/derived/divisions.test.ts (11 tests) 11ms
+ ✓ packages/exercise-catalog/src/search.test.ts (7 tests) 12ms
+ ✓ packages/database/src/notifications/notification-deeplink.test.ts (8 tests) 10ms
+ ✓ packages/exercise-catalog/src/ranking-coverage.test.ts (11 tests) 243ms
+ ✓ packages/shared/src/units.test.ts (5 tests) 7ms
+ ✓ packages/ranking-core/src/testing/ranking.golden.test.ts (90 tests) 2092ms
+     ✓ port and legacy agree for every catalog exercise  752ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/exercise-catalog/src/build.test.ts > buildCatalogPipeline > the committed catalog.v1.json matches a 
+fresh pipeline build byte-for-byte
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ packages/exercise-catalog/src/build.test.ts:98:3
+     96|   });
+     97|
+     98|   it("the committed catalog.v1.json matches a fresh pipeline build byt…
+       |   ^
+     99|     const committed = readFileSync(BUILT, "utf8");
+    100|     const parsed = JSON.parse(committed) as CatalogV1;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 48 passed (49)
+      Tests  1 failed | 575 passed (576)
+   Start at  21:03:31
+   Duration  34.24s (transform 21.59s, setup 0ms, import 43.71s, tests 267.58s, environment 15ms)
+
+[ELIFECYCLE] Test failed. See above for more details.
