@@ -1,4 +1,4 @@
-import { StyleSheet, Text, Pressable } from "react-native";
+import { Pressable, StyleSheet, Text, type PressableProps } from "react-native";
 import { colors } from "../../design/colors";
 import { radius } from "../../design/radii";
 import { space } from "../../design/spacing";
@@ -16,10 +16,13 @@ export function Chip(props: {
   onPress?: () => void;
   disabled?: boolean;
   accessibilityLabel?: string;
+  /** Optional touch inset (e.g. dense filter rows reach the 44dp target). */
+  hitSlop?: PressableProps["hitSlop"];
 }) {
   return (
     <Pressable
       accessible
+      hitSlop={props.hitSlop}
       accessibilityRole="button"
       accessibilityLabel={props.accessibilityLabel ?? props.label}
       accessibilityState={{ selected: props.selected === true, disabled: props.disabled === true }}
