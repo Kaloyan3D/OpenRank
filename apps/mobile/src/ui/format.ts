@@ -24,6 +24,16 @@ export function formatDateTime(iso: string): string {
   });
 }
 
+/** ISO timestamp -> "Wed, Sep 2" style short journal date (no year/time). */
+export function formatDayShort(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
 /** Seconds -> "57 min" / "42 s" for summaries. */
 export function formatDurationRough(totalSeconds: number): string {
   if (totalSeconds >= 3600) {
