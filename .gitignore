@@ -20,3 +20,7 @@ npm-cache/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Local development artifacts
+.pnpm-store/
+.task-screens/
