@@ -95,7 +95,10 @@ describe("buildCatalogPipeline", () => {
     expect(JSON.stringify(first.catalog)).toBe(JSON.stringify(second.catalog));
   });
 
-  it("the committed catalog.v1.json matches a fresh pipeline build byte-for-byte", () => {
+  // Full-catalog pipeline rebuild - the sibling deterministic build above
+  // already documents this workload at 30s; the 5s default is a latent flake
+  // on slower machines. The byte-for-byte assertion itself is unchanged.
+  it("the committed catalog.v1.json matches a fresh pipeline build byte-for-byte", { timeout: 30_000 }, () => {
     const committed = readFileSync(BUILT, "utf8");
     const parsed = JSON.parse(committed) as CatalogV1;
     const upstream = JSON.parse(readFileSync(ROOT_UPSTREAM, "utf8")) as RawExercise[];
